@@ -26,17 +26,16 @@ The default theme is Azure dark. If the user clicks again the azure theme, it wi
 The GUI:
 
 
-    ```
-    ![image](assets/images/image.png)
-    ```
+    
+![alt text](https://github.com/LabAsim/scrape_tpp_gui/blob/main/assets/images/image.png)
+
 
 ## Convert to executable
 
 The script can be converted to an .exe by running in your terminal: 
 
-	```
 	py scrape_tpp_gui_pyinstaller.py 
-	``` 
+
 
 Note that the folders images & source, as well as, the .exe must be in the **same directory** in order the .exe to successfully run.
 
@@ -54,22 +53,4 @@ All the code written by me is released under the MIT license.
 
 ---
 
-🏆 The previous sections are the bare minimum, and your project will ultimately determine the content of this document. You might also want to consider adding the following sections.
 
-## Badges
-
-![badmath](https://img.shields.io/github/languages/top/lernantino/badmath)
-
-Badges aren't necessary, per se, but they demonstrate street cred. Badges let other developers know that you know what you're doing. Check out the badges hosted by [shields.io](https://shields.io/). You may not understand what they all represent now, but you will in time.
-
-## Features
-
-If your project has a lot of features, list them here.
-
-## How to Contribute
-
-If you created an application or package and would like other developers to contribute it, you can include guidelines for how to do so. The [Contributor Covenant](https://www.contributor-covenant.org/) is an industry standard, but you can always write your own if you'd prefer.
-
-## Tests
-
-Go the extra mile and write tests for your application. Then provide examples on how to run them here.
