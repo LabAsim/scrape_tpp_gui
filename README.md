@@ -4,7 +4,9 @@
 
 This is my first project in order to learn Python. 
 I have built so as to access the news faster and in a more aggregated manner than just reading the site.
-It scrapes, using several 3rd party packages, the news categories of ThePressProject site.
+It scrapes the news categories of ThePressProject site.
+
+It has been tested in Python 3.10. It heavily relies on 3rd party packages.
 
 
 ## Table of Contents
