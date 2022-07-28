@@ -24,7 +24,7 @@ The GUI automatically loads all the news titles and their date. The user can ren
 
 There are 8 themes. 
 
-The default theme is Azure dark. If the user clicks again the azure theme, it will switch to Azure light and vice versa. 
+The default theme is [Azure](https://github.com/rdbende/Azure-ttk-theme) dark. If the user clicks again on the azure theme, it will switch to Azure light and vice versa. 
 
 The GUI:
 
