@@ -11,6 +11,7 @@ It scrapes, using several 3rd party packages, the news categories of ThePressPro
 - [Usage](#usage)
 - [Convert to executable](#convert-to-executable)
 - [Credits](#credits)
+- [Donate](#donate)
 - [License](#license)
 
 ## Usage
