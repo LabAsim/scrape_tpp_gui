@@ -1,3 +1,4 @@
+# Version 24/8/2022
 import dataclasses
 import os
 import sys
@@ -8,12 +9,15 @@ import webbrowser
 from datetime import datetime
 from tkinter import messagebox, Menu, StringVar, ttk
 from typing import Any
+
+import PIL.Image
 import requests
 from bs4 import BeautifulSoup
 import random
 from PIL import Image, ImageTk
 from ttkwidgets.font import FontSelectFrame
 import tktooltip  # https://github.com/gnikit/tkinter-tooltip`
+import undetected_chromedriver as uc
 
 headers_list = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
@@ -136,84 +140,10 @@ url_list_second_page = {"newsroom": "https://thepressproject.gr/article_type/new
                         "report": "https://thepressproject.gr/article_type/report/page/2/",
                         "analysis": "https://thepressproject.gr/article_type/analysis/page/2/"}
 
-'''
-class SubPageReader:
-    dict_subpage = {}
-    data_to_return = []
-
-    def __init__(self, url, header):
-        self.headers = header
-        self.url = url
-        self.soup = None
-        SubPageReader.data_to_return.clear()
-        print(f"URL >>>>>>>>>>>>>>>>> {url}")
-        try:
-            self.r = requests.get(url, headers=self.headers)
-            self.status_code = self.r.status_code
-        except Exception as err:
-            print(f'Error fetching the URL: {url}\nError: {err}')
-        try:
-            self.soup = BeautifulSoup(self.r.text, "html.parser")
-        except Exception as err:
-            print(f'Could not parse the xml: {self.url}\nError: {err}')
-        self.news_dict = {}
-        # print(self.soup)
-        SubPageReader.data_to_return.append(self.url)
-        try:
-            for a in self.soup.find_all('h1', {'class': "entry-title"}):
-                data = a.text.strip()
-                print(f'Title: {data}')
-                SubPageReader.data_to_return.append(data)
-                SubPageReader.dict_subpage[self.url] = [data]
-        except Exception as err:
-            print(f'Error in soup: {err}')
-        # print(self.soup.title)
-        PageReader.page_values = []
-        try:
-            for number, a in enumerate(self.soup.find_all('div', class_="article-date")):
-                if number == 0:
-                    SubPageReader.dict_subpage[self.url].append(
-                        a.text.strip().replace("\nΑναρτήθηκε", "").split(':')[0].strip())
-                    for _a in FirstPage.values:
-                        if self.url == _a[1]:
-                            date = a.text.replace("\nΑναρτήθηκε", "").split(':')[0].strip()
-                            _a.append(date)
-                            SubPageReader.data_to_return.append(date)
-                            print(date)
-        except Exception as err:
-            print(f'SubPageReader Error: {err}')
-        try:
-            for number, a in enumerate(self.soup.find_all('div', class_="subtitle article-summary")):
-                data = a.text.strip()
-                SubPageReader.data_to_return.append(data)
-
-        except Exception as err:
-            print(f'SubPageReader Error: {err}')
-        print('\n')
-        try:
-            for number, a in enumerate(self.soup.find_all('div', class_="main-content article-content")):
-                data = a.text.strip()
-                SubPageReader.data_to_return.append(data)
-
-        except Exception as err:
-            print(f'SubPageReader Error: {err}')
-        # print(len(SubPageReader.data_to_return))
-        SubPageReader.return_url_tuple()
-
-    @staticmethod
-    def return_url_tuple():
-        """Returns a list with 5 strings: Url, Title, Date, Subtitle summary, Main content"""
-        newsclass = NewsDataclass(url=SubPageReader.data_to_return[0], date=SubPageReader.data_to_return[2],
-                                  title=SubPageReader.data_to_return[1], summary=SubPageReader.data_to_return[3],
-                                  main_content=SubPageReader.data_to_return[4])
-        FirstPage.news_total.append(newsclass)
-        return SubPageReader.data_to_return
-'''
-
 
 class SubPageReader:
     dict_subpage = {}
-    data_to_return = []
+    data_to_return = []  # a list with 5 strings: Url, Title, Date, Subtitle summary, Main content
 
     def __init__(self, url, header):
         self.headers = header
@@ -329,10 +259,6 @@ class SubPageReader:
     @staticmethod
     def return_url_tuple(url, header):
         """Returns a list with 5 strings: Url, Title, Date, Subtitle summary, Main content"""
-        # newsclass = NewsDataclass(url=SubPageReader.data_to_return[0], date=SubPageReader.data_to_return[2],
-        #                          title=SubPageReader.data_to_return[1], summary=SubPageReader.data_to_return[3],
-        #                          main_content=SubPageReader.data_to_return[4])
-        # FirstPage.news_total.append(newsclass)
         SubPageReader(url=url, header=header)
         return SubPageReader.data_to_return
 
@@ -392,6 +318,208 @@ class PageReader:
             print(FirstPage.values)
 
 
+class SubPageReaderBypass:
+    """
+    Reads the url html and returns SubPageReaderBypass.data_to_return
+    """
+    dict_subpage = {}
+    data_to_return = []  # a list with 5 strings: Url, Title, Date, Subtitle summary, Main content
+
+    def __init__(self, url, header):
+        self.headers = header
+        self.url = url
+        self.soup = None
+        SubPageReaderBypass.data_to_return.clear()
+        print(f"SubPageReaderBypass>URL >>>>> {url}")
+        try:
+            options = uc.ChromeOptions()
+            # options.add_argument("--headless")
+            # options.add_argument("start-minimized")
+            options.add_argument("--lang=en-US")
+            driver = uc.Chrome(use_subprocess=True, options=options)
+            time.sleep(0.5)
+            driver.get(self.url)
+            time.sleep(6)
+            self.r = driver.page_source
+            driver.close()
+            driver.quit()
+        except Exception as err:
+            print(f'Error fetching the URL: {url}\n\tError: {err}')
+        try:
+            self.soup = BeautifulSoup(self.r, "html.parser")
+        except Exception as err:
+            print(f'Could not parse the xml: {self.url}\n\tError: {err}')
+        self.news_dict = {}
+        # print(self.soup)
+        SubPageReaderBypass.data_to_return.append(self.url)
+        try:
+            if len(self.soup.find_all('h1', {'class': "entry-title"})) != 0:
+                for a in self.soup.find_all('h1', {'class': "entry-title"}):
+                    data = a.text.strip()
+                    print(f'Title: {data}')
+                    SubPageReaderBypass.data_to_return.append(data)
+                    SubPageReaderBypass.dict_subpage[self.url] = [data]
+            elif len(self.soup.find_all('h1')) != 0:
+                for a in self.soup.find_all('h1'):
+                    data = a.text.strip()
+                    print(f'Title: {data}')
+                    SubPageReaderBypass.data_to_return.append(data)
+                    SubPageReaderBypass.dict_subpage[self.url] = [data]
+            else:
+                if len(SubPageReaderBypass.data_to_return) < 2:  # It should contain Url + Title
+                    SubPageReaderBypass.data_to_return.append(" ")
+        except Exception as err:
+            print(f'SubReader Error in soup: {err}')
+        # print(self.soup.title)
+        PageReaderBypass.page_values = []
+        try:
+            for number, a in enumerate(self.soup.find_all('div', class_="article-date")):
+                count = 0
+                if number == 0:
+                    print(a.text)
+                    if "Αναρτήθηκε" in a.text:
+                        # SubPageReader.dict_subpage[self.url].append(
+                        #    a.text.strip().replace("\nΑναρτήθηκε", "").split(':')[0].strip())
+                        for _a in FirstPage.values:
+                            if count == 0:
+                                date = a.text.replace("\nΑναρτήθηκε", "").split(':')[0].strip()
+                                _a.append(date)
+                                SubPageReaderBypass.data_to_return.append(date)
+                                print(date)
+                                count += 1
+                    else:
+                        # SubPageReader.dict_subpage[self.url].append(a.text.strip().split(':')[0].strip())
+                        for _a in FirstPage.values:
+                            if count == 0:
+                                if "Αναρτήθηκε" in a.text:
+                                    date = a.text.replace("\nΑναρτήθηκε", "").split(':')[0].strip()
+                                    _a.append(date)
+                                    SubPageReaderBypass.data_to_return.append(date)
+                                    print(date)
+                                    count += 1
+                                else:
+                                    date = a.text.split(':')[0].strip()
+                                    _a.append(date)
+                                    SubPageReaderBypass.data_to_return.append(date)
+                                    print(date)
+                                    count += 1
+        except Exception as err:
+            print(f'SubPageReader article-date Error: {err}')
+            raise err
+        if len(SubPageReaderBypass.data_to_return) < 3:  # It should contain Url + Title + Date
+            SubPageReaderBypass.data_to_return.append(" ")
+        try:
+            if len(self.soup.find_all('div', class_="subtitle article-summary")) != 0:
+                for number, a in enumerate(self.soup.find_all('div', class_="subtitle article-summary")):
+                    if len(a.text) != 0:
+                        data = a.text.strip()
+                        SubPageReaderBypass.data_to_return.append(data)
+            elif len(self.soup.find_all('div', class_="col-lg-7")) != 0:
+                for number, a in enumerate(self.soup.find_all('div', class_="col-lg-7")):
+                    if len(a.text) != 0:
+                        data = a.text.strip()
+                        print(f'div_col_lg_7: {data}')
+                        if data not in SubPageReaderBypass.data_to_return:
+                            # To avoid duplicates of title etc. (same class under div)
+                            SubPageReaderBypass.data_to_return.append(data)
+            else:
+                if len(SubPageReaderBypass.data_to_return) < 4:  # It should contain Url + Title + Date + Summary
+                    SubPageReaderBypass.data_to_return.append(" ")
+        except Exception as err:
+            print(f'SubPageReader subtitle article-summary Error: {err}')
+            raise err
+        try:
+            for number, a in enumerate(self.soup.find_all('div', class_="main-content article-content")):
+                if len(a.text) != 0:
+                    data = a.text.strip()
+                    SubPageReaderBypass.data_to_return.append(data)
+                else:
+                    if len(SubPageReaderBypass.data_to_return) < 2:  # It should contain Url + Title
+                        SubPageReaderBypass.data_to_return.append(" ")
+        except Exception as err:
+            print(f'SubPageReader main-content article-content Error: {err}')
+            raise err
+        if len(SubPageReaderBypass.data_to_return) < 5:  # It should contain Url + Title + Date + Summary + Main_content
+            SubPageReaderBypass.data_to_return.append(" ")
+        # print(len(SubPageReader.data_to_return))
+        # SubPageReader.return_url_tuple()
+
+    @staticmethod
+    def return_url_tuple(url, header):
+        """Returns a list with 5 strings: Url, Title, Date, Subtitle summary, Main content"""
+        # newsclass = NewsDataclass(url=SubPageReader.data_to_return[0], date=SubPageReader.data_to_return[2],
+        #                          title=SubPageReader.data_to_return[1], summary=SubPageReader.data_to_return[3],
+        #                          main_content=SubPageReader.data_to_return[4])
+        # FirstPage.news_total.append(newsclass)
+        SubPageReaderBypass(url=url, header=header)
+        return SubPageReaderBypass.data_to_return
+
+
+class PageReaderBypass:
+    """
+    Reads the html from the main category (Newsroom etc.) url and stores the title, link and date to a Dataclass in
+    FirstPage.news_total
+    """
+    page_values = []
+
+    def __init__(self, url, name, driver):
+        self.name = name
+        self.url = url
+        self.driver = driver
+        self.soup = None
+        try:
+            driver.get(self.url)
+            if self.name == 'Newsroom':  # Only for the first time, wait for the Chrome to open.
+                time.sleep(4)
+            time.sleep(1)
+            self.r = driver.page_source
+        except Exception as err:
+            print(f'Error fetching the URL: {url}'
+                  f'\nError: {err}')
+        try:
+            self.soup = BeautifulSoup(self.r, "html.parser")
+        except Exception as err:
+            print(f'Could not parse the html: {self.url}'
+                  f'\nError: {err}')
+        self.temp_list = []
+        self.news_dict = {}
+        try:
+            for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
+                temp_list = []
+                title = ""
+                link = ""
+                date = ""
+                # print(div.text)
+                for a in div.find_all('h3'):
+                    # print(a.text)
+                    for b in a.find_all('a', href=True, rel=True):
+                        # print(b.text)
+                        # print(f"url: {b['href']}, Title: {b['rel']}")
+                        link = b['href'].strip()
+                        for num, word in enumerate(b['rel']):
+                            if num != 0:  # Do not include a space in front of the first word
+                                title += " "
+                            title += word
+                        title.strip()
+                        temp_list.append(title)
+                        temp_list.append(link)
+                for number, a in enumerate(div.find('div', class_="archive-info info-text")):
+                    if number == 0:
+                        # Get the label as an author
+                        temp_date = div.find('div', class_="archive-info info-text")
+                        date_child = list(temp_date.children)[0].strip().replace("ί", "ι")
+                        date = date_child
+                        print(f'PageReaderBypass> date: {date_child}')
+                        temp_list.append(date_child)
+                FirstPage.values.append(temp_list)
+                FirstPage.news_to_open_in_browser.append(temp_list)
+                FirstPage.news_total.append(NewsDataclass(url=link, title=title, date=date))
+        except Exception as err:
+            print(f'PageReaderBypass Error: {err}')
+        if debug:
+            print(FirstPage.values)
+
+
 @dataclasses.dataclass
 class NewsDataclass:
     date: Any
@@ -429,6 +557,7 @@ class FirstPage:
         self.right_click_menu = Menu(font='Arial 10',
                                      tearoff=0)
         self.right_click_menu.add_command(label='Show article', command=self.show_main_article)
+        self.right_click_menu.add_command(label='Show article (bypass)', command=self.show_main_article_bypass)
         self.right_click_menu.add_command(label='Open article in browser', command=self.open_article_link)
         self.tree.bind('<ButtonRelease-3>', self.post_menu)
 
@@ -440,25 +569,65 @@ class FirstPage:
         current_article = self.tree.item(current)['values'][1]  # [0] is the Date
         print(f'current: {current_article}')
         count = 0
-        for class_ in FirstPage.news_total:
+        for  number, class_ in enumerate(FirstPage.news_total):
             if current_article == class_.title and count == 0:
-                if class_.main_content != "":
-                    print(f'Main content: {class_.main_content}')
+                class_.main_content.strip()
+                print(f'class_.main_content ({len(class_.main_content)})')
+                if len(class_.main_content) != 0:
+                    print(f'FirstPage>show_main_article>Content exists: Main content: '
+                          f'\n{class_.main_content}')
                     count += 1
+                    ToplevelArticle(class_, operation='main_article')
                 else:
                     print(f'SubPageReader to be called')
                     added_new = SubPageReader(url=class_.url, header=headers())
                     data = added_new.data_to_return
-                    print(f'{len(data)}\n{data}')
+                    print(f'length of SubPageReader: {len(data)}'
+                          f'\nData from SubPageReader: {data}')
                     newsclass = NewsDataclass(url=data[0], date=data[2],
                                               title=data[1], summary=data[3],
                                               main_content=data[4])
-                    FirstPage.news_total.append(newsclass)
+
                     self.tree.item(current, values=(self.tree.item(current)['values'][0], newsclass.title))
                     print(f'Main content: \n{newsclass.main_content}')
                     count += 1
                     ToplevelArticle(newsclass, operation='main_article')
+                    # Remove the Dataclass not containing main_content and summary
+                    # after appending the newsclass to the same list
+                    FirstPage.news_total.insert(number, newsclass)  # Insert the newsclass to same index as class_
+                    FirstPage.news_total.remove(class_)
 
+    def show_main_article_bypass(self):
+        current = self.tree.focus()
+        current_article = self.tree.item(current)['values'][1]  # [0] is the Date
+        print(f'current: {current_article}')
+        count = 0
+        for number, class_ in enumerate(FirstPage.news_total):
+            if current_article == class_.title and count == 0:
+                class_.main_content.strip()
+                print(f'class_.main_content ({len(class_.main_content)})')
+                if len(class_.main_content) != 0:
+                    print(f'FirstPage>show_main_article_bypass>Content exists: Main content: '
+                          f'\n{class_.main_content}')
+                    count += 1
+                    ToplevelArticle(class_, operation='main_article')
+                else:
+                    print(f'FirstPage>show_main_article_bypass>SubPageReaderBypass to be called')
+                    added_new = SubPageReaderBypass(url=class_.url, header=None)
+                    data = added_new.data_to_return
+                    print(f'length of SubPageReaderBypass: {len(data)}'
+                          f'\nData from SubPageReaderBypass: {data}')
+                    newsclass = NewsDataclass(url=data[0], date=data[2],
+                                              title=data[1], summary=data[3],
+                                              main_content=data[4])
+                    self.tree.item(current, values=(self.tree.item(current)['values'][0], newsclass.title))
+                    print(f'Main content: \n{newsclass.main_content}')
+                    count += 1
+                    ToplevelArticle(newsclass, operation='main_article')
+                    # Remove the Dataclass not containing main_content and summary
+                    # after appending the newsclass to the same list
+                    FirstPage.news_total.insert(number, newsclass)  # Insert the newsclass to same index as class_
+                    FirstPage.news_total.remove(class_)
     '''def show_summary(self):
         current = self.tree.focus()
         current_article = self.tree.item(current)['values'][1]  # [0] is the Date
@@ -542,7 +711,6 @@ class FirstPage:
 
     def fill_the_tree(self):
         # Clear the treeview
-
         try:
             for item in self.tree.get_children():
                 self.tree.delete(item)
@@ -559,6 +727,48 @@ class FirstPage:
             for number, tuple_feed in enumerate(FirstPage.values):
                 self.tree.insert("", tk.END, iid=str(number),
                                  values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
+            if debug:
+                print(f'Treeview was filled {FirstPage.values}')
+        except Exception as err:
+            print(f'Loading failed! Error: {err}')
+
+    def renew_feed_bypass(self):
+        FirstPage.values.clear()
+        FirstPage.news_to_open_in_browser.clear()
+        self.fill_the_tree_bypass()
+        print(f"FirstPage>renew_feed_bypass(): Tree renewed")
+
+    def fill_the_tree_bypass(self):
+        # Clear the treeview
+        try:
+            for item in self.tree.get_children():
+                self.tree.delete(item)
+            print('Tree was erased')
+        except Exception as err:
+            print(f'Error in deleting the Tree: {err}')
+        try:
+            if self.name == "Newsroom":
+                options = uc.ChromeOptions()
+                # options.add_argument("--headless")
+                # options.add_argument("start-minimized")
+                options.add_argument("--lang=en-US")
+                global driver
+                driver = uc.Chrome(use_subprocess=True, options=options)
+                # driver.set_window_position(-1000, 0)
+            feed = PageReaderBypass(url=self.url, name=self.name, driver=driver)
+            title_list = [font.measure(d[0]) for d in FirstPage.values]
+            date_list = [font.measure(d[2]) for d in FirstPage.values]
+            self.tree.column(column='Title', minwidth=100, width=max(title_list), stretch=True)
+            self.tree.column(column='Date', minwidth=150, width=max(date_list), stretch=True)
+            print(max(title_list))
+            for number, tuple_feed in enumerate(FirstPage.values):
+                self.tree.insert("", tk.END, iid=str(number),
+                                 values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
+            print(f"App.page_dict {list(App.page_dict.keys())[-1]}")  # TODO: remove it
+            if self.name == "Analysis":  # After the last page, close the chromedriver
+                driver.close()
+                driver.quit()
+                print(f"FirstPage>fill_the_tree_bypass> {driver} closed")
             if debug:
                 print(f'Treeview was filled {FirstPage.values}')
         except Exception as err:
@@ -581,7 +791,6 @@ class App:
         root.geometry(f'{App.x}x{App.y}')
         self.root = root
         self.root.title('The Press Project news feed')
-
         self.widgets()
         self.note = ttk.Notebook(self.root)
         self.note.pack(side='bottom', fill='both', expand=True)
@@ -603,6 +812,7 @@ class App:
         self.context = Menu(self.main_menu, font='Arial 10',
                             tearoff=0)
         self.context.add_command(label='Renew titles', font='Arial 10', command=self.call_renew_feed)
+        self.context.add_command(label='Renew titles (bypass)', font='Arial 10', command=self.call_renew_feed_bypass)
         self.context.add_separator()
         self.context.add_command(label='Exit', font='Arial 10', command=self.exit_the_program)
         # Add the cascade here. The submenu has to be built first and then be added to the main menu
@@ -635,10 +845,15 @@ class App:
         self.main_menu.add_cascade(label="Help", menu=self.help_menu, underline=0)
 
     def notebook_pages(self, url, note, controller, name):
+        """
+        Stores all the pages of the notebook in App.page_dict
+        :param url:
+        :param note:
+        :param controller:
+        :param name:
+        :return:
+        """
         App.page_dict[name] = FirstPage(note=note, name=name, controller=self, url=url)
-
-    def show_tpp_social_media(self):
-        pass
 
     def call_renew_feed(self):
         """Recalls the site and renew the treeview for all tabs"""
@@ -648,6 +863,17 @@ class App:
         self.f_time.destroy()
         self.widgets()
         print(f'App>call_renew_feed()')
+
+    def call_renew_feed_bypass(self):
+        """
+        Renews the treeview for all tabs by using Chromedriver
+        """
+        FirstPage.news_total.clear()  # Clear needs to be called here, just once. Not in Firstpage via renew_feed()
+        for dictio in App.page_dict.values():
+            dictio.renew_feed_bypass()
+        self.f_time.destroy()
+        self.widgets()
+        print(f'App>call_renew_feed_bypass()')
 
     def widgets(self):
         # Time frame
@@ -1042,8 +1268,8 @@ class ToplevelAbout:
         self.toplevel = tk.Toplevel()
         self.toplevel.title = 'About ThePressProject Scrape GUI'
         self.toplevel.geometry(f'{ToplevelAbout.x}x{ToplevelAbout.y}')
-        #self.empty_top_label = ttk.Label(self.toplevel, text='\n')
-        #self.empty_top_label.pack(expand=True, fill='y')
+        # self.empty_top_label = ttk.Label(self.toplevel, text='\n')
+        # self.empty_top_label.pack(expand=True, fill='y')
         self.big_labelframe = ttk.Frame(self.toplevel)
         self.big_labelframe.pack(expand=True, fill='both')
         text = '\nThePressProject name and all of its content belongs to the ThePressProject team. ' \
@@ -1077,7 +1303,7 @@ class AskQuit(tkinter.Toplevel):
         valueLabel.pack(side='right', expand=True)
         image = Image.open("images/questionmark.png")
         image = image.resize(
-            (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), Image.ANTIALIAS)
+            (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), PIL.Image.ANTIALIAS)
         image = ImageTk.PhotoImage(image)
         image_label = ttk.Label(askquit_topframe, image=image)
         image_label.pack(side='left', expand=True, padx=10, pady=10)
