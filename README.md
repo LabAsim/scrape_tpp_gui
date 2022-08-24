@@ -3,7 +3,7 @@
 ## Description
 
 This is my first project in order to learn Python. 
-I have built it so as to access the news faster and in a more aggregated way than just reading the site.
+I have built it to access the news faster and in a more aggregated way than just reading the site.
 It scrapes the news categories of ThePressProject site.
 
 It has been tested in Python 3.10. It heavily relies on 3rd party packages.
@@ -21,6 +21,10 @@ It has been tested in Python 3.10. It heavily relies on 3rd party packages.
 The usage is pretty straightforward. 
 
 The GUI automatically loads all the news titles and their date. The user can renew the titles through menu>renew titles.
+
+If no news are loaded, try to renew titles via menu>renew titles(bypass). It requires Chromedriver and Chrome in order 
+to bypass Cloudflare bot protection. A Chrome window will be launched off the screen to access the news (headless mode
+gets detected by Cloudflare).
 
 There are 8 themes. 
 
