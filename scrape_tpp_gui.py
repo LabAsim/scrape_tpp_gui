@@ -1245,7 +1245,6 @@ class ToplevelSocial:
         print((int(self.toplevelsocial.winfo_width()), int(self.toplevelsocial.winfo_height())))
 
     def resize_images(self, event):
-        # self.img_facebook = Image.open(os.path.join(self.dir_path, 'Facebook_wikimedia.png'))
         img_facebook = self.img_facebook.resize(
             (int(self.toplevelsocial.winfo_width() / 3), int(self.toplevelsocial.winfo_height() / 3)))
         self.img_facebook_tk = ImageTk.PhotoImage(img_facebook)
