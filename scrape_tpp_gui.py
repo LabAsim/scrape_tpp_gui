@@ -1249,7 +1249,6 @@ class ToplevelSocial:
             (int(self.toplevelsocial.winfo_width() / 3), int(self.toplevelsocial.winfo_height() / 3)))
         self.img_facebook_tk = ImageTk.PhotoImage(img_facebook)
         self.label_facebook.config(image=self.img_facebook_tk)
-        # self.img_twitter = Image.open(os.path.join(self.dir_path, 'twitter_tpp.png'))
         img_twitter = self.img_twitter.resize(
             (int(self.bigframe.winfo_width() / 3), int(self.bigframe.winfo_height() / 3)),
             Image.ANTIALIAS)
