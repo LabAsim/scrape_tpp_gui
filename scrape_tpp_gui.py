@@ -1354,8 +1354,6 @@ if __name__ == "__main__":
     # https://rdbende.github.io/tkinter-docs/tutorials/how-to-use-themes.html
     root.tk.call('source',
                  os.path.join(dir_path, 'source/azure/azure.tcl'))  # https://github.com/rdbende/Azure-ttk-theme
-    # root.tk.call('source', os.path.join(dir_path, 'source/forest/forest-dark.tcl'))
-    # root.tk.call('source', os.path.join(dir_path, 'source/forest/forest-light.tcl'))
     root.tk.call('source', os.path.join(dir_path, 'source/plastik/plastik.tcl'))
     root.tk.call('source', os.path.join(dir_path, 'source/radiance/radiance.tcl'))
     root.tk.call('source', os.path.join(dir_path, 'source/aquativo/aquativo.tcl'))
