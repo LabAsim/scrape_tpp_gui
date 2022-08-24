@@ -10,11 +10,21 @@ It has been tested in Python 3.10. It heavily relies on 3rd party packages.
 
 
 ## Table of Contents
+- [Dependencies](#dependencies)
 - [Usage](#usage)
 - [Convert to executable](#convert-to-executable)
 - [Credits](#credits)
 - [Donate](#donate)
 - [License](#license)
+
+##Dependencies
+
+- Pillow
+- undetected chromedriver
+- BeautifulSoup
+- [tktooltip](https://github.com/gnikit/tkinter-tooltip)
+- ttkwidgets
+- requests
 
 ## Usage
 
