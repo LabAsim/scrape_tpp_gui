@@ -17,7 +17,7 @@ It has been tested in Python 3.10. It heavily relies on 3rd party packages.
 - [Donate](#donate)
 - [License](#license)
 
-##Dependencies
+## Dependencies
 
 - Pillow
 - undetected chromedriver
