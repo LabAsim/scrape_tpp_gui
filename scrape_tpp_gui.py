@@ -9,7 +9,6 @@ import webbrowser
 from datetime import datetime
 from tkinter import messagebox, Menu, StringVar, ttk
 from typing import Any
-
 import PIL.Image
 import requests
 from bs4 import BeautifulSoup
@@ -337,9 +336,8 @@ class SubPageReaderBypass:
             # options.add_argument("start-minimized")
             options.add_argument("--lang=en-US")
             driver = uc.Chrome(use_subprocess=True, options=options)
-            time.sleep(0.5)
             driver.get(self.url)
-            time.sleep(6)
+            time.sleep(5)
             self.r = driver.page_source
             driver.close()
             driver.quit()
@@ -468,10 +466,11 @@ class PageReaderBypass:
         self.driver = driver
         self.soup = None
         try:
-            driver.get(self.url)
+            self.driver.get(self.url)
             if self.name == 'Newsroom':  # Only for the first time, wait for the Chrome to open.
-                time.sleep(4)
-            time.sleep(1)
+                time.sleep(3.5)
+            else:
+                time.sleep(0.75)
             self.r = driver.page_source
         except Exception as err:
             print(f'Error fetching the URL: {url}'
@@ -537,6 +536,7 @@ class FirstPage:
     values = []  # A temporary list containing lists for each news-link in the form of [title-string, url, date]
     news_to_open_in_browser = []  # Contains all the scraped news in the form of [title-string, url, date]
     news_total = []  # Contains all the dataclasses
+    driver = ""  # The Chromedriver
 
     def __init__(self, note, name, controller, url):
         self.note = note
@@ -604,9 +604,8 @@ class FirstPage:
         count = 0
         for number, class_ in enumerate(FirstPage.news_total):
             if current_article == class_.title and count == 0:
-                class_.main_content.strip()
                 print(f'class_.main_content ({len(class_.main_content)})')
-                if len(class_.main_content) != 0:
+                if len(class_.main_content) >= 2:  # To avoid containing a single "\n" after not scraping with BS
                     print(f'FirstPage>show_main_article_bypass>Content exists: Main content: '
                           f'\n{class_.main_content}')
                     count += 1
@@ -623,11 +622,12 @@ class FirstPage:
                     self.tree.item(current, values=(self.tree.item(current)['values'][0], newsclass.title))
                     print(f'Main content: \n{newsclass.main_content}')
                     count += 1
-                    ToplevelArticle(newsclass, operation='main_article')
                     # Remove the Dataclass not containing main_content and summary
                     # after appending the newsclass to the same list
                     FirstPage.news_total.insert(number, newsclass)  # Insert the newsclass to same index as class_
                     FirstPage.news_total.remove(class_)
+                    ToplevelArticle(newsclass, operation='main_article')
+
     '''def show_summary(self):
         current = self.tree.focus()
         current_article = self.tree.item(current)['values'][1]  # [0] is the Date
@@ -751,10 +751,12 @@ class FirstPage:
                 options = uc.ChromeOptions()
                 # options.add_argument("--headless")
                 # options.add_argument("start-minimized")
-                options.add_argument("--lang=en-US")
-                global driver
+                # options.add_argument("--lang=en-US")
                 driver = uc.Chrome(use_subprocess=True, options=options)
-                # driver.set_window_position(-1000, 0)
+                FirstPage.driver = driver
+                #driver.set_window_position(-1000, 0)  # Set Chrome off screen
+            else:
+                driver = FirstPage.driver
             feed = PageReaderBypass(url=self.url, name=self.name, driver=driver)
             title_list = [font.measure(d[0]) for d in FirstPage.values]
             date_list = [font.measure(d[2]) for d in FirstPage.values]
@@ -765,7 +767,7 @@ class FirstPage:
                 self.tree.insert("", tk.END, iid=str(number),
                                  values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
             print(f"App.page_dict {list(App.page_dict.keys())[-1]}")  # TODO: remove it
-            if self.name == "Analysis":  # After the last page, close the chromedriver
+            if self.name == list(App.page_dict.keys())[-1]:  # After the last page ("Analysis"), close the chromedriver
                 driver.close()
                 driver.quit()
                 print(f"FirstPage>fill_the_tree_bypass> {driver} closed")
@@ -868,12 +870,13 @@ class App:
         """
         Renews the treeview for all tabs by using Chromedriver
         """
+        print(f'App>call_renew_feed_bypass()')
         FirstPage.news_total.clear()  # Clear needs to be called here, just once. Not in Firstpage via renew_feed()
         for dictio in App.page_dict.values():
             dictio.renew_feed_bypass()
         self.f_time.destroy()
         self.widgets()
-        print(f'App>call_renew_feed_bypass()')
+        print(f'Notebooks renewed')
 
     def widgets(self):
         # Time frame
@@ -1245,10 +1248,12 @@ class ToplevelSocial:
         print((int(self.toplevelsocial.winfo_width()), int(self.toplevelsocial.winfo_height())))
 
     def resize_images(self, event):
+        # self.img_facebook = Image.open(os.path.join(self.dir_path, 'Facebook_wikimedia.png'))
         img_facebook = self.img_facebook.resize(
             (int(self.toplevelsocial.winfo_width() / 3), int(self.toplevelsocial.winfo_height() / 3)))
         self.img_facebook_tk = ImageTk.PhotoImage(img_facebook)
         self.label_facebook.config(image=self.img_facebook_tk)
+        # self.img_twitter = Image.open(os.path.join(self.dir_path, 'twitter_tpp.png'))
         img_twitter = self.img_twitter.resize(
             (int(self.bigframe.winfo_width() / 3), int(self.bigframe.winfo_height() / 3)),
             Image.ANTIALIAS)
