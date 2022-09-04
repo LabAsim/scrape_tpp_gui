@@ -1,4 +1,4 @@
-# Version 24/8/2022
+# Version 4/9/2022
 import dataclasses
 import json
 import os
@@ -629,32 +629,6 @@ class FirstPage:
                     FirstPage.news_total.insert(number, newsclass)  # Insert the newsclass to same index as class_
                     FirstPage.news_total.remove(class_)
                     ToplevelArticle(newsclass, operation='main_article')
-
-    '''def show_summary(self):
-        current = self.tree.focus()
-        current_article = self.tree.item(current)['values'][1]  # [0] is the Date
-        print(f'current: {current_article}')
-        count = 0
-        for class_ in FirstPage.news_total:
-            if current_article == class_.title and count == 0:
-                if class_.summary != "":
-                    print(f'Summary: \n{class_.summary}')
-
-                    count += 1
-                else:
-                    print(f'SubPageReader to be called')
-                    added_new = SubPageReader(url=class_.url, header=headers)
-                    data = added_new.data_to_return
-                    print(f'{len(data)}\n{data}')
-                    newsclass = NewsDataclass(url=data[0], date=data[2],
-                                              title=data[1], summary=data[3],
-                                              )
-
-                    FirstPage.news_total.append(newsclass)
-                    self.tree.item(current, values=(newsclass.date, newsclass.title))  # Wrong date
-                    print(f'Summary: \n{newsclass.summary}')
-                    count += 1
-                    ToplevelArticle(newsclass, operation='summary')'''
 
     def open_article_link(self):
         #  Solution: https://stackoverflow.com/questions/30614279/tkinter-treeview-get-selected-item-values
