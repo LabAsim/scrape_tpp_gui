@@ -25,6 +25,7 @@ It has been tested in Python 3.10. It heavily relies on 3rd party packages.
 - [tktooltip](https://github.com/gnikit/tkinter-tooltip)
 - ttkwidgets
 - requests
+- [pyperclip](https://github.com/asweigart/pyperclip)
 
 ## Usage
 
