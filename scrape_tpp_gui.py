@@ -1027,7 +1027,7 @@ class App:
             myapp.change_theme_yaru()
         elif theme == "arc":
             myapp.change_theme_arc()
-        elif theme == "xp-native":
+        elif theme == "vista":
             myapp.change_theme_xpnative()
 
 
@@ -1237,8 +1237,8 @@ class ToplevelSocial:
 
 
 class ToplevelAbout:
-    x = 650
-    y = 300
+    x = 580
+    y = 280
 
     def __init__(self, controller):
         self.controller = controller
@@ -1250,13 +1250,14 @@ class ToplevelAbout:
         self.big_labelframe = ttk.Frame(self.toplevel)
         self.big_labelframe.pack(expand=True, fill='both')
         text = '\nThePressProject name and all of its content belongs to the ThePressProject team. ' \
-               '\nI have no affiliation with the team. This GUI is built only for educational purposes. ' \
-               '\n\nThe 3rd party packages used to build this GUi have their own licenses. ' \
-               '\nThe rest of the code which is written by me, it\'s released under MIT license.' \
+               '\n\nI have no affiliation with the team. This GUI was built only for educational purposes. ' \
+               '\n\nThe 3rd party packages used to build this GUΙ have their own licenses. ' \
+               'The rest of the code which is written by me, it\'s released under MIT license.' \
                '\n\nDo not forget to donate monthly to ThePressProject!'
         self.text = tk.Text(self.big_labelframe, wrap="word", font='Arial 13')
         self.text.pack(expand=True, fill='both')
         self.text.insert("1.0", text)
+        self.text.config(state="disabled")
         center(self.toplevel, root)
 
 
