@@ -1,5 +1,6 @@
 # Version 24/8/2022
 import dataclasses
+import json
 import os
 import sys
 import time
@@ -17,6 +18,7 @@ from PIL import Image, ImageTk
 from ttkwidgets.font import FontSelectFrame
 import tktooltip  # https://github.com/gnikit/tkinter-tooltip`
 import undetected_chromedriver as uc
+from helper_functions import file_exists
 
 headers_list = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
@@ -569,7 +571,7 @@ class FirstPage:
         current_article = self.tree.item(current)['values'][1]  # [0] is the Date
         print(f'current: {current_article}')
         count = 0
-        for  number, class_ in enumerate(FirstPage.news_total):
+        for number, class_ in enumerate(FirstPage.news_total):
             if current_article == class_.title and count == 0:
                 class_.main_content.strip()
                 print(f'class_.main_content ({len(class_.main_content)})')
@@ -754,7 +756,7 @@ class FirstPage:
                 # options.add_argument("--lang=en-US")
                 driver = uc.Chrome(use_subprocess=True, options=options)
                 FirstPage.driver = driver
-                #driver.set_window_position(-1000, 0)  # Set Chrome off screen
+                # driver.set_window_position(-1000, 0)  # Set Chrome off screen
             else:
                 driver = FirstPage.driver
             feed = PageReaderBypass(url=self.url, name=self.name, driver=driver)
@@ -834,6 +836,7 @@ class App:
         self.theme_menu.add_command(label='Arc', command=self.change_theme_arc)
         self.theme_menu.add_command(label='XP native', command=self.change_theme_xpnative)
         self.edit_menu.add_cascade(label='Change theme', font='Arial 10', menu=self.theme_menu, underline=0)
+        self.edit_menu.add_command(label='Save theme', font='Arial 10', command=App.save_theme, underline=0)
         # TPP menu
         self.tpp_menu = Menu(self.main_menu, tearoff=0)
         self.tpp_menu.add_command(label='Social media', font='Arial 10', command=lambda: ToplevelSocial(self))
@@ -914,27 +917,6 @@ class App:
                     print(err)
         except tkinter.TclError as err:
             print(err)
-        '''if root.tk.call("ttk::style", "theme", "use") not in ("azure-light", "azure-dark"):
-            try:
-                root.tk.call('source', os.path.join(dir_path, 'source/azure/azure.tcl'))
-                root.tk.call("set_theme", "dark")
-            except tkinter.TclError as err:
-                print(f'Error in setting azure: {err}')
-                try:
-                    root.tk.call("ttk::style", "theme", "use", 'vista')
-                    root.tk.call("ttk::style", "theme", "use", "azure-light")
-                except Exception as err:
-                    print(err)
-            finally:
-                return
-        if root.tk.call("ttk::style", "theme", "use") == "azure-dark":
-            # Set light theme
-            root.tk.call("set_theme", "light")
-            return
-        else: # root.tk.call("ttk::style", "theme", "use") == "azure-light":
-            # Set dark theme
-            root.tk.call("set_theme", "dark")
-            return'''
 
     def change_theme_forest(self):
         print(f'All styles: {root.tk.call("ttk::style", "theme", "names")}')
@@ -956,27 +938,6 @@ class App:
                     print(err)
         except tkinter.TclError as err:
             print(err)
-        '''if root.tk.call("ttk::style", "theme", "use") not in ("azure-light", "azure-dark"):
-            try:
-                root.tk.call('source', os.path.join(dir_path, 'source/azure/azure.tcl'))
-                root.tk.call("set_theme", "dark")
-            except tkinter.TclError as err:
-                print(f'Error in setting azure: {err}')
-                try:
-                    root.tk.call("ttk::style", "theme", "use", 'vista')
-                    root.tk.call("ttk::style", "theme", "use", "azure-light")
-                except Exception as err:
-                    print(err)
-            finally:
-                return
-        if root.tk.call("ttk::style", "theme", "use") == "azure-dark":
-            # Set light theme
-            root.tk.call("set_theme", "light")
-            return
-        else: # root.tk.call("ttk::style", "theme", "use") == "azure-light":
-            # Set dark theme
-            root.tk.call("set_theme", "dark")
-            return'''
 
     def change_theme_sun_valley(self):
         """
@@ -1055,6 +1016,45 @@ class App:
             root.tk.call("ttk::style", "theme", "use", 'arc')
         except tkinter.TclError as err:
             print(err)
+
+    @staticmethod
+    def save_theme():
+        """Saves the preferred theme"""
+        with open("saved_theme.json", "w+", encoding='utf-8') as file:
+            json_data = {'theme': root.tk.call("ttk::style", "theme", "use")}
+            json.dump(json_data, file, indent=4)
+            print(f"Theme saved to saved_theme.json")
+
+    @staticmethod
+    def read_theme():
+        """Reads the preferred theme"""
+        if file_exists(name="saved_theme.json", dir_path=dir_path):
+            with open("saved_theme.json", "r+", encoding='utf-8') as file:
+                json_data = json.load(file)
+                return json_data['theme']
+        return None
+
+    @staticmethod
+    def use_theme(theme):
+        """Sets the theme passed to the function"""
+        if theme == 'azure-dark' or None:
+            root.tk.call("set_theme", "dark")
+        elif theme == 'azure-light':
+            root.tk.call("set_theme", "light")
+        elif theme == 'radiance':
+            myapp.change_theme_radiance()
+        elif theme == 'aquativo':
+            myapp.change_theme_aquativo()
+        elif theme == "plastik":
+            myapp.change_theme_plastik()
+        elif theme == "adapta":
+            myapp.change_theme_adapta()
+        elif theme == "yaru":
+            myapp.change_theme_yaru()
+        elif theme == "arc":
+            myapp.change_theme_arc()
+        elif theme == "xp-native":
+            myapp.change_theme_xpnative()
 
 
 class ToplevelArticle:
@@ -1345,6 +1345,14 @@ class AskQuit(tkinter.Toplevel):
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
+themes_paths = {"azure": os.path.join(dir_path, 'source/azure/azure.tcl'),
+                "plastik": os.path.join(dir_path, 'source/plastik/plastik.tcl'),
+                "radiance": os.path.join(dir_path, 'source/radiance/radiance.tcl'),
+                "aquativo": os.path.join(dir_path, 'source/aquativo/aquativo.tcl'),
+                "adapta": os.path.join(dir_path, 'source/adapta/adapta.tcl'),
+                "yaru": os.path.join(dir_path, 'source/yaru/yaru.tcl'),
+                "arc": os.path.join(dir_path, 'source/arc/arc.tcl')}
+
 if __name__ == "__main__":
     start = time.time()
     debug = False
@@ -1355,18 +1363,19 @@ if __name__ == "__main__":
     font = tkinter.font.Font(size=14)
     dir_path = os.path.dirname(os.path.realpath(__file__))
     # https://rdbende.github.io/tkinter-docs/tutorials/how-to-use-themes.html
-    root.tk.call('source',
-                 os.path.join(dir_path, 'source/azure/azure.tcl'))  # https://github.com/rdbende/Azure-ttk-theme
-    root.tk.call('source', os.path.join(dir_path, 'source/plastik/plastik.tcl'))
-    root.tk.call('source', os.path.join(dir_path, 'source/radiance/radiance.tcl'))
-    root.tk.call('source', os.path.join(dir_path, 'source/aquativo/aquativo.tcl'))
-    root.tk.call('source', os.path.join(dir_path, 'source/adapta/adapta.tcl'))
-    root.tk.call('source', os.path.join(dir_path, 'source/yaru/yaru.tcl'))
-    root.tk.call('source', os.path.join(dir_path, 'source/arc/arc.tcl'))
+    root.tk.call('source', themes_paths["azure"])  # https://github.com/rdbende/Azure-ttk-theme
+    root.tk.call('source', themes_paths["plastik"])
+    root.tk.call('source', themes_paths['radiance'])
+    root.tk.call('source', themes_paths['aquativo'])
+    root.tk.call('source', themes_paths['adapta'])
+    root.tk.call('source', themes_paths['yaru'])
+    root.tk.call('source', themes_paths['arc'])
     root.tk.call("set_theme", "dark")
     myapp = App(root)
     root.protocol("WM_DELETE_WINDOW", lambda: AskQuit(
         root))  # https://stackoverflow.com/questions/111155/how-do-i-handle-the-window-close-event-in-tkinter
+    preferred_theme = myapp.read_theme()  # Reads the theme from the json (if exists)
+    myapp.use_theme(preferred_theme)  # Sets the theme. If None, azure-dark is the default.
     center(root)
     end = time.time()
     print(f'Current Style: {root.tk.call("ttk::style", "theme", "use")}')
