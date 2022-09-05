@@ -1,4 +1,4 @@
-# Version 4/9/2022
+# Version 5/9/2022
 import dataclasses
 import json
 import os
@@ -19,7 +19,7 @@ from ttkwidgets.font import FontSelectFrame
 import tktooltip  # https://github.com/gnikit/tkinter-tooltip`
 import undetected_chromedriver as uc
 from helper_functions import file_exists
-
+import pyperclip
 headers_list = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
     "Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36",
@@ -994,16 +994,16 @@ class App:
     @staticmethod
     def save_theme():
         """Saves the preferred theme"""
-        with open("saved_theme.json", "w+", encoding='utf-8') as file:
+        with open("tpp.json", "w+", encoding='utf-8') as file:
             json_data = {'theme': root.tk.call("ttk::style", "theme", "use")}
             json.dump(json_data, file, indent=4)
-            print(f"Theme saved to saved_theme.json")
+            print(f"Theme saved to tpp.json")
 
     @staticmethod
     def read_theme():
         """Reads the preferred theme"""
-        if file_exists(name="saved_theme.json", dir_path=dir_path):
-            with open("saved_theme.json", "r+", encoding='utf-8') as file:
+        if file_exists(name="tpp.json", dir_path=dir_path):
+            with open("tpp.json", "r+", encoding='utf-8') as file:
                 json_data = json.load(file)
                 return json_data['theme']
         return None
@@ -1094,8 +1094,23 @@ class ToplevelArticle:
         # Allow user to select the text (i.e. if the user wants to copy it)
         self.text.bind("<1>", lambda event: self.text.focus_set())
         self.text1.bind("<1>", lambda event: self.text1.focus_set())
-        # center_to_screen(self.toplevelarticle)
+        # Create Right-click menu for copying
+        self.menu = Menu(self.note, tearoff=0)
+        self.menu.add_command(label='Copy', font='Arial 10', command=self.copy_text_to_clipboard)
+        self.text.bind('<ButtonRelease-3>', self.post_menu)  # Menu is posted in self.text
+        self.text1.bind('<ButtonRelease-3>', self.post_menu)
         center(self.toplevelarticle, root)
+
+    def post_menu(self, event):
+        """Posts the right click menu at the cursor's coordinates"""
+        self.menu.post(event.x_root, event.y_root)
+
+    def copy_text_to_clipboard(self):
+        """Gets the selected text from the Text and copies it to the clipboard
+        https://stackoverflow.com/questions/4073468/how-do-i-get-a-selected-string-in-from-a-tkinter-text-box"""
+        text = self.big_frame.selection_get()
+        pyperclip.copy(text)
+        print(f"Text coped to clipboard: {text}")
 
     def update_preview(self, font_tuple):
         """Modifies the text font
@@ -1262,9 +1277,12 @@ class ToplevelAbout:
 
 
 class AskQuit(tkinter.Toplevel):
+    x = 300
+    y = 130
 
     def __init__(self, parent):
         super().__init__()
+        self.geometry(f'{AskQuit.x}x{AskQuit.y}')
         self.parent = parent
         self.grab_set()
         self.big_frame = ttk.Frame(self)
@@ -1304,7 +1322,6 @@ class AskQuit(tkinter.Toplevel):
                 widget.destroy()
                 self.destroy()
                 print(f'AskQuit>toplevel_quit: {widget} & {self} is now destroyed')
-
         else:
             self.destroy()
             print(f'AskQuit>toplevel_quit: {self} is now destroyed')
