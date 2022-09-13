@@ -1,4 +1,5 @@
 # Version 13/9/2022
+import argparse
 import dataclasses
 import json
 import os
@@ -19,8 +20,8 @@ from ttkwidgets.font import FontSelectFrame
 import tktooltip  # https://github.com/gnikit/tkinter-tooltip`
 import undetected_chromedriver as uc
 import pyperclip
-from helper_functions import file_exists, center, callback, headers_list, headers
-
+from helper_functions import file_exists, center, callback, headers_list, headers, str2bool
+import sv_ttk
 
 def sortby(tree, col, descending):
     """sort tree contents when a column header is clicked on"""
@@ -784,7 +785,7 @@ class App:
         # Change theme menu
         self.theme_menu = Menu(self.edit_menu, tearoff=0)
         self.theme_menu.add_command(label='Azure', command=self.change_theme_azure)
-        # self.theme_menu.add_command(label="Forest", command=self.change_theme_forest)
+        # self.theme_menu.add_command(label="Sun valley", command=self.change_theme_sun_valley)
         self.theme_menu.add_command(label='Adapta', command=self.change_theme_adapta)
         self.theme_menu.add_command(label='Aquativo',
                                     command=self.change_theme_aquativo)  # https://ttkthemes.readthedocs.io/en/latest/themes.html#radiance-ubuntu
@@ -909,13 +910,25 @@ class App:
         print(f'All styles: {root.tk.call("ttk::style", "theme", "names")}')
         print(f'Previous Style: {root.tk.call("ttk::style", "theme", "use")}')
         try:
+            if sv_ttk.get_theme() == "dark":
+                print("Setting theme to light")
+                sv_ttk.use_light_theme()
+            elif sv_ttk.get_theme() == "light":
+                print("Setting theme to dark")
+                sv_ttk.use_dark_theme()
+            else:
+                print("Not Sun Valley theme")
+        except tkinter.TclError as err:
+            print(err)
+        try:
             if root.tk.call("ttk::style", "theme", "use") == "sun-valley-dark":
+                root.tk.call("ttk::style", "theme", "use", 'sun-valley-light')
                 root.tk.call("set_theme", "light")
 
             # elif root.tk.call("ttk::style", "theme", "use") == "sun-valley-light":
             else:
                 # Set dark theme
-                # root.tk.call("ttk::style", "theme", "use", 'sun-valley-dark')
+                root.tk.call("ttk::style", "theme", "use", 'sun-valley-dark')
                 root.tk.call("set_theme", "dark")
         except tkinter.TclError as err:
             print(err)
@@ -1273,8 +1286,12 @@ themes_paths = {"azure": os.path.join(dir_path, 'source/azure/azure.tcl'),
                 "arc": os.path.join(dir_path, 'source/arc/arc.tcl')}
 
 if __name__ == "__main__":
+    my_parser = argparse.ArgumentParser(add_help=True)
+    my_parser.add_argument('--debug', type=str2bool, action='store', const=True, nargs='?', required=False,
+                           default=True, help='If True, it does not load the news.')
+    args = my_parser.parse_args()
+    debug = args.debug
     start = time.time()
-    debug = False
     root = tk.Tk()  # First window
     style = ttk.Style(root)
     # A solution in order to measure the length of the titles
