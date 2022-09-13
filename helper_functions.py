@@ -1,3 +1,4 @@
+import argparse
 import os.path
 import pathlib
 import random
@@ -99,3 +100,23 @@ def center(window, parent_window=None):
         y_dif = height_parent // 2 - size[1] // 2
         window.geometry('+{}+{}'.format(parent_x + x_dif, parent_y + y_dif))
         print(f"Window: {window} centered according to the {parent_window} width and height")
+
+
+def str2bool(v):
+    """
+    Convert a string to a boolean argument
+    https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
+    """
+    if isinstance(v, bool):
+        return v
+    elif isinstance(v, int):
+        if v == 1:
+            return True
+        elif v == 0:
+            return False
+    elif v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
