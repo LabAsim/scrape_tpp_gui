@@ -1,4 +1,4 @@
-# Version 5/9/2022
+# Version 13/9/2022
 import dataclasses
 import json
 import os
@@ -18,53 +18,8 @@ from PIL import Image, ImageTk
 from ttkwidgets.font import FontSelectFrame
 import tktooltip  # https://github.com/gnikit/tkinter-tooltip`
 import undetected_chromedriver as uc
-from helper_functions import file_exists
 import pyperclip
-headers_list = [
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
-    "Mozilla/5.0 (X11; CrOS x86_64 8172.45.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.64 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_2) AppleWebKit/601.3.9 (KHTML, like Gecko) Version/9.0.2 Safari/601.3.9",
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36",
-    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:15.0) Gecko/20100101 Firefox/15.0.1",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/37.0.2062.94 Chrome/37.0.2062.94 Safari/537.36,"
-    "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.85 Safari/537.36",
-    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:40.0) Gecko/20100101 Firefox/40.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:101.0) Gecko/20100101 Firefox/101.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.67 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:100.0) Gecko/20100101 Firefox/100.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0",
-    "Mozilla/5.0 (X11; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Safari/605.1.15",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36",
-    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.61 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36",
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:100.0) Gecko/20100101 Firefox/100.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36 Edg/101.0.1210.53",
-    "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.0.0 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.62 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.115 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36 Edg/101.0.1210.47",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36 Edg/102.0.1245.33",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.75 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36 Edg/102.0.1245.39",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.64 Safari/537.36",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 OPR/86.0.4363.59",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36 Edg/101.0.1210.39",
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36 Edg/102.0.1245.30"]
-
-
-# Use a random header from the header_list
-def headers():
-    """Picks and returns a random user agent from the list"""
-    header = {'User-Agent': random.choice(headers_list)}
-    print(f'Random header: {header}')
-    return header
+from helper_functions import file_exists, center, callback, headers_list, headers
 
 
 def sortby(tree, col, descending):
@@ -83,11 +38,6 @@ def sortby(tree, col, descending):
                                                      int(not descending)))
 
 
-def callback(url):
-    """Opens the url in the browser"""
-    webbrowser.open_new_tab(url)
-
-
 def close_tkinter():
     if messagebox.askokcancel(title="Quit", message="Do you want to quit?"):
         root.destroy()
@@ -95,36 +45,64 @@ def close_tkinter():
         sys.exit()
 
 
-def center(window, parent_window=None):
-    """
-    https://stackoverflow.com/questions/3352918/how-to-center-a-window-on-the-screen-in-tkinter
-    :param window: The window to be centered
-    :param parent_window: A toplevel or root
-    """
-    if not parent_window:
-        window.update_idletasks()
-        width = window.winfo_width()
-        frm_width = window.winfo_rootx() - window.winfo_x()
-        win_width = width + 2 * frm_width
-        height = window.winfo_height()
-        titlebar_height = window.winfo_rooty() - window.winfo_y()
-        win_height = height + titlebar_height + frm_width
-        x = window.winfo_screenwidth() // 2 - win_width // 2
-        y = window.winfo_screenheight() // 2 - win_height // 2
-        window.geometry('+{}+{}'.format(x, y))
-        window.deiconify()
-        print(f"Window: {window} centered according to the width and the height of the screen")
-    else:
-        window.update_idletasks()
-        width_parent = parent_window.winfo_width()
-        height_parent = parent_window.winfo_height()
-        parent_x = parent_window.winfo_x()
-        parent_y = parent_window.winfo_y()
-        size = tuple(int(_) for _ in window.geometry().split('+')[0].split('x'))
-        x_dif = width_parent // 2 - size[0] // 2
-        y_dif = height_parent // 2 - size[1] // 2
-        window.geometry('+{}+{}'.format(parent_x + x_dif, parent_y + y_dif))
-        print(f"Window: {window} centered according to the {parent_window} width and height")
+class AskQuit(tk.Toplevel):
+    x = 300
+    y = 130
+
+    def __init__(self, parent):
+        super().__init__()
+        self.root = root
+        self.geometry(f'{AskQuit.x}x{AskQuit.y}')  # Here, self is tkinter.Toplevel
+        self.parent = parent
+        self.grab_set()
+        self.big_frame = ttk.Frame(self)
+        self.big_frame.pack(expand=True, fill='both')
+        self.initUI()
+        self.setActive()
+        center(self, self.parent)
+
+    def initUI(self):
+        self.title("Quit")
+        askquit_topframe = ttk.Frame(self.big_frame)
+        askquit_topframe.pack(side='top', expand=True)
+        valueLabel = ttk.Label(askquit_topframe, text="Do you want to quit?")
+        valueLabel.pack(side='right', expand=True)
+        image = Image.open("images/questionmark.png")
+        image = image.resize(
+            (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), PIL.Image.ANTIALIAS)
+        image = ImageTk.PhotoImage(image)
+        image_label = ttk.Label(askquit_topframe, image=image)
+        image_label.pack(side='left', expand=True, padx=10, pady=10)
+        image_label.image = image
+        buttonsframe = ttk.Frame(self.big_frame)
+        buttonsframe.pack(side='bottom', expand=True)
+        okButton = ttk.Button(buttonsframe, text="Ok", command=lambda: self.toplevel_quit(self.parent))
+        okButton.pack(side='left', expand=True, pady=10, padx=10)
+        cancelButton = ttk.Button(buttonsframe, text="Cancel", command=self.destroy)
+        cancelButton.pack(side='right', expand=True, pady=10, padx=10)
+
+    def toplevel_quit(self, widget=None):
+        """how to bind a messagebox to toplevel window in python
+           https://stackoverflow.com/questions/17910866/python-3-tkinter-messagebox-with-a-toplevel-as-master"""
+        if widget is not None:
+            if widget == root:
+                print(f'AskQuit>toplevel_quit: Root is now exiting')
+                sys.exit()
+            else:
+                widget.destroy()
+                self.destroy()
+                print(f'AskQuit>toplevel_quit: {widget} & {self} is now destroyed')
+        else:
+            self.destroy()
+            print(f'AskQuit>toplevel_quit: {self} is now destroyed')
+
+    def setActive(self):
+        """
+        https://stackoverflow.com/questions/15944533/how-to-keep-the-window-focus-on-new-toplevel-window-in-tkinter
+        """
+        self.big_frame.lift()
+        self.big_frame.focus_force()
+        self.big_frame.grab_set()
 
 
 url_list = {"newsroom": ["https://thepressproject.gr/article_type/newsroom/",
@@ -153,12 +131,14 @@ class SubPageReader:
         SubPageReader.data_to_return.clear()
         print(f"URL >>>>>>>>>>>>>>>>> {url}")
         try:
-            self.r = requests.get(url, headers=self.headers)
-            self.status_code = self.r.status_code
+            if not debug:
+                self.r = requests.get(url, headers=self.headers)
+                self.status_code = self.r.status_code
         except Exception as err:
             print(f'Error fetching the URL: {url}\n\tError: {err}')
         try:
-            self.soup = BeautifulSoup(self.r.text, "html.parser")
+            if not debug:
+                self.soup = BeautifulSoup(self.r.text, "html.parser")
         except Exception as err:
             print(f'Could not parse the xml: {self.url}\n\tError: {err}')
         self.news_dict = {}
@@ -272,14 +252,18 @@ class PageReader:
         self.url = url
         self.soup = None
         try:
-            self.r = requests.get(url, headers=self.headers)
-            self.status_code = self.r.status_code
+            if not debug:
+                self.r = requests.get(url, headers=self.headers)
+                self.status_code = self.r.status_code
         except Exception as err:
-            print(f'Error fetching the URL: {url}\nError: {err}')
+            print(f'Error fetching the URL: {url}'
+                  f'\nError: {err}')
         try:
-            self.soup = BeautifulSoup(self.r.text, "html.parser")
+            if not debug:
+                self.soup = BeautifulSoup(self.r.text, "html.parser")
         except Exception as err:
-            print(f'Could not parse the xml: {self.url}\nError: {err}')
+            print(f'Could not parse the xml: {self.url}'
+                  f'\nError: {err}')
         self.temp_list = []
         self.news_dict = {}
         try:
@@ -815,6 +799,8 @@ class App:
         self.tpp_menu = Menu(self.main_menu, tearoff=0)
         self.tpp_menu.add_command(label='Social media', font='Arial 10', command=lambda: ToplevelSocial(self))
         self.tpp_menu.add_command(label='Donate', font='Arial 10', command=lambda: ToplevelDonate(self))
+        self.tpp_menu.add_command(label='Subscribe to Newsletter', font='Arial 10',
+                                  command=lambda: callback('http://eepurl.com/dGNy2H'))
         # Create the Help menu
         self.help_menu = Menu(self.main_menu, tearoff=0)
         self.help_menu.add_command(label='About...', font='Arial 10', command=lambda: ToplevelAbout(self))
@@ -1274,65 +1260,6 @@ class ToplevelAbout:
         self.text.insert("1.0", text)
         self.text.config(state="disabled")
         center(self.toplevel, root)
-
-
-class AskQuit(tkinter.Toplevel):
-    x = 300
-    y = 130
-
-    def __init__(self, parent):
-        super().__init__()
-        self.geometry(f'{AskQuit.x}x{AskQuit.y}')
-        self.parent = parent
-        self.grab_set()
-        self.big_frame = ttk.Frame(self)
-        self.big_frame.pack(expand=True, fill='both')
-        self.initUI()
-        self.setActive()
-        center(self, self.parent)
-
-    def initUI(self):
-        self.title("Quit")
-        askquit_topframe = ttk.Frame(self.big_frame)
-        askquit_topframe.pack(side='top', expand=True)
-        valueLabel = ttk.Label(askquit_topframe, text="Do you want to quit?")
-        valueLabel.pack(side='right', expand=True)
-        image = Image.open("images/questionmark.png")
-        image = image.resize(
-            (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), PIL.Image.ANTIALIAS)
-        image = ImageTk.PhotoImage(image)
-        image_label = ttk.Label(askquit_topframe, image=image)
-        image_label.pack(side='left', expand=True, padx=10, pady=10)
-        image_label.image = image
-        buttonsframe = ttk.Frame(self.big_frame)
-        buttonsframe.pack(side='bottom', expand=True)
-        okButton = ttk.Button(buttonsframe, text="Ok", command=lambda: self.toplevel_quit(self.parent))
-        okButton.pack(side='left', expand=True, pady=10, padx=10)
-        cancelButton = ttk.Button(buttonsframe, text="Cancel", command=self.destroy)
-        cancelButton.pack(side='right', expand=True, pady=10, padx=10)
-
-    def toplevel_quit(self, widget=None):
-        """how to bind a messagebox to toplevel window in python
-           https://stackoverflow.com/questions/17910866/python-3-tkinter-messagebox-with-a-toplevel-as-master"""
-        if widget is not None:
-            if widget == root:
-                print(f'AskQuit>toplevel_quit: Root is now exiting')
-                sys.exit()
-            else:
-                widget.destroy()
-                self.destroy()
-                print(f'AskQuit>toplevel_quit: {widget} & {self} is now destroyed')
-        else:
-            self.destroy()
-            print(f'AskQuit>toplevel_quit: {self} is now destroyed')
-
-    def setActive(self):
-        """
-        https://stackoverflow.com/questions/15944533/how-to-keep-the-window-focus-on-new-toplevel-window-in-tkinter
-        """
-        self.big_frame.lift()
-        self.big_frame.focus_force()
-        self.big_frame.grab_set()
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
