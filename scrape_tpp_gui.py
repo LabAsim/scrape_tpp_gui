@@ -1,4 +1,4 @@
-# Version 13/9/2022
+# Version 4/10/2022
 import argparse
 import dataclasses
 import json
@@ -17,12 +17,13 @@ from bs4 import BeautifulSoup
 import random
 from PIL import Image, ImageTk
 from ttkwidgets.font import FontSelectFrame
-import tktooltip  # https://github.com/gnikit/tkinter-tooltip`
+import tktooltip  # https://github.com/gnikit/tkinter-tooltip
 import undetected_chromedriver as uc
 import pyperclip
 import sv_ttk
 from helper_functions import file_exists, center, callback, headers_list, headers, str2bool
 from help_text import text_about
+
 
 def sortby(tree, col, descending):
     """sort tree contents when a column header is clicked on"""
@@ -48,7 +49,7 @@ def close_tkinter():
 
 
 class AskQuit(tk.Toplevel):
-    x = 275
+    x = 260
     y = 110
 
     def __init__(self, parent):
@@ -716,7 +717,7 @@ class FirstPage:
                 # options.add_argument("--lang=en-US")
                 driver = uc.Chrome(use_subprocess=True, options=options)
                 FirstPage.driver = driver
-                # driver.set_window_position(-1000, 0)  # Set Chrome off screen
+                driver.set_window_position(-1000, 0)  # Set Chrome off screen
             else:
                 driver = FirstPage.driver
             feed = PageReaderBypass(url=self.url, name=self.name, driver=driver)
@@ -1005,7 +1006,7 @@ class App:
     def read_theme():
         """Reads the preferred theme"""
         if file_exists(name="tpp.json", dir_path=dir_path):
-            with open("tpp.json", "r+", encoding='utf-8') as file:
+            with open(os.path.join(dir_path, "tpp.json"), "r+", encoding='utf-8') as file:
                 json_data = json.load(file)
                 return json_data['theme']
         return None
@@ -1370,7 +1371,7 @@ class ToplevelAbout:
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-
+print(dir_path)
 themes_paths = {"azure": os.path.join(dir_path, 'source/azure/azure.tcl'),
                 "plastik": os.path.join(dir_path, 'source/plastik/plastik.tcl'),
                 "radiance": os.path.join(dir_path, 'source/radiance/radiance.tcl'),
