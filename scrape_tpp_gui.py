@@ -48,8 +48,8 @@ def close_tkinter():
 
 
 class AskQuit(tk.Toplevel):
-    x = 300
-    y = 130
+    x = 275
+    y = 110
 
     def __init__(self, parent):
         super().__init__()
@@ -1382,7 +1382,7 @@ themes_paths = {"azure": os.path.join(dir_path, 'source/azure/azure.tcl'),
 if __name__ == "__main__":
     my_parser = argparse.ArgumentParser(add_help=True)
     my_parser.add_argument('--debug', type=str2bool, action='store', const=True, nargs='?', required=False,
-                           default=True, help='If True, it does not load the news.')
+                           default=False, help='If True, it does not load the news.')
     args = my_parser.parse_args()
     debug = args.debug
     start = time.time()
