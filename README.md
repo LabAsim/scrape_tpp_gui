@@ -62,7 +62,7 @@ Note that the folders images & source, as well as, the .exe must be in the **sam
 Thanks to all the 3rd party packages maintainers and the StackOverflow users.
 ## Donate
 
-Do not forget to donate monthly to [ThePressProject team](https://community.thepressproject.gr/?lang=en). Recurrent monthly donation/funding is the only way for a truly independable journalism to exist. 
+Do not forget to donate monthly to [ThePressProject team](https://community.thepressproject.gr/?lang=en). Recurrent monthly donation/funding is the only way for a truly independent journalism to exist. 
 
 ## License
 ThePressProject Trademark, name and all of its content belong to the ThePressProject team. 
