@@ -3,11 +3,10 @@ import os.path
 import pathlib
 import random
 import sys
-import tkinter as tk
 import webbrowser
-from tkinter import ttk
-from PIL import Image, ImageTk
-import PIL.Image
+from tkinter import messagebox
+
+from misc import themes_paths
 
 headers_list = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
@@ -48,7 +47,30 @@ headers_list = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36 Edg/102.0.1245.30"]
 
 
-def file_exists(dir_path, name):
+def close_tkinter(root):
+    if messagebox.askokcancel(title="Quit", message="Do you want to quit?"):
+        root.destroy()
+        print('close_tkinter(): Tkinter window is exiting')
+        sys.exit()
+
+
+def sortby(tree, col, descending):
+    """sort tree contents when a column header is clicked on"""
+    # grab values to sort
+    data = [(tree.set(child, col), child)
+            for child in tree.get_children('')]
+    # if the data to be sorted is numeric change to float
+    # data =  change_numeric(data)
+    # now sort the data in place
+    data.sort(reverse=descending)
+    for ix, item in enumerate(data):
+        tree.move(item[1], '', ix)
+    # Switch the heading, so it will be sorted  in the opposite direction
+    tree.heading(col, command=lambda col=col: sortby(tree, col,
+                                                     int(not descending)))
+
+
+def file_exists(dir_path, name) -> bool:
     """Returns true if the path exists"""
     path_to_name = pathlib.Path(os.path.join(dir_path, name))
     if path_to_name.exists():
@@ -57,8 +79,7 @@ def file_exists(dir_path, name):
         return False
 
 
-# Use a random header from the header_list
-def headers():
+def headers() -> dict[str, str]:
     """Picks and returns a random user agent from the list"""
     header = {'User-Agent': random.choice(headers_list)}
     print(f'Random header: {header}')
@@ -102,7 +123,7 @@ def center(window, parent_window=None):
         print(f"Window: {window} centered according to the {parent_window} width and height")
 
 
-def str2bool(v):
+def str2bool(v) -> bool:
     """
     Convert a string to a boolean argument
     https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
@@ -120,3 +141,20 @@ def str2bool(v):
         return False
     else:
         raise argparse.ArgumentTypeError('Boolean value expected.')
+
+
+def tkinter_theme_calling(root):
+    """
+    Registers the themes to tkinter instance
+    :param root: tkinter.Tk()
+    :return: None
+    """
+    # https://rdbende.github.io/tkinter-docs/tutorials/how-to-use-themes.html
+    root.tk.call('source', themes_paths["azure"])  # https://github.com/rdbende/Azure-ttk-theme
+    root.tk.call('source', themes_paths["plastik"])
+    root.tk.call('source', themes_paths['radiance'])
+    root.tk.call('source', themes_paths['aquativo'])
+    root.tk.call('source', themes_paths['adapta'])
+    root.tk.call('source', themes_paths['yaru'])
+    root.tk.call('source', themes_paths['arc'])
+    root.tk.call("set_theme", "dark")
