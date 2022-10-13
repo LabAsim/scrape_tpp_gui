@@ -1,4 +1,4 @@
-# Version 8/10/2022
+# Version 13/10/2022
 import argparse
 import json
 import os
@@ -428,11 +428,18 @@ class FirstPage:
         self.right_click_menu.add_command(label='Show article (bypass)', command=self.show_main_article_bypass)
         self.right_click_menu.add_command(label='Open article in browser', command=self.open_article_link)
         self.tree.bind('<ButtonRelease-3>', self.post_menu)
+        # Bind left double click to post the menu
+        self.tree.bind("<Double-1>", self.show_main_article)
 
     def post_menu(self, event):
         self.right_click_menu.post(event.x_root, event.y_root)
 
-    def show_main_article(self):
+    def show_main_article(self, event):
+        """
+        Shows the summary and the main article in a separate tk.Toplevel
+        :param event: The event passed behind the scenes by self.tree.bind method
+        :return:
+        """
         current = self.tree.focus()
         current_article = self.tree.item(current)['values'][1]  # [0] is the Date
         print(f'current: {current_article}')
