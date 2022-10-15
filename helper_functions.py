@@ -123,7 +123,7 @@ def center(window, parent_window=None):
         print(f"Window: {window} centered according to the {parent_window} width and height")
 
 
-def str2bool(v) -> bool:
+def str2bool(v: bool | int | str) -> bool:
     """
     Convert a string to a boolean argument
     https://stackoverflow.com/questions/15008758/parsing-boolean-values-with-argparse
@@ -140,7 +140,7 @@ def str2bool(v) -> bool:
     elif v.lower() in ('no', 'false', 'f', 'n', '0'):
         return False
     else:
-        raise argparse.ArgumentTypeError('Boolean value expected.')
+        raise argparse.ArgumentTypeError('Boolean or equivalent value expected.')
 
 
 def tkinter_theme_calling(root):
