@@ -1,4 +1,4 @@
-# Version 13/10/2022
+# Version 15/10/2022
 import argparse
 import json
 import os
@@ -31,24 +31,43 @@ class SubPageReader:
     data_to_return = []  # a list with 5 strings: Url, Title, Date, Subtitle summary, Main content
 
     def __init__(self, url, header):
+        self.status_code = None
+        self.r = None
+        self.soup = None
         self.headers = header
         self.url = url
-        self.soup = None
         SubPageReader.data_to_return.clear()
-        print(f"URL >>>>>>>>>>>>>>>>> {url}")
+        self.connect_to_url()
+        self.soup_the_request()
+        self.news_dict = {}
+        SubPageReader.data_to_return.append(self.url)
+        self.scrape_the_title()
+        PageReader.page_values = []
+        self.scrape_the_date()
+        self.scrape_the_summary()
+        self.scrape_the_main_article_content()
+
+    def connect_to_url(self):
+        print(f"URL >>>>>>>>>>>>>>>>> {self.url}")
         try:
             if not debug:
-                self.r = requests.get(url, headers=self.headers)
+                self.r = requests.get(self.url, headers=self.headers)
                 self.status_code = self.r.status_code
         except Exception as err:
-            print(f'Error fetching the URL: {url}\n\tError: {err}')
+            print(f'Error fetching the URL: {self.url}\n\tError: {err}')
+
+    def soup_the_request(self):
         try:
             if not debug:
                 self.soup = BeautifulSoup(self.r.text, "html.parser")
         except Exception as err:
             print(f'Could not parse the xml: {self.url}\n\tError: {err}')
-        self.news_dict = {}
-        SubPageReader.data_to_return.append(self.url)
+
+    def scrape_the_title(self):
+        """
+        Scapes the title of the article
+        :return:
+        """
         try:
             if len(self.soup.find_all('h1', {'class': "entry-title"})) != 0:
                 for a in self.soup.find_all('h1', {'class': "entry-title"}):
@@ -68,7 +87,12 @@ class SubPageReader:
         except Exception as err:
             print(f'SubReader Error in soup: {err}')
             raise err
-        PageReader.page_values = []
+
+    def scrape_the_date(self):
+        """
+        Scrapes the Date of the article
+        :return: None
+        """
         try:
             for number, a in enumerate(self.soup.find_all('div', class_="article-date")):
                 count = 0
@@ -105,6 +129,12 @@ class SubPageReader:
             raise err
         if len(SubPageReader.data_to_return) < 3:  # It should contain Url + Title + Date
             SubPageReader.data_to_return.append(" ")
+
+    def scrape_the_summary(self):
+        """
+        Scrapes the summary
+        :return: None
+        """
         try:
             if len(self.soup.find_all('div', class_="subtitle article-summary")) != 0:
                 for number, a in enumerate(self.soup.find_all('div', class_="subtitle article-summary")):
@@ -125,6 +155,12 @@ class SubPageReader:
         except Exception as err:
             print(f'SubPageReader subtitle article-summary Error: {err}')
             raise err
+
+    def scrape_the_main_article_content(self):
+        """
+        Scrapes the content of the main article
+        :return: None
+        """
         try:
             for number, a in enumerate(self.soup.find_all('div', class_="main-content article-content")):
                 if len(a.text) != 0:
@@ -140,8 +176,13 @@ class SubPageReader:
             SubPageReader.data_to_return.append(" ")
 
     @staticmethod
-    def return_url_tuple(url, header):
-        """Returns a list with 5 strings: Url, Title, Date, Subtitle summary, Main content"""
+    def return_url_list(url, header):
+        """
+        Returns a list with 5 strings: Url, Title, Date, Subtitle summary, Main content
+        :param url: The url to scrape
+        :param header: A header
+        :return: list: Data_to_return from SubPageReader containing all the data for the article
+        """
         SubPageReader(url=url, header=header)
         return SubPageReader.data_to_return
 
@@ -150,24 +191,50 @@ class PageReader:
     page_values = []
 
     def __init__(self, url, header):
+        self.status_code = None
+        self.r = None
+        self.soup = None
         self.headers = header
         self.url = url
-        self.soup = None
+        self.connect_to_url(url=self.url, header=self.headers)
+        self.soup_the_request(request=self.r)
+        self.temp_list = []
+        self.news_dict = {}
+        self.scrape_the_soup()
+
+    def connect_to_url(self, url, header):
+        """
+        Connects to the url using header
+        :param url: The url to connect to
+        :param header: The headers (user-agent) for the request to url
+        :return: None
+        """
         try:
             if not debug:
-                self.r = requests.get(url, headers=self.headers)
+                self.r = requests.get(url, headers=header)
                 self.status_code = self.r.status_code
         except Exception as err:
             print(f'Error fetching the URL: {url}'
                   f'\nError: {err}')
+
+    def soup_the_request(self, request):
+        """
+        Makes a soup from the request using BeautifulSoup.
+        :param request: The request object
+        :return: None
+        """
         try:
             if not debug:
-                self.soup = BeautifulSoup(self.r.text, "html.parser")
+                self.soup = BeautifulSoup(request.text, "html.parser")  # Otherwise, self.r.text
         except Exception as err:
             print(f'Could not parse the xml: {self.url}'
                   f'\nError: {err}')
-        self.temp_list = []
-        self.news_dict = {}
+
+    def scrape_the_soup(self):
+        """
+        Scrapes the soup
+        :return: None
+        """
         try:
             for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
                 temp_list = []
