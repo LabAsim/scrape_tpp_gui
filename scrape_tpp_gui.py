@@ -280,50 +280,20 @@ class SubPageReaderBypass:
     data_to_return = []  # a list with 5 strings: Url, Title, Date, Subtitle summary, Main content
 
     def __init__(self, url, header):
+        self.r = None
+        self.options = None
+        self.driver = None
         self.headers = header
         self.url = url
         self.soup = None
         SubPageReaderBypass.data_to_return.clear()
-        print(f"SubPageReaderBypass>URL >>>>> {url}")
-        try:
-            options = uc.ChromeOptions()
-            # options.add_argument("--headless")
-            # options.add_argument("start-minimized")
-            options.add_argument("--lang=en-US")
-            driver = uc.Chrome(use_subprocess=True, options=options)
-            driver.set_window_position(-1000, 0)  # Set Chrome off-screen
-            driver.get(self.url)
-            time.sleep(3.5)
-            self.r = driver.page_source
-            driver.close()
-            driver.quit()
-        except Exception as err:
-            print(f'Error fetching the URL: {url}\n\tError: {err}')
-        try:
-            self.soup = BeautifulSoup(self.r, "html.parser")
-        except Exception as err:
-            print(f'Could not parse the xml: {self.url}\n\tError: {err}')
+        self.open_url_with_Chromedriver()
+        self.soup_the_page_source()
         self.news_dict = {}
         SubPageReaderBypass.data_to_return.append(self.url)
-        try:
-            if len(self.soup.find_all('h1', {'class': "entry-title"})) != 0:
-                for a in self.soup.find_all('h1', {'class': "entry-title"}):
-                    data = a.text.strip()
-                    print(f'Title: {data}')
-                    SubPageReaderBypass.data_to_return.append(data)
-                    SubPageReaderBypass.dict_subpage[self.url] = [data]
-            elif len(self.soup.find_all('h1')) != 0:
-                for a in self.soup.find_all('h1'):
-                    data = a.text.strip()
-                    print(f'Title: {data}')
-                    SubPageReaderBypass.data_to_return.append(data)
-                    SubPageReaderBypass.dict_subpage[self.url] = [data]
-            else:
-                if len(SubPageReaderBypass.data_to_return) < 2:  # It should contain Url + Title
-                    SubPageReaderBypass.data_to_return.append(" ")
-        except Exception as err:
-            print(f'SubReader Error in soup: {err}')
+        self.scrape_the_title()
         PageReaderBypass.page_values = []
+
         try:
             for number, a in enumerate(self.soup.find_all('div', class_="article-date")):
                 count = 0
@@ -392,6 +362,61 @@ class SubPageReaderBypass:
             raise err
         if len(SubPageReaderBypass.data_to_return) < 5:  # It should contain Url + Title + Date + Summary + Main_content
             SubPageReaderBypass.data_to_return.append(" ")
+
+    def open_url_with_Chromedriver(self):
+        """
+        Uses Chromedriver to open the url ang get the page source.
+        :return: None
+        """
+        print(f"SubPageReaderBypass>URL >>>>> {self.url}")
+        try:
+            self.options = uc.ChromeOptions()
+            # options.add_argument("--headless")
+            # options.add_argument("start-minimized")
+            self.options.add_argument("--lang=en-US")
+            self.driver = uc.Chrome(use_subprocess=True, options=self.options)
+            self.driver.set_window_position(-1000, 0)  # Set Chrome off-screen
+            self.driver.get(self.url)
+            time.sleep(3.5)
+            self.r = self.driver.page_source
+            self.driver.close()
+            self.driver.quit()
+        except Exception as err:
+            print(f'Error fetching the URL: {self.url}\n\tError: {err}')
+
+    def soup_the_page_source(self):
+        """
+        Soups the page source
+        :return: None
+        """
+        try:
+            self.soup = BeautifulSoup(self.r, "html.parser")
+        except Exception as err:
+            print(f'Could not parse the xml: {self.url}\n\tError: {err}')
+
+    def scrape_the_title(self):
+        """
+        Scrapes the title of the article.
+        :return:
+        """
+        try:
+            if len(self.soup.find_all('h1', {'class': "entry-title"})) != 0:
+                for a in self.soup.find_all('h1', {'class': "entry-title"}):
+                    data = a.text.strip()
+                    print(f'Title: {data}')
+                    SubPageReaderBypass.data_to_return.append(data)
+                    SubPageReaderBypass.dict_subpage[self.url] = [data]
+            elif len(self.soup.find_all('h1')) != 0:
+                for a in self.soup.find_all('h1'):
+                    data = a.text.strip()
+                    print(f'Title: {data}')
+                    SubPageReaderBypass.data_to_return.append(data)
+                    SubPageReaderBypass.dict_subpage[self.url] = [data]
+            else:
+                if len(SubPageReaderBypass.data_to_return) < 2:  # It should contain Url + Title
+                    SubPageReaderBypass.data_to_return.append(" ")
+        except Exception as err:
+            print(f'SubReader Error in soup: {err}')
 
     @staticmethod
     def return_url_tuple(url, header):
