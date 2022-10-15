@@ -457,23 +457,44 @@ class PageReaderBypass:
         self.url = url
         self.driver = driver  # driver passed from FirstPage
         self.soup = None
+        self.use_chromedriver_and_get_page_source()
+        self.soup_the_page_source()
+        self.temp_list = []
+        self.news_dict = {}
+        self.scrape_the_data()
+
+    def use_chromedriver_and_get_page_source(self):
+        """
+        Uses the driver passed as argument and gets the page source.
+        :return: None
+        """
         try:
             self.driver.get(self.url)
             if self.name == 'Newsroom':  # Only for the first time, wait for the Chrome to open.
                 time.sleep(3.5)
             else:
                 time.sleep(0.75)
-            self.r = driver.page_source
+            self.r = self.driver.page_source
         except Exception as err:
-            print(f'Error fetching the URL: {url}'
+            print(f'Error fetching the URL: {self.url}'
                   f'\nError: {err}')
+
+    def soup_the_page_source(self):
+        """
+        Soups the page source
+        :return:
+        """
         try:
             self.soup = BeautifulSoup(self.r, "html.parser")
         except Exception as err:
             print(f'Could not parse the html: {self.url}'
                   f'\nError: {err}')
-        self.temp_list = []
-        self.news_dict = {}
+
+    def scrape_the_data(self):
+        """
+        Scrapes the data from the soup of the target url
+        :return:
+        """
         try:
             for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
                 temp_list = []
