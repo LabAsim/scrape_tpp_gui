@@ -453,6 +453,12 @@ class PageReaderBypass:
     page_values = []
 
     def __init__(self, url, name, driver):
+        """
+        
+        :param url:
+        :param name:
+        :param driver:
+        """
         self.name = name
         self.url = url
         self.driver = driver  # driver passed from FirstPage
