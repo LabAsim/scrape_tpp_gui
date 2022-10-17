@@ -1,11 +1,10 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
-
 import pyperclip
 from PIL import Image, ImageTk
 from helper_functions import file_exists, center, callback
-from help_text import text_about
+from source.misc.help_text import text_about
 from ttkwidgets.font import FontSelectFrame
 import tktooltip
 
