@@ -19,12 +19,12 @@ It has been tested in Python 3.10. It heavily relies on 3rd party packages.
 
 ## Dependencies
 
-- Pillow
-- undetected chromedriver
-- BeautifulSoup
+- [Pillow](https://python-pillow.org/)
+- [undetected chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver)
+- [BeautifulSoup](https://code.launchpad.net/beautifulsoup/)
 - [tktooltip](https://github.com/gnikit/tkinter-tooltip)
-- ttkwidgets
-- requests
+- [ttkwidgets](https://pypi.org/project/ttkwidgets/)
+- [requests](https://requests.readthedocs.io/en/latest/)
 - [pyperclip](https://github.com/asweigart/pyperclip)
 
 ## Usage
