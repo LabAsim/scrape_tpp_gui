@@ -10,9 +10,9 @@ from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 import requests
 from bs4 import BeautifulSoup
-import tktooltip  # https://github.com/gnikit/tkinter-tooltip
-import undetected_chromedriver as uc
-import sv_ttk
+import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
+import undetected_chromedriver as uc # pip install undetected-chromedriver
+#import sv_ttk
 from helper_functions import file_exists, center, callback, headers, str2bool, tkinter_theme_calling, \
     sortby
 from misc import url_list, dir_path
@@ -196,12 +196,28 @@ class PageReader:
         self.soup = None
         self.headers = header
         self.url = url
-        self.connect_to_url(url=self.url, header=self.headers)
-        self.soup_the_request(request=self.r)
-        self.temp_list = []
-        self.news_dict = {}
-        self.scrape_the_soup()
+        self.check_url_and_iterate(self.url, self.headers)
+        #self.connect_to_url(url=self.url, header=self.headers)
+        #self.soup_the_request(request=self.r)
+        #self.temp_list = []
+        #self.news_dict = {}
+        #self.scrape_the_soup()
 
+    def check_url_and_iterate(self, url: str | list, header):
+        """"""
+        if isinstance(url, list):
+            for __url__ in url:
+                self.connect_to_url(__url__, header)
+                self.soup_the_request(request=self.r)
+                self.temp_list = []
+                self.news_dict = {}
+                self.scrape_the_soup()
+        else:  # It is not a list, but a url.
+            self.connect_to_url(url, header)
+            self.soup_the_request(request=self.r)
+            self.temp_list = []
+            self.news_dict = {}
+            self.scrape_the_soup()
     def connect_to_url(self, url, header):
         """
         Connects to the url using header
@@ -561,8 +577,7 @@ class FirstPage:
         self.setup_tree()
         self.fill_the_tree()
         # Menu emerging on the right click only
-        self.right_click_menu = Menu(font='Arial 10',
-                                     tearoff=0)
+        self.right_click_menu = Menu(font='Arial 10', tearoff=0)
         self.right_click_menu.add_command(label='Show article', command=self.show_main_article)
         self.right_click_menu.add_command(label='Show article (bypass)', command=self.show_main_article_bypass)
         self.right_click_menu.add_command(label='Open article in browser', command=self.open_article_link)
@@ -705,6 +720,7 @@ class FirstPage:
             print('Tree was erased')
         except Exception as err:
             print(f'Error in deleting the Tree: {err}')
+            trace_error()
         try:
             feed = PageReader(url=self.url, header=headers())
             title_list = [font.measure(d[0]) for d in FirstPage.values]
@@ -784,7 +800,8 @@ class App:
         self.widgets()
         self.note = ttk.Notebook(self.root)
         self.note.pack(side='bottom', fill='both', expand=True)
-        self.notebook_pages(url=list(url_list.values())[0][0], note=self.note, controller=self, name='Newsroom')
+        # For just the 1st page of Newsroom: list(url_list.values())[0][0]
+        self.notebook_pages(url=list(url_list.values())[0], note=self.note, controller=self, name='Newsroom')
         self.notebook_pages(url=list(url_list.values())[1], note=self.note, controller=self, name='Politics')
         self.notebook_pages(url=list(url_list.values())[2], note=self.note, controller=self, name='Economy')
         self.notebook_pages(url=list(url_list.values())[3], note=self.note, controller=self, name='International')
