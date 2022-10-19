@@ -18,20 +18,26 @@ def trace_error(to_print_error=True):
     # exc_type, exc_value, exc_traceback = sys.exc_info()  # All the info from the exception
     formatted_lines = traceback.format_exc().splitlines()
     error_filepath = os.path.join(dir_path, 'errors.txt')
-    json_data = ''
+    error_data = ""
+    # Alternative, just print and write traceback.format_exc()
     for line in formatted_lines:
         if to_print_error:
             print(line)
         if file_exists(dir_path, 'errors.txt'):
             with open(error_filepath, 'r+', encoding='utf-8') as file:
-                json_data = json.load(file)
-                if len(json_data) == 0:  # To avoid empty string in the text file
-                    json_data = line
-                else:
-                    json_data.update(line)
+                file_contents = file.read()
+                error_data =  file_contents + line + "\n"
             with open(error_filepath, 'w+', encoding='utf-8') as file:
-                json.dump(json_data, file, indent=4)
+                file.write(error_data)
         else:
             with open(error_filepath, 'w+', encoding='utf-8') as file:
-                json_data.update(line)
-                json.dump(json_data, file, indent=4)
+                file.write(f"{line}\n")  # Add \n in the end to format nicely
+
+
+if __name__ == "__main__":
+    # Example for trace_error()
+    try:
+        a = 2
+        a + "b"
+    except Exception:
+        trace_error()
