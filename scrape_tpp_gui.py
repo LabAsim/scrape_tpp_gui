@@ -24,7 +24,7 @@ from classes.ToplevelDonate import ToplevelDonate
 from classes.ToplevelAboutTpp import ToplevelAboutTpp
 from classes.AskQuit import AskQuit
 from classes.ToplevelArticle import ToplevelArticle
-
+import concurrent.futures
 
 class SubPageReader:
     dict_subpage = {}
@@ -197,14 +197,14 @@ class PageReader:
         self.headers = header
         self.url = url
         self.check_url_and_iterate(self.url, self.headers)
-        #self.connect_to_url(url=self.url, header=self.headers)
-        #self.soup_the_request(request=self.r)
-        #self.temp_list = []
-        #self.news_dict = {}
-        #self.scrape_the_soup()
 
     def check_url_and_iterate(self, url: str | list, header):
-        """"""
+        """
+        Checks if the url is a list of urls or a url and then proceeds.
+        :param url: The url to connect to
+        :param header:
+        :return:
+        """
         if isinstance(url, list):
             for __url__ in url:
                 self.connect_to_url(__url__, header)
@@ -218,6 +218,7 @@ class PageReader:
             self.temp_list = []
             self.news_dict = {}
             self.scrape_the_soup()
+
     def connect_to_url(self, url, header):
         """
         Connects to the url using header
@@ -251,41 +252,54 @@ class PageReader:
         Scrapes the soup
         :return: None
         """
-        try:
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=11) as executor: # 12->3.3sec
+            # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
             for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
-                temp_list = []
-                title = ""
-                link = ""
-                date = ""
-                # print(div.text)
-                for a in div.find_all('h3'):
-                    # print(a.text)
-                    for b in a.find_all('a', href=True, rel=True):
-                        # print(b.text)
-                        # print(f"url: {b['href']}, Title: {b['rel']}")
-                        link = b['href'].strip()
-                        for num, word in enumerate(b['rel']):
-                            if num != 0:  # Do not include a space in front of the first word
-                                title += " "
-                            title += word
-                        title.strip()
-                        temp_list.append(title)
-                        temp_list.append(link)
-                for number, a in enumerate(div.find('div', class_="archive-info info-text")):
-                    if number == 0:
-                        # Get the label as an author
-                        temp_date = div.find('div', class_="archive-info info-text")
-                        date_child = list(temp_date.children)[0].strip().replace("ί", "ι")
-                        date = date_child
-                        print(f'PageReader> date: {date_child}')
-                        temp_list.append(date_child)
-                FirstPage.values.append(temp_list)
-                FirstPage.news_to_open_in_browser.append(temp_list)
-                FirstPage.news_total.append(NewsDataclass(url=link, title=title, date=date))
-        except Exception as err:
-            print(f'SubPageReader Error: {err}')
+                try:
+                    executor.submit(self.iterate_div(div))
+                except Exception as err:
+                    print(f'SubPageReader Error: {err}')
+                    trace_error()
+                    raise err
         if debug:
             print(FirstPage.values)
+
+    def iterate_div(self, div):
+        """
+        Iterates div from the soup and scrapes the data
+
+        :param div: The div object from soup
+        :return: None
+        """
+        temp_list = []
+        title = ""
+        link = ""
+        date = ""
+        for a in div.find_all('h3'):
+            # print(a.text)
+            for b in a.find_all('a', href=True, rel=True):
+                # print(b.text)
+                # print(f"url: {b['href']}, Title: {b['rel']}")
+                link = b['href'].strip()
+                for num, word in enumerate(b['rel']):
+                    if num != 0:  # Do not include a space in front of the first word
+                        title += " "
+                    title += word
+                title.strip()
+                temp_list.append(title)
+                temp_list.append(link)
+        for number, a in enumerate(div.find('div', class_="archive-info info-text")):
+            if number == 0:
+                # Get the label as an author
+                temp_date = div.find('div', class_="archive-info info-text")
+                date_child = list(temp_date.children)[0].strip().replace("ί", "ι")
+                date = date_child
+                print(f'PageReader> date: {date_child}')
+                temp_list.append(date_child)
+        FirstPage.values.append(temp_list)
+        FirstPage.news_to_open_in_browser.append(temp_list)
+        FirstPage.news_total.append(NewsDataclass(url=link, title=title, date=date))
 
 
 class SubPageReaderBypass:
