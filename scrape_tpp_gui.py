@@ -11,8 +11,8 @@ from tkinter import Menu, StringVar, ttk
 import requests
 from bs4 import BeautifulSoup
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
-import undetected_chromedriver as uc # pip install undetected-chromedriver
-#import sv_ttk
+import undetected_chromedriver as uc  # pip install undetected-chromedriver
+# import sv_ttk
 from helper_functions import file_exists, center, callback, headers, str2bool, tkinter_theme_calling, \
     sortby
 from misc import url_list, dir_path
@@ -25,6 +25,7 @@ from classes.ToplevelAboutTpp import ToplevelAboutTpp
 from classes.AskQuit import AskQuit
 from classes.ToplevelArticle import ToplevelArticle
 import concurrent.futures
+
 
 class SubPageReader:
     dict_subpage = {}
@@ -253,7 +254,7 @@ class PageReader:
         :return: None
         """
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=11) as executor: # 12->3.3sec
+        with concurrent.futures.ThreadPoolExecutor(max_workers=11) as executor:  # 12->3.3sec
             # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
             for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
                 try:
