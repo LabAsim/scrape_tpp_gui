@@ -71,7 +71,6 @@ def date_to_unix(date):
     date = str(date[0])
     # If the date is in the form of "Πριν 6 ώρες/λεπτά"
     if re.match('[Ππ]ρ[ιίΙ]ν', date):
-        print(f"date: {date}")
         # Remove 'Πριν/πριν'
         # See docs: https://docs.python.org/3/library/re.html#re.sub
         date = re.sub(pattern='[Ππ]ρ[ιίΙ]ν', repl="", string=date).lstrip(' ')
