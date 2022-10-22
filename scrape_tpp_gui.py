@@ -8,6 +8,8 @@ import tkinter as tk
 import tkinter.font
 from datetime import datetime
 from tkinter import Menu, StringVar, ttk
+from typing import Any
+
 import requests
 from bs4 import BeautifulSoup
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
@@ -255,11 +257,11 @@ class PageReader:
         :return: None
         """
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=11) as executor:  # 12->3.3sec
+        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:  # 12->3.3sec
             # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
             for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
                 try:
-                    executor.submit(self.iterate_div(div))
+                    executor.submit(self.iterate_div, div)
                 except Exception as err:
                     print(f'SubPageReader Error: {err}')
                     trace_error()
@@ -267,7 +269,7 @@ class PageReader:
         if debug:
             print(FirstPage.values)
 
-    def iterate_div(self, div):
+    def iterate_div(self, div: Any):
         """
         Iterates div from the soup and scrapes the data
 
