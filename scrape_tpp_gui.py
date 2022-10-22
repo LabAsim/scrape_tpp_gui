@@ -9,7 +9,6 @@ import tkinter.font
 from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 from typing import Any
-
 import requests
 from bs4 import BeautifulSoup
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
@@ -195,6 +194,8 @@ class PageReader:
     page_values = []
 
     def __init__(self, url, header):
+        self.news_dict = None
+        self.temp_list = None
         self.status_code = None
         self.r = None
         self.soup = None
@@ -216,7 +217,7 @@ class PageReader:
                 self.temp_list = []
                 self.news_dict = {}
                 self.scrape_the_soup()
-        else:  # It is not a list, but a url.
+        else:  # It is not a list, but an url.
             self.connect_to_url(url, header)
             self.soup_the_request(request=self.r)
             self.temp_list = []
