@@ -12,7 +12,8 @@ import requests
 from bs4 import BeautifulSoup
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
 import undetected_chromedriver as uc  # pip install undetected-chromedriver
-# import sv_ttk
+import sv_ttk
+import concurrent.futures
 from helper_functions import file_exists, center, callback, headers, str2bool, tkinter_theme_calling, \
     sortby
 from misc import url_list, dir_path
