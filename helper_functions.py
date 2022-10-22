@@ -218,6 +218,7 @@ def tkinter_theme_calling(root):
     root.tk.call('source', themes_paths['arc'])
     root.tk.call("set_theme", "dark")
 
+
 def strip_ansi_characters(text=''):
     """https://stackoverflow.com/questions/48782529/exclude-ansi-escape-sequences-from-output-log-file"""
     try:

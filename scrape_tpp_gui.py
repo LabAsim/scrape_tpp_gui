@@ -555,16 +555,18 @@ class PageReaderBypass:
         Scrapes the data from the soup of the target url
         :return: None
         """
+        # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
-            # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
+            # For some reason, chromedriver scrapes only with 1 worker. It also does not scrape without executor at all.
             for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
                 try:
                     executor.submit(self.iterate_div, div)
+                    # self.iterate_div(div)
                 except Exception as err:
                     print(f'SubPageReader Error: {err}')
                     trace_error()
-        if debug:
-            print(FirstPage.values)
+            if debug:
+                print(FirstPage.values)
 
     def iterate_div(self, div):
         """
@@ -812,6 +814,7 @@ class FirstPage:
                 # options.add_argument("--headless")
                 # options.add_argument("start-minimized")
                 # options.add_argument("--lang=en-US")
+
                 driver = uc.Chrome(use_subprocess=True, options=options)
                 FirstPage.driver = driver
                 driver.set_window_position(-1000, 0)  # Set Chrome off screen
