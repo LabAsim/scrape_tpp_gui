@@ -16,7 +16,7 @@ import undetected_chromedriver as uc  # pip install undetected-chromedriver
 import sv_ttk
 import concurrent.futures
 from helper_functions import file_exists, center, callback, headers, str2bool, tkinter_theme_calling, \
-    sortby
+    sortby, date_to_unix
 from misc import url_list, dir_path
 from trace_error import trace_error
 from classes.NewsDataclass import NewsDataclass
@@ -749,6 +749,11 @@ class FirstPage:
             for number, tuple_feed in enumerate(FirstPage.values):
                 self.tree.insert("", tk.END, iid=str(number),
                                  values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
+            rows = [(self.tree.set(item, 'Date').lower(), item) for item in self.tree.get_children('')]
+            rows.sort(key=date_to_unix, reverse=True)
+            # Move the sorted days
+            for index, (values, item) in enumerate(rows):
+                self.tree.move(item, '', index)
             if debug:
                 print(f'Treeview was filled {FirstPage.values}')
         except Exception as err:

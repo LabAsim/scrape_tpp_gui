@@ -2,8 +2,11 @@ import argparse
 import os.path
 import pathlib
 import random
+import re
 import sys
+import time
 import webbrowser
+from datetime import datetime, timedelta
 from tkinter import messagebox
 
 from misc import themes_paths
@@ -52,6 +55,62 @@ def close_tkinter(root):
         root.destroy()
         print('close_tkinter(): Tkinter window is exiting')
         sys.exit()
+
+def date_to_unix(date):
+    """
+    Converts and returns the date to unix timestamp
+    :param date: Date in various forms
+    :return: Unix timestamp
+    See also:
+        examples: https://www.devdungeon.com/content/working-dates-and-times-python-3
+    Python docs:
+        time: https://docs.python.org/3/library/time.html
+        datetime: https://docs.python.org/3/library/datetime.html
+    """
+    # Make sure it's a string. Date is a tuple containing the date and an integer from sorting function (sortby())
+    date = str(date[0])
+    # If the date is in the form of "Πριν 6 ώρες/λεπτά"
+    if re.match('[Ππ]ρ[ιίΙ]ν', date):
+        print(f"date: {date}")
+        # Remove 'Πριν/πριν'
+        # See docs: https://docs.python.org/3/library/re.html#re.sub
+        date = re.sub(pattern='[Ππ]ρ[ιίΙ]ν', repl="", string=date).lstrip(' ')
+        if 'λεπτά' in date:  # "2 λεπτά"
+            date_now = datetime.now()
+            date = date.strip('Πριν').strip("λεπτά").strip()
+            date = float(date)
+            unix_date = date_now - timedelta(minutes=date)
+            unix_date = time.mktime(unix_date.timetuple())
+            return unix_date
+        elif 'ώρ' in date:  # "2 ώρες / ώρα"
+            date_now = datetime.now()
+            date = date.strip('Πριν').strip("ώρα").strip("ώρες").strip()
+            date = float(date)
+            unix_date = date_now - timedelta(hours=date)
+            unix_date = time.mktime(unix_date.timetuple())
+            return unix_date
+        elif 'δευ' in date:  # "39 δευτερόλεπτα"
+            date_now = datetime.now()
+            date = date.split(' ')
+            date = float(date[0])
+            unix_date = date_now - timedelta(seconds=date)
+            unix_date = time.mktime(unix_date.timetuple())
+            return unix_date
+        else:  # '1 ημέρα'
+            date_now = datetime.now()
+            date = date.split(' ')
+            date = float(date[0])
+            unix_date = date_now - timedelta(days=date)
+            unix_date = time.mktime(unix_date.timetuple())
+            return unix_date
+    else:  # Date is in the form of "19/10/22"
+        date = date.split('/')
+        year = int(date[-1])
+        month = int(date[1])
+        day = int(date[0])
+        unix_date = datetime(year, month, day)
+        unix_date = time.mktime(unix_date.timetuple())
+        return unix_date
 
 
 def sortby(tree, col, descending):
