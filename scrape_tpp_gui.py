@@ -749,9 +749,10 @@ class FirstPage:
             for number, tuple_feed in enumerate(FirstPage.values):
                 self.tree.insert("", tk.END, iid=str(number),
                                  values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
+            # Sort the rows of column with heading "Date"
             rows = [(self.tree.set(item, 'Date').lower(), item) for item in self.tree.get_children('')]
             rows.sort(key=date_to_unix, reverse=True)
-            # Move the sorted days
+            # Move the sorted dates
             for index, (values, item) in enumerate(rows):
                 self.tree.move(item, '', index)
             if debug:
