@@ -58,6 +58,7 @@ class SubPageReader:
                 self.status_code = self.r.status_code
         except Exception as err:
             print(f'Error fetching the URL: {self.url}\n\tError: {err}')
+            trace_error()
 
     def soup_the_request(self):
         try:
@@ -493,23 +494,41 @@ class PageReaderBypass:
         :param name:
         :param driver:
         """
+        self.news_dict = None
+        self.temp_list = None
+        self.r = None
         self.name = name
         self.url = url
         self.driver = driver  # driver passed from FirstPage
         self.soup = None
-        self.use_chromedriver_and_get_page_source()
-        self.soup_the_page_source()
-        self.temp_list = []
-        self.news_dict = {}
-        self.scrape_the_data()
+        self.check_url_and_iterate(self.url)
 
-    def use_chromedriver_and_get_page_source(self):
+    def check_url_and_iterate(self, url: str | list):
+        """
+        Checks if the url is a list of urls or a url and then proceeds.
+        :param url: The (list of) url to connect to
+        """
+        if isinstance(url, list):
+            for __url__ in url:
+                self.use_chromedriver_and_get_page_source(__url__)
+                self.soup_the_page_source()
+                self.temp_list = []
+                self.news_dict = {}
+                self.scrape_the_data()
+        else:  # It is not a list, but an url.
+            self.use_chromedriver_and_get_page_source(url)
+            self.soup_the_page_source()
+            self.temp_list = []
+            self.news_dict = {}
+            self.scrape_the_data()
+
+    def use_chromedriver_and_get_page_source(self, url):
         """
         Uses the driver passed as argument and gets the page source.
         :return: None
         """
         try:
-            self.driver.get(self.url)
+            self.driver.get(url)
             if self.name == 'Newsroom':  # Only for the first time, wait for the Chrome to open.
                 time.sleep(3.5)
             else:
@@ -529,47 +548,58 @@ class PageReaderBypass:
         except Exception as err:
             print(f'Could not parse the html: {self.url}'
                   f'\nError: {err}')
+            trace_error()
 
     def scrape_the_data(self):
         """
         Scrapes the data from the soup of the target url
         :return:
         """
-        try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+            # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
             for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
-                temp_list = []
-                title = ""
-                link = ""
-                date = ""
-                # print(div.text)
-                for a in div.find_all('h3'):
-                    # print(a.text)
-                    for b in a.find_all('a', href=True, rel=True):
-                        # print(b.text)
-                        # print(f"url: {b['href']}, Title: {b['rel']}")
-                        link = b['href'].strip()
-                        for num, word in enumerate(b['rel']):
-                            if num != 0:  # Do not include a space in front of the first word
-                                title += " "
-                            title += word
-                        title.strip()
-                        temp_list.append(title)
-                        temp_list.append(link)
-                for number, a in enumerate(div.find('div', class_="archive-info info-text")):
-                    if number == 0:
-                        # Get the label as an author
-                        temp_date = div.find('div', class_="archive-info info-text")
-                        date_child = list(temp_date.children)[0].strip().replace("ί", "ι")
-                        date = date_child
-                        print(f'PageReaderBypass> date: {date_child}')
-                        temp_list.append(date_child)
-                FirstPage.values.append(temp_list)
-                FirstPage.news_to_open_in_browser.append(temp_list)
-                FirstPage.news_total.append(NewsDataclass(url=link, title=title, date=date))
-        except Exception as err:
-            print(f'PageReaderBypass Error: {err}')
+                try:
+                    executor.submit(self.iterate_div, div)
+                except Exception as err:
+                    print(f'SubPageReader Error: {err}')
+                    trace_error()
         if debug:
             print(FirstPage.values)
+
+    def iterate_div(self, div):
+        """
+        Scrapes for data
+        :param div: The div to iterate
+        """
+        temp_list = []
+        title = ""
+        link = ""
+        date = ""
+        # print(div.text)
+        for a in div.find_all('h3'):
+            # print(a.text)
+            for b in a.find_all('a', href=True, rel=True):
+                # print(b.text)
+                # print(f"url: {b['href']}, Title: {b['rel']}")
+                link = b['href'].strip()
+                for num, word in enumerate(b['rel']):
+                    if num != 0:  # Do not include a space in front of the first word
+                        title += " "
+                    title += word
+                title.strip()
+                temp_list.append(title)
+                temp_list.append(link)
+        for number, a in enumerate(div.find('div', class_="archive-info info-text")):
+            if number == 0:
+                # Get the label as an author
+                temp_date = div.find('div', class_="archive-info info-text")
+                date_child = list(temp_date.children)[0].strip().replace("ί", "ι")
+                date = date_child
+                print(f'PageReaderBypass> date: {date_child}')
+                temp_list.append(date_child)
+        FirstPage.values.append(temp_list)
+        FirstPage.news_to_open_in_browser.append(temp_list)
+        FirstPage.news_total.append(NewsDataclass(url=link, title=title, date=date))
 
 
 class FirstPage:
@@ -593,7 +623,8 @@ class FirstPage:
         self.f1.pack(side='top', expand=True, fill='both', padx=2, pady=2)
         self.tree = ttk.Treeview(self.f1, columns=FirstPage.header, show='headings')
         self.setup_tree()
-        self.fill_the_tree()
+        # self.fill_the_tree()
+        self.fill_the_tree_bypass()
         # Menu emerging on the right click only
         self.right_click_menu = Menu(font='Arial 10', tearoff=0)
         self.right_click_menu.add_command(label='Show article', command=self.show_main_article)
@@ -759,6 +790,7 @@ class FirstPage:
                 print(f'Treeview was filled {FirstPage.values}')
         except Exception as err:
             print(f'Loading failed! Error: {err}')
+            trace_error()
 
     def renew_feed_bypass(self):
         FirstPage.values.clear()
@@ -794,7 +826,13 @@ class FirstPage:
             for number, tuple_feed in enumerate(FirstPage.values):
                 self.tree.insert("", tk.END, iid=str(number),
                                  values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
-            print(f"App.page_dict {list(App.page_dict.keys())[-1]}")  # TODO: remove it
+            # print(f"App.page_dict {list(App.page_dict.keys())[-1]}")  # TODO: remove it
+            # Sort the rows of column with heading "Date"
+            rows = [(self.tree.set(item, 'Date').lower(), item) for item in self.tree.get_children('')]
+            rows.sort(key=date_to_unix, reverse=True)
+            # Move the sorted dates
+            for index, (values, item) in enumerate(rows):
+                self.tree.move(item, '', index)
             if self.name == list(App.page_dict.keys())[-1]:  # After the last page ("Analysis"), close the chromedriver
                 driver.close()
                 driver.quit()
@@ -803,6 +841,15 @@ class FirstPage:
                 print(f'Treeview was filled {FirstPage.values}')
         except Exception as err:
             print(f'Loading failed! Error: {err}')
+            trace_error()
+            try:
+                # After the last page ("Analysis"), close the chromedriver
+                if self.name == list(App.page_dict.keys())[-1]:
+                    driver.close()
+                    driver.quit()
+                    print(f"FirstPage>fill_the_tree_bypass> {driver} closed")
+            except Exception:
+                trace_error()
 
     def __repr__(self):
         return self.name
