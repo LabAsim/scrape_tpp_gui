@@ -553,9 +553,9 @@ class PageReaderBypass:
     def scrape_the_data(self):
         """
         Scrapes the data from the soup of the target url
-        :return:
+        :return: None
         """
-        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
             for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
                 try:
@@ -833,7 +833,8 @@ class FirstPage:
             # Move the sorted dates
             for index, (values, item) in enumerate(rows):
                 self.tree.move(item, '', index)
-            if self.name == list(App.page_dict.keys())[-1]:  # After the last page ("Analysis"), close the chromedriver
+            if self.name == 'Analysis':  # After the last page ("Analysis"), close the chromedriver
+                # list(App.page_dict.keys())[-1]:
                 driver.close()
                 driver.quit()
                 print(f"FirstPage>fill_the_tree_bypass> {driver} closed")
@@ -844,10 +845,9 @@ class FirstPage:
             trace_error()
             try:
                 # After the last page ("Analysis"), close the chromedriver
-                if self.name == list(App.page_dict.keys())[-1]:
-                    driver.close()
-                    driver.quit()
-                    print(f"FirstPage>fill_the_tree_bypass> {driver} closed")
+                driver.close()
+                driver.quit()
+                print(f"FirstPage>fill_the_tree_bypass> {driver} closed")
             except Exception:
                 trace_error()
 
