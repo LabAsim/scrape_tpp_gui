@@ -8,7 +8,7 @@ import time
 import webbrowser
 from datetime import datetime, timedelta
 from tkinter import messagebox
-
+from colorama import Fore, Style, Back
 from misc import themes_paths
 
 headers_list = [
@@ -55,6 +55,7 @@ def close_tkinter(root):
         root.destroy()
         print('close_tkinter(): Tkinter window is exiting')
         sys.exit()
+
 
 def date_to_unix(date):
     """
@@ -216,3 +217,31 @@ def tkinter_theme_calling(root):
     root.tk.call('source', themes_paths['yaru'])
     root.tk.call('source', themes_paths['arc'])
     root.tk.call("set_theme", "dark")
+
+def strip_ansi_characters(text=''):
+    """https://stackoverflow.com/questions/48782529/exclude-ansi-escape-sequences-from-output-log-file"""
+    try:
+        ansi_re = re.compile(r'\x1b\[[0-9;]*m')
+        return re.sub(ansi_re, '', text)
+    except re.error as err:
+        print(err)
+
+
+def get_current_time():
+    """
+    :return: The current datetime as a string
+    """
+    time_now = datetime.now()
+    dt = str(time_now.strftime("%d-%m-%Y %H:%M:%S")) + f'.{Fore.LIGHTBLACK_EX}{str(round(time_now.microsecond))[:4]}' \
+                                                       f'{Style.RESET_ALL}'
+    dt = f"[{dt}]\t"
+    return dt
+
+
+def cprint(text, to_print_time=True):
+    """Prints and timestamps the text"""
+    text = str(text)  # Be sure that text is a string.
+    if to_print_time:
+        print(f'{get_current_time()}{text}')
+    elif not to_print_time:
+        print(f'{text}')

@@ -1,7 +1,7 @@
 import json
 import os.path
 import traceback
-from helper_functions import file_exists
+from helper_functions import file_exists, cprint, get_current_time, strip_ansi_characters
 from misc import dir_path
 
 
@@ -22,16 +22,16 @@ def trace_error(to_print_error=True):
     # Alternative, just print and write traceback.format_exc()
     for line in formatted_lines:
         if to_print_error:
-            print(line)
+            cprint(line)
         if file_exists(dir_path, 'errors.txt'):
             with open(error_filepath, 'r+', encoding='utf-8') as file:
                 file_contents = file.read()
-                error_data =  file_contents + line + "\n"
+                error_data = f'{file_contents}{strip_ansi_characters(get_current_time())} {line}\n'
             with open(error_filepath, 'w+', encoding='utf-8') as file:
                 file.write(error_data)
         else:
             with open(error_filepath, 'w+', encoding='utf-8') as file:
-                file.write(f"{line}\n")  # Add \n in the end to format nicely
+                file.write(f"{strip_ansi_characters(get_current_time())}{line}\n")  # Add \n in the end to format nicely
 
 
 if __name__ == "__main__":

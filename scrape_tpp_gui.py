@@ -555,7 +555,7 @@ class PageReaderBypass:
         Scrapes the data from the soup of the target url
         :return: None
         """
-        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
             # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
             for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
                 try:
