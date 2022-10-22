@@ -611,11 +611,12 @@ class FirstPage:
     news_total = []  # Contains all the dataclasses
     driver = ""  # The Chromedriver
 
-    def __init__(self, note, name, controller, url):
+    def __init__(self, note, name, controller, url, to_bypass):
         self.note = note
         self.name = name
         self.controller = controller
         self.url = url
+        self.to_bypass = to_bypass
         self.frame = ttk.Frame(self.note)
         self.frame.pack(expand=True, fill='both', padx=1, pady=1)
         self.note.add(self.frame, text=name)
@@ -625,8 +626,10 @@ class FirstPage:
         self.f1.pack(side='top', expand=True, fill='both', padx=2, pady=2)
         self.tree = ttk.Treeview(self.f1, columns=FirstPage.header, show='headings')
         self.setup_tree()
-        # self.fill_the_tree()
-        self.fill_the_tree_bypass()
+        if not self.to_bypass:  # To use BeautifulSoup
+            self.fill_the_tree()
+        else:  # self.to_bypass = True ==> Uses chromedriver
+            self.fill_the_tree_bypass()
         # Menu emerging on the right click only
         self.right_click_menu = Menu(font='Arial 10', tearoff=0)
         self.right_click_menu.add_command(label='Show article', command=self.show_main_article)
@@ -865,7 +868,7 @@ class App:
     base_url = "https://thepressproject.gr/"
     page_dict = {}
 
-    def __init__(self, root):
+    def __init__(self, root, to_bypass):
         self.f_time = None
         self.time = None
         root.geometry(f'{App.x}x{App.y}')
@@ -936,7 +939,7 @@ class App:
         """
         Stores all the pages of the notebook in App.page_dict
         """
-        App.page_dict[name] = FirstPage(note=note, name=name, controller=self, url=url)
+        App.page_dict[name] = FirstPage(note=note, name=name, controller=self, url=url, to_bypass=bypass)
 
     def call_renew_feed(self):
         """Recalls the site and renew the treeview for all tabs"""
@@ -1151,8 +1154,11 @@ if __name__ == "__main__":
     my_parser = argparse.ArgumentParser(add_help=True)
     my_parser.add_argument('--debug', type=str2bool, action='store', const=True, nargs='?', required=False,
                            default=False, help='If True, it does not load the news.')
+    my_parser.add_argument('--bypass', type=str2bool, action='store', required=False, default=False,
+                           help='If true, the first time it scrapes, it will use chromedriver')
     args = my_parser.parse_args()
     debug = args.debug
+    bypass = args.bypass
     start = time.time()
     root = tk.Tk()  # First window
     style = ttk.Style(root)
@@ -1160,9 +1166,9 @@ if __name__ == "__main__":
     # https://stackoverflow.com/questions/30950925/tkinter-getting-screen-text-unit-width-not-pixels
     font = tkinter.font.Font(size=14)
     tkinter_theme_calling(root)
-    myapp = App(root)
-    root.protocol("WM_DELETE_WINDOW", lambda: AskQuit(
-        root))  # https://stackoverflow.com/questions/111155/how-do-i-handle-the-window-close-event-in-tkinter
+    myapp = App(root=root, to_bypass=bypass)
+    # https://stackoverflow.com/questions/111155/how-do-i-handle-the-window-close-event-in-tkinter
+    root.protocol("WM_DELETE_WINDOW", lambda: AskQuit(root))
     preferred_theme = myapp.read_theme()  # Reads the theme from the json (if exists)
     myapp.use_theme(preferred_theme)  # Sets the theme. If None, azure-dark is the default.
     center(root)  # Centers tkinter.Tk to screen's height & length
