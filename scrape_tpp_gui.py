@@ -257,7 +257,6 @@ class PageReader:
         Scrapes the soup
         :return: None
         """
-
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:  # 12->3.3sec
             # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
             for div in self.soup.find_all('div', class_='col-md-8 archive-item'):

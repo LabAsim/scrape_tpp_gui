@@ -2,11 +2,16 @@ import os
 
 url_list = {"newsroom": ["https://thepressproject.gr/article_type/newsroom/",
                          "https://thepressproject.gr/article_type/newsroom/page/2/"],
-            "politics": "https://thepressproject.gr/category/politics/",
-            "economy": "https://thepressproject.gr/category/economy/",
-            "international": "https://thepressproject.gr/category/international/",
-            "report": "https://thepressproject.gr/article_type/report/",
-            "analysis": "https://thepressproject.gr/article_type/analysis/"}
+            "politics": ["https://thepressproject.gr/category/politics/",
+                         "https://thepressproject.gr/category/politics/page/2/"],
+            "economy": ["https://thepressproject.gr/category/economy/",
+                        "https://thepressproject.gr/category/economy/page/2/"],
+            "international": ["https://thepressproject.gr/category/international/",
+                              "https://thepressproject.gr/category/international/page/2/"],
+            "report": ["https://thepressproject.gr/article_type/report/",
+                       "https://thepressproject.gr/article_type/report/page/2/"],
+            "analysis": ["https://thepressproject.gr/article_type/analysis/",
+                         "https://thepressproject.gr/article_type/analysis/page/2/"]}
 
 url_list_second_page = {"newsroom": "https://thepressproject.gr/article_type/newsroom/page/2/",
                         "politics": "https://thepressproject.gr/category/politics/page/2/",
