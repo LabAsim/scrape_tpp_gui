@@ -75,7 +75,14 @@ def date_to_unix(date):
         # Remove 'Πριν/πριν'
         # See docs: https://docs.python.org/3/library/re.html#re.sub
         date = re.sub(pattern='[Ππ]ρ[ιίΙ]ν', repl="", string=date).lstrip(' ')
-        if 'λεπτά' in date:  # "2 λεπτά"
+        if 'δευ' in date:  # "39 δευτερόλεπτα"
+            date_now = datetime.now()
+            date = date.split(' ')
+            date = float(date[0])
+            unix_date = date_now - timedelta(seconds=date)
+            unix_date = time.mktime(unix_date.timetuple())
+            return unix_date
+        elif 'λεπτά' in date:  # "2 λεπτά"
             date_now = datetime.now()
             date = date.strip('Πριν').strip("λεπτά").strip()
             date = float(date)
@@ -87,13 +94,6 @@ def date_to_unix(date):
             date = date.strip('Πριν').strip("ώρα").strip("ώρες").strip()
             date = float(date)
             unix_date = date_now - timedelta(hours=date)
-            unix_date = time.mktime(unix_date.timetuple())
-            return unix_date
-        elif 'δευ' in date:  # "39 δευτερόλεπτα"
-            date_now = datetime.now()
-            date = date.split(' ')
-            date = float(date[0])
-            unix_date = date_now - timedelta(seconds=date)
             unix_date = time.mktime(unix_date.timetuple())
             return unix_date
         else:  # '1 ημέρα'
@@ -121,9 +121,12 @@ def sortby(tree, col, descending):
     # if the data to be sorted is numeric change to float
     # data =  change_numeric(data)
     # now sort the data in place
-    data.sort(reverse=descending)
-    for ix, item in enumerate(data):
-        tree.move(item[1], '', ix)
+    if col.title() == 'Date':
+        data.sort(key=date_to_unix, reverse=descending)
+    else:
+        data.sort(reverse=descending)
+    for index, item in enumerate(data):
+        tree.move(item[1], '', index)
     # Switch the heading, so it will be sorted  in the opposite direction
     tree.heading(col, command=lambda col=col: sortby(tree, col,
                                                      int(not descending)))
