@@ -66,7 +66,7 @@ class ToplevelArticle:
         self.horizontal_scrollbar1.pack(side='bottom', fill='x')
         self.text.pack(expand=True, fill='both')
         self.text1.pack(expand=True, fill='both')
-        # Disable text widget, so as reader can not delete its content. It needs to be done AFTER text.insert
+        # Disable text widget, so as the reader can not delete its content. It needs to be done AFTER text.insert
         # https://stackoverflow.com/questions/3842155/is-there-a-way-to-make-the-tkinter-text-widget-read-only
         self.text.config(state='disabled')
         self.text1.config(state='disabled')
