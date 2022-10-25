@@ -8,10 +8,10 @@ source_dir_path = os.path.join(dir_path, 'source')
 
 PyInstaller.__main__.run([
     f'{name}',
-    '--onedir',
+    '--onefile',
     '--console',
-    # '--nowindowed',
-    # '--noconsole',
+    '--nowindowed',
+    '--noconsole',
     f'--add-data={images_dir_path};images',
     f'--add-data={source_dir_path};source',
     '-y'
