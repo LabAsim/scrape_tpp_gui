@@ -1,14 +1,17 @@
 import os
 import tkinter as tk
 from tkinter import ttk, messagebox
-
 import pyperclip
-from PIL import Image, ImageTk
+from ttkwidgets.font import FontSelectFrame
+import tktooltip
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
+sys.path.append(parent)
+# Now, python can detect the helper_functions.py from the parent directory
 from helper_functions import file_exists, center, callback
 from source.misc.help_text import text_about
-from ttkwidgets.font import FontSelectFrame
 from classes.AskQuit import AskQuit
-import tktooltip
+
 
 class ToplevelArticle:
     x = 1200
