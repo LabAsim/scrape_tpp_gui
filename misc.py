@@ -14,12 +14,11 @@ url_list = {"newsroom": ["https://thepressproject.gr/article_type/newsroom/",
                          "https://thepressproject.gr/article_type/analysis/page/2/"]}
 
 url_list_base_page = {"Newsroom": "https://thepressproject.gr/article_type/newsroom/page/",
-                        "Politics": "https://thepressproject.gr/category/politics/page/",
-                        "Economy": "https://thepressproject.gr/category/economy/page/",
-                        "International": "https://thepressproject.gr/category/international/page/",
-                        "Report": "https://thepressproject.gr/article_type/report/page/",
-                        "Analysis": "https://thepressproject.gr/article_type/analysis/page/"}
-
+                      "Politics": "https://thepressproject.gr/category/politics/page/",
+                      "Economy": "https://thepressproject.gr/category/economy/page/",
+                      "International": "https://thepressproject.gr/category/international/page/",
+                      "Reportage": "https://thepressproject.gr/article_type/report/page/",
+                      "Analysis": "https://thepressproject.gr/article_type/analysis/page/"}
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
