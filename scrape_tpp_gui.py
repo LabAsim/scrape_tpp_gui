@@ -17,7 +17,7 @@ import sv_ttk
 import concurrent.futures
 from helper_functions import file_exists, center, callback, headers, str2bool, tkinter_theme_calling, \
     sortby, date_to_unix
-from misc import url_list, dir_path
+from misc import url_list, dir_path, url_list_base_page
 from trace_error import trace_error
 from classes.NewsDataclass import NewsDataclass
 from classes.ToplevelAbout import ToplevelAbout
@@ -196,7 +196,8 @@ class PageReader:
     Connects to the list of url (or a single url) and scrapes the title, date. After that, it appends the data to
     Firstpage.values, FirstPage.news_to_open_in_browser and FirstPage.news_total.
     """
-    #page_values = []
+
+    # page_values = []
 
     def __init__(self, url, header):
         self.news_dict = None
@@ -861,10 +862,21 @@ class FirstPage:
             except Exception:
                 trace_error()
 
-    def insert_news_from_page(self, page):
+    def insert_news_from_page(self, url):
+        """
+        Inserts the news from the url to the notebook tab sorted based on the Date.
+        :param url: The url to scrape
+        """
+        FirstPage.values.clear()  # Clear the temporary list
+        PageReader(url=url, header=headers())
         for number, tuple_feed in enumerate(FirstPage.values):
-            self.tree.insert("", tk.END, iid=str(number),
+            self.tree.insert("", tk.END,
                              values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
+        # Sort the rows of column with heading "Date"
+        rows = [(self.tree.set(item, 'Date').lower(), item) for item in self.tree.get_children('')]
+        rows.sort(key=date_to_unix, reverse=True)
+        for index, (values, item) in enumerate(rows):
+            self.tree.move(item, '', index)
 
     def __repr__(self):
         return self.name
@@ -875,7 +887,9 @@ class App:
     x = 1600
     y = 500
     base_url = "https://thepressproject.gr/"
-    page_dict = {}
+    page_dict = {}  # Holds the FirstPage objects
+    # Holds the number of the page inserted in each notebook tab (FirstPage).
+    treeview_tab_page_counter = {}  # Default: {'Newsroom: 2'} (as, it loads the news up to the second page)
 
     def __init__(self, root, to_bypass):
         self.f_time = None
@@ -899,11 +913,18 @@ class App:
         tktooltip.ToolTip(self.top_label, msg='Click to open ThePressProject site in the browser', delay=0.75)
         # Main menu
         self.main_menu = Menu(self.root, font='Arial 16',
-                              tearoff=0)  # Tearoff has to be 0, in order the command to start being posted in position 0.
+                              tearoff=0)  # Tearoff has to be 0, so as the command to start being posted in position 0.
         self.root.config(menu=self.main_menu)
-        # Emerging Menu for main tk Window
+        # Menu named "Menu" for main tk Window
         self.context = Menu(self.main_menu, font='Arial 10',
                             tearoff=0)
+        # 'Load more news' Menu. It's a submenu of self.context
+        self.load_more_news = Menu(self.context, font='Arial 10', tearoff=0)
+        self.load_more_news.add_command(label='Newsroom', font='Arial 10',
+                                        command=lambda: self.insert_news_for_a_particular_tab(name='Newsroom'))
+        # Add the self.load_more_news to self.context
+        self.context.add_cascade(label='Load more news', menu=self.load_more_news, underline=0, font='Arial 10')
+        # Add more commands
         self.context.add_command(label='Renew titles', font='Arial 10', command=self.call_renew_feed)
         self.context.add_command(label='Renew titles (bypass)', font='Arial 10', command=self.call_renew_feed_bypass)
         self.context.add_separator()
@@ -946,14 +967,24 @@ class App:
 
     def notebook_pages(self, url, note, controller, name):
         """
-        Stores all the pages of the notebook in App.page_dict
+        Initiates and stores all the pages of the notebook (FirstPage class) in App.page_dict
         """
         App.page_dict[name] = FirstPage(note=note, name=name, controller=self, url=url, to_bypass=bypass)
+        if name not in App.treeview_tab_page_counter:
+            App.treeview_tab_page_counter[name] = 2
 
-    def insert_news_for_a_particular_tab(self, name):
-        pass
-
-
+    @staticmethod
+    def insert_news_for_a_particular_tab(name):
+        """
+        Saves the number of pages loaded in the particular category to App.treeview_tab_page_counter[name]
+        and loads the App.treeview_tab_page_counter[name] + 1.
+        :param name: The name of the category as a strings
+        :return: None
+        """
+        App.treeview_tab_page_counter[name] += 1  # Add 1 to the default counter
+        url_to_scrape = str(url_list_base_page[name]) + str(App.treeview_tab_page_counter[name])
+        print(f"News will be added to the category {name} from url: {url_to_scrape}")
+        App.page_dict[name].insert_news_from_page(url=url_to_scrape)
 
     def call_renew_feed(self):
         """Recalls the site and renew the treeview for all tabs"""
