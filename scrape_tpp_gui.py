@@ -192,7 +192,11 @@ class SubPageReader:
 
 
 class PageReader:
-    page_values = []
+    """
+    Connects to the list of url (or a single url) and scrapes the title, date. After that, it appends the data to
+    Firstpage.values, FirstPage.news_to_open_in_browser and FirstPage.news_total.
+    """
+    #page_values = []
 
     def __init__(self, url, header):
         self.news_dict = None
@@ -857,6 +861,11 @@ class FirstPage:
             except Exception:
                 trace_error()
 
+    def insert_news_from_page(self, page):
+        for number, tuple_feed in enumerate(FirstPage.values):
+            self.tree.insert("", tk.END, iid=str(number),
+                             values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
+
     def __repr__(self):
         return self.name
 
@@ -940,6 +949,11 @@ class App:
         Stores all the pages of the notebook in App.page_dict
         """
         App.page_dict[name] = FirstPage(note=note, name=name, controller=self, url=url, to_bypass=bypass)
+
+    def insert_news_for_a_particular_tab(self, name):
+        pass
+
+
 
     def call_renew_feed(self):
         """Recalls the site and renew the treeview for all tabs"""
