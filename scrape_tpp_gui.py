@@ -613,6 +613,9 @@ class PageReaderBypass:
 
 
 class FirstPage:
+    """
+    A class which controls the tab(s) of the ttk.notebook from the App class.
+    """
     header = ('Date', 'Title', 'Summary')
     values = []  # A temporary list containing lists for each news-link in the form of [title-string, url, date]
     news_to_open_in_browser = []  # Contains all the scraped news in the form of [title-string, url, date]
