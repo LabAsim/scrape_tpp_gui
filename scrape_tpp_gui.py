@@ -1159,7 +1159,7 @@ if __name__ == "__main__":
     args = my_parser.parse_args()
     debug = args.debug
     bypass = args.bypass
-    start = time.time()
+    start = time.perf_counter()
     root = tk.Tk()  # First window
     style = ttk.Style(root)
     # A solution in order to measure the length of the titles
@@ -1172,7 +1172,7 @@ if __name__ == "__main__":
     preferred_theme = myapp.read_theme()  # Reads the theme from the json (if exists)
     myapp.use_theme(preferred_theme)  # Sets the theme. If None, azure-dark is the default.
     center(root)  # Centers tkinter.Tk to screen's height & length
-    end = time.time()
+    end = time.perf_counter()
     print(f'Current Style: {root.tk.call("ttk::style", "theme", "use")}')
     print(f'Load in {end - start}')
     root.mainloop()
