@@ -640,6 +640,8 @@ class FirstPage:
         self.right_click_menu.add_command(label='Show article', command=self.show_main_article)
         self.right_click_menu.add_command(label='Show article (bypass)', command=self.show_main_article_bypass)
         self.right_click_menu.add_command(label='Open article in browser', command=self.open_article_link)
+        self.right_click_menu.add_command(label='Load more news',
+                                          command=lambda: App.insert_news_for_a_particular_tab(self.name))
         self.tree.bind('<ButtonRelease-3>', self.post_menu)
         # Bind left double click to post the menu
         self.tree.bind("<Double-1>", self.show_main_article)
