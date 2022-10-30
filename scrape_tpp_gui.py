@@ -912,12 +912,12 @@ class App:
         self.note = ttk.Notebook(self.root)
         self.note.pack(side='bottom', fill='both', expand=True)
         # For just the 1st page of Newsroom: list(url_list.values())[0][0]
-        self.notebook_pages(url=list(url_list.values())[0], note=self.note, controller=self, name='Newsroom')
-        self.notebook_pages(url=list(url_list.values())[1], note=self.note, controller=self, name='Politics')
-        self.notebook_pages(url=list(url_list.values())[2], note=self.note, controller=self, name='Economy')
-        self.notebook_pages(url=list(url_list.values())[3], note=self.note, controller=self, name='International')
-        self.notebook_pages(url=list(url_list.values())[4], note=self.note, controller=self, name='Reportage')
-        self.notebook_pages(url=list(url_list.values())[5], note=self.note, controller=self, name='Analysis')
+        self.notebook_pages(url=list(url_list.values())[0][0], note=self.note, controller=self, name='Newsroom')
+        self.notebook_pages(url=list(url_list.values())[1][0], note=self.note, controller=self, name='Politics')
+        self.notebook_pages(url=list(url_list.values())[2][0], note=self.note, controller=self, name='Economy')
+        self.notebook_pages(url=list(url_list.values())[3][0], note=self.note, controller=self, name='International')
+        self.notebook_pages(url=list(url_list.values())[4][0], note=self.note, controller=self, name='Reportage')
+        self.notebook_pages(url=list(url_list.values())[5][0], note=self.note, controller=self, name='Analysis')
         self.top_label = ttk.Label(self.root, text='The Press Project', cursor='hand2', font='Arial 20')
         self.top_label.pack(side='top', pady=15)
         self.top_label.bind("<Button-1>", lambda e: callback(App.base_url))
@@ -935,7 +935,7 @@ class App:
         """
         App.page_dict[name] = FirstPage(note=note, name=name, controller=self, url=url, to_bypass=bypass)
         if name not in App.treeview_tab_page_counter:
-            App.treeview_tab_page_counter[name] = 2
+            App.treeview_tab_page_counter[name] = 1
 
     def create_menu(self):
         """
