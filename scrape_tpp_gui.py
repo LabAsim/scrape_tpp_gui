@@ -892,6 +892,12 @@ class App:
     treeview_tab_page_counter = {}  # Default: {'Newsroom: 2'} (as, it loads the news up to the second page)
 
     def __init__(self, root, to_bypass):
+        self.help_menu = None
+        self.tpp_menu = None
+        self.theme_menu = None
+        self.edit_menu = None
+        self.load_more_news = None
+        self.context = None
         self.f_time = None
         self.time = None
         root.geometry(f'{App.x}x{App.y}')
@@ -915,6 +921,22 @@ class App:
         self.main_menu = Menu(self.root, font='Arial 16',
                               tearoff=0)  # Tearoff has to be 0, so as the command to start being posted in position 0.
         self.root.config(menu=self.main_menu)
+        # Create the rest menus
+        self.create_menu()
+
+    def notebook_pages(self, url, note, controller, name):
+        """
+        Initiates and stores all the pages of the notebook (FirstPage class) in App.page_dict
+        """
+        App.page_dict[name] = FirstPage(note=note, name=name, controller=self, url=url, to_bypass=bypass)
+        if name not in App.treeview_tab_page_counter:
+            App.treeview_tab_page_counter[name] = 2
+
+    def create_menu(self):
+        """
+        Creates all the menus. Base menu is self.main_menu.
+        :return: None
+        """
         # Menu named "Menu" for main tk Window
         self.context = Menu(self.main_menu, font='Arial 10',
                             tearoff=0)
@@ -922,6 +944,16 @@ class App:
         self.load_more_news = Menu(self.context, font='Arial 10', tearoff=0)
         self.load_more_news.add_command(label='Newsroom', font='Arial 10',
                                         command=lambda: self.insert_news_for_a_particular_tab(name='Newsroom'))
+        self.load_more_news.add_command(label='Politics', font='Arial 10',
+                                        command=lambda: self.insert_news_for_a_particular_tab(name='Politics'))
+        self.load_more_news.add_command(label='Economy', font='Arial 10',
+                                        command=lambda: self.insert_news_for_a_particular_tab(name='Economy'))
+        self.load_more_news.add_command(label='International', font='Arial 10',
+                                        command=lambda: self.insert_news_for_a_particular_tab(name='International'))
+        self.load_more_news.add_command(label='Reportage', font='Arial 10',
+                                        command=lambda: self.insert_news_for_a_particular_tab(name='Reportage'))
+        self.load_more_news.add_command(label='Analysis', font='Arial 10',
+                                        command=lambda: self.insert_news_for_a_particular_tab(name='Analysis'))
         # Add the self.load_more_news to self.context
         self.context.add_cascade(label='Load more news', menu=self.load_more_news, underline=0, font='Arial 10')
         # Add more commands
@@ -964,14 +996,6 @@ class App:
         self.main_menu.add_cascade(label='Edit', menu=self.edit_menu, underline=0)
         self.main_menu.add_cascade(label='TPP', menu=self.tpp_menu, underline=0)
         self.main_menu.add_cascade(label="Help", menu=self.help_menu, underline=0)
-
-    def notebook_pages(self, url, note, controller, name):
-        """
-        Initiates and stores all the pages of the notebook (FirstPage class) in App.page_dict
-        """
-        App.page_dict[name] = FirstPage(note=note, name=name, controller=self, url=url, to_bypass=bypass)
-        if name not in App.treeview_tab_page_counter:
-            App.treeview_tab_page_counter[name] = 2
 
     @staticmethod
     def insert_news_for_a_particular_tab(name):
