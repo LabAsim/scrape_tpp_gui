@@ -30,6 +30,9 @@ import concurrent.futures
 
 
 class SubPageReader:
+    """
+    Reads the url html and returns SubPageReader.data_to_return
+    """
     dict_subpage = {}
     data_to_return = []  # a list with 5 strings: Url, Title, Date, Subtitle summary, Main content
 
