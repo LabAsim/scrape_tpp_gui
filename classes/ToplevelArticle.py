@@ -89,15 +89,19 @@ class ToplevelArticle:
         self.menu.post(event.x_root, event.y_root)
 
     def copy_text_to_clipboard(self):
-        """Gets the selected text from the Text and copies it to the clipboard
-        https://stackoverflow.com/questions/4073468/how-do-i-get-a-selected-string-in-from-a-tkinter-text-box"""
+        """
+        Gets the selected text from the Text and copies it to the clipboard
+        https://stackoverflow.com/questions/4073468/how-do-i-get-a-selected-string-in-from-a-tkinter-text-box
+        """
         text = self.big_frame.selection_get()
         pyperclip.copy(text)
-        print(f"Text coped to clipboard: {text}")
+        print(f"Text copied to clipboard: {text}")
 
     def update_preview(self, font_tuple):
-        """Modifies the text font
-           https://ttkwidgets.readthedocs.io/en/latest/examples/font/FontSelectFrame.html"""
+        """
+        Modifies the text font
+        ttps://ttkwidgets.readthedocs.io/en/latest/examples/font/FontSelectFrame.html
+        """
         print(font_tuple)
         selected_font = self.font_selection.font[0]
         if selected_font is not None:
@@ -110,15 +114,19 @@ class ToplevelArticle:
 
     @staticmethod
     def toplevel_quit(widget):
-        """how to bind a messagebox to toplevel window in python
-           https://stackoverflow.com/questions/17910866/python-3-tkinter-messagebox-with-a-toplevel-as-master"""
+        """
+        how to bind a messagebox to toplevel window in python
+        https://stackoverflow.com/questions/17910866/python-3-tkinter-messagebox-with-a-toplevel-as-master
+        """
         if widget is not None:
             widget.destroy()
 
     @staticmethod
     def ask_toplevel_quit(widget):
-        """how to bind a messagebox to toplevel window in python
-                   https://stackoverflow.com/questions/17910866/python-3-tkinter-messagebox-with-a-toplevel-as-master"""
+        """
+        how to bind a messagebox to toplevel window in python
+        https://stackoverflow.com/questions/17910866/python-3-tkinter-messagebox-with-a-toplevel-as-master
+        """
         if messagebox.askokcancel(title="Quit", message="Do you want to quit?", parent=widget):
             if widget is not None:
                 widget.destroy()
