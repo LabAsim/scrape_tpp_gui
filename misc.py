@@ -20,7 +20,7 @@ url_list_base_page = {"Newsroom": "https://thepressproject.gr/article_type/newsr
                       "Reportage": "https://thepressproject.gr/article_type/report/page/",
                       "Analysis": "https://thepressproject.gr/article_type/analysis/page/"}
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+dir_path = os.path.dirname(os.path.realpath(__file__))  # As a one-file executable, this path is a temporary folder.
 
 themes_paths = {"azure": os.path.join(dir_path, 'source/azure/azure.tcl'),
                 "plastik": os.path.join(dir_path, 'source/plastik/plastik.tcl'),
