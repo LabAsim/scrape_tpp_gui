@@ -17,7 +17,7 @@ import sv_ttk
 import concurrent.futures
 from helper_functions import file_exists, center, callback, headers, str2bool, tkinter_theme_calling, \
     sortby, date_to_unix
-from misc import url_list, dir_path, url_list_base_page
+from misc import url_list,  url_list_base_page, dir_path
 from trace_error import trace_error
 from classes.NewsDataclass import NewsDataclass
 from classes.ToplevelAbout import ToplevelAbout
@@ -1249,17 +1249,32 @@ class App:
     @staticmethod
     def save_theme():
         """Saves the preferred theme"""
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        #print(dir_path)
+        #print(os.path.dirname(os.path.realpath(__file__)))
+        # https://stackoverflow.com/questions/404744/determining-application-path-in-a-python-exe-generated-by-pyinstaller
+        # Determine if the application is a script file or a frozen exe
+        if getattr(sys, 'frozen', False):  # TODO: review this
+            print(getattr(sys, 'frozen', False))
+            dir_path = os.path.dirname(os.path.realpath(sys.executable))
+            print("Exe:", dir_path)
+        elif __file__:
+            dir_path = os.path.dirname(__file__)
+            print(f'Script: {dir_path}')
+        print(dir_path)
         with open(os.path.join(dir_path, "tpp.json"), "w+", encoding='utf-8') as file:
             json_data = {'theme': root.tk.call("ttk::style", "theme", "use")}
             json.dump(json_data, file, indent=4)
-            print(f"Theme saved to tpp.json")
+            print(f"Theme saved to {os.path.join(dir_path, 'tpp.json')}")
 
     @staticmethod
     def read_theme() -> str | None:
         """Reads the preferred theme"""
+        dir_path = os.path.dirname(os.path.realpath(__file__))
         if file_exists(name="tpp.json", dir_path=dir_path):
             with open(os.path.join(dir_path, "tpp.json"), "r+", encoding='utf-8') as file:
                 json_data = json.load(file)
+                print(json_data)
                 return json_data['theme']
         return None
 
@@ -1299,7 +1314,7 @@ class App:
 if __name__ == "__main__":
     my_parser = argparse.ArgumentParser(add_help=True)
     my_parser.add_argument('--debug', type=str2bool, action='store', const=True, nargs='?', required=False,
-                           default=False, help='If True, it does not load the news.')
+                           default=True, help='If True, it does not load the news.')
     my_parser.add_argument('--bypass', type=str2bool, action='store', required=False, default=False,
                            help='If true, the first time it scrapes, it will use chromedriver')
     args = my_parser.parse_args()
