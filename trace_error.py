@@ -28,7 +28,7 @@ def trace_error(to_print_error=True):
                 file_contents = file.read()
                 error_data = f'{file_contents}{strip_ansi_characters(get_current_time())} {line}\n'
             with open(error_filepath, 'w+', encoding='utf-8') as file:
-                file.write(error_data)
+                file.write(strip_ansi_characters(error_data))
         else:
             with open(error_filepath, 'w+', encoding='utf-8') as file:
                 file.write(f"{strip_ansi_characters(get_current_time())}{line}\n")  # Add \n in the end to format nicely
