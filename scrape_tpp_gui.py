@@ -1299,7 +1299,7 @@ class App:
 if __name__ == "__main__":
     my_parser = argparse.ArgumentParser(add_help=True)
     my_parser.add_argument('--debug', type=str2bool, action='store', const=True, nargs='?', required=False,
-                           default=True, help='If True, it does not load the news.')
+                           default=False, help='If True, it does not load the news.')
     my_parser.add_argument('--bypass', type=str2bool, action='store', required=False, default=False,
                            help='If true, the first time it scrapes, it will use chromedriver')
     args = my_parser.parse_args()
