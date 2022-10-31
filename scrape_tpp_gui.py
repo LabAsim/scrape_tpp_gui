@@ -1091,7 +1091,7 @@ class App:
             self.change_theme_yaru()
         elif theme == "arc":
             self.change_theme_arc()
-        elif theme == "vista":
+        elif theme == "xpnative":
             self.change_theme_xpnative()
         root.deiconify()  # After changing the theme, re-draw first the root
         for toplevel in toplevel_temporary_list:  # Then re-draw the toplevel windows.
