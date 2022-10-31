@@ -976,16 +976,16 @@ class App:
         self.edit_menu = Menu(self.main_menu, tearoff=0)
         # Change theme menu
         self.theme_menu = Menu(self.edit_menu, tearoff=0)
-        self.theme_menu.add_command(label='Azure', command=self.change_theme_azure)
+        self.theme_menu.add_command(label='Azure', command= lambda: self.change_theme('azure'))
         # self.theme_menu.add_command(label="Sun valley", command=self.change_theme_sun_valley)
-        self.theme_menu.add_command(label='Adapta', command=self.change_theme_adapta)
-        self.theme_menu.add_command(label='Aquativo',
-                                    command=self.change_theme_aquativo)  # https://ttkthemes.readthedocs.io/en/latest/themes.html#radiance-ubuntu
-        self.theme_menu.add_command(label='Radiance', command=self.change_theme_radiance)
-        self.theme_menu.add_command(label='Plastik', command=self.change_theme_plastik)
-        self.theme_menu.add_command(label='Yaru', command=self.change_theme_yaru)
-        self.theme_menu.add_command(label='Arc', command=self.change_theme_arc)
-        self.theme_menu.add_command(label='XP native', command=self.change_theme_xpnative)
+        self.theme_menu.add_command(label='Adapta', command=lambda: self.change_theme('adapta'))
+        self.theme_menu.add_command(label='Aquativo', # https://ttkthemes.readthedocs.io/en/latest/themes.html#radiance-ubuntu
+                                    command=self.change_theme_aquativo)
+        self.theme_menu.add_command(label='Radiance', command=lambda: self.change_theme('radiance'))
+        self.theme_menu.add_command(label='Plastik', command=lambda: self.change_theme('plastik'))
+        self.theme_menu.add_command(label='Yaru', command=lambda: self.change_theme('yaru'))
+        self.theme_menu.add_command(label='Arc', command=lambda: self.change_theme('arc'))
+        self.theme_menu.add_command(label='XP native', command=lambda: self.change_theme('xpnative'))
         self.edit_menu.add_cascade(label='Change theme', font='Arial 10', menu=self.theme_menu, underline=0)
         self.edit_menu.add_command(label='Save theme', font='Arial 10', command=App.save_theme, underline=0)
         # TPP menu
@@ -1060,6 +1060,44 @@ class App:
         print(f'App>exit_the_program()')
         sys.exit()
 
+    def change_theme(self, theme: str):
+        """
+        Changes the theme of the tkinter based on the theme's name passed.
+        :param theme: The name of theme
+        """
+        toplevel_temporary_list = []
+        '''# https://stackoverflow.com/questions/10343759/determining-what-tkinter-window-is-currently-on-top
+        # https://python-forum.io/thread-7744.html
+        stack_order = root.tk.eval('wm stackorder {}'.format(root))
+        L = [x.lstrip('.') for x in stack_order.split()]
+        print([(root.children[x] if x else root) for x in L])
+        print(stack_order)'''
+        for (child, child_widget) in root.children.items():  # Withdraw the toplevel windows
+            if 'toplevel' in child:
+                toplevel_temporary_list.append(child_widget)  # Save temporarily the toplevel objects
+                child_widget.withdraw()
+        root.withdraw()  # Hide the root
+        if theme == 'azure':
+            self.change_theme_azure()
+        elif theme == 'radiance':
+            self.change_theme_radiance()
+        elif theme == 'aquativo':
+            self.change_theme_aquativo()
+        elif theme == "plastik":
+            self.change_theme_plastik()
+        elif theme == "adapta":
+            self.change_theme_adapta()
+        elif theme == "yaru":
+            self.change_theme_yaru()
+        elif theme == "arc":
+            self.change_theme_arc()
+        elif theme == "vista":
+            self.change_theme_xpnative()
+        root.deiconify()  # After changing the theme, re-draw first the root
+        for toplevel in toplevel_temporary_list:  # Then re-draw the toplevel windows.
+            # Thus, the toplevel will always be on top
+            toplevel.deiconify()
+
     def change_theme_azure(self):
         print(f'All styles: {root.tk.call("ttk::style", "theme", "names")}')
         # NOTE: The theme's real name is azure-<mode>
@@ -1074,13 +1112,19 @@ class App:
                     # root.tk.call("ttk::style", "theme", "use", "azure-dark")
                 except tkinter.TclError as err:
                     print(err)
-        except tkinter.TclError as err:
+        except (tkinter.TclError, Exception) as err:
             print(err)
 
     def change_theme_forest(self):
         print(f'All styles: {root.tk.call("ttk::style", "theme", "names")}')
         # NOTE: The theme's real name is azure-<mode>
         print(f'Previous Style: {root.tk.call("ttk::style", "theme", "use")}')
+        toplevel_temporary_list = []
+        for (child, child_widget) in root.children.items():  # Withdraw the toplevel windows
+            if 'toplevel' in child:
+                toplevel_temporary_list.append(child_widget)  # Save temporarily the toplevel objects
+                child_widget.withdraw()
+        root.withdraw()  # Hide the root
         try:
             if root.tk.call("ttk::style", "theme", "use") == "forest-dark":
                 root.tk.call("set_theme", "light")
@@ -1097,6 +1141,10 @@ class App:
                     print(err)
         except tkinter.TclError as err:
             print(err)
+        root.deiconify()  # After changing the theme, re-draw first the root
+        for toplevel in toplevel_temporary_list:  # Then re-draw the toplevel windows.
+            # Thus, the toplevel will always be on top
+            toplevel.deiconify()
 
     def change_theme_sun_valley(self):
         """
@@ -1107,6 +1155,12 @@ class App:
         """
         print(f'All styles: {root.tk.call("ttk::style", "theme", "names")}')
         print(f'Previous Style: {root.tk.call("ttk::style", "theme", "use")}')
+        toplevel_temporary_list = []
+        for (child, child_widget) in root.children.items():  # Withdraw the toplevel windows
+            if 'toplevel' in child:
+                toplevel_temporary_list.append(child_widget)  # Save temporarily the toplevel objects
+                child_widget.withdraw()
+        root.withdraw()  # Hide the root
         try:
             if sv_ttk.get_theme() == "dark":
                 print("Setting theme to light")
@@ -1130,6 +1184,10 @@ class App:
                 root.tk.call("set_theme", "dark")
         except tkinter.TclError as err:
             print(err)
+        root.deiconify()  # After changing the theme, re-draw first the root
+        for toplevel in toplevel_temporary_list:  # Then re-draw the toplevel windows.
+            # Thus, the toplevel will always be on top
+            toplevel.deiconify()
 
     def change_theme_xpnative(self):
         try:
@@ -1208,6 +1266,12 @@ class App:
     @staticmethod
     def use_theme(theme):
         """Sets the theme passed to the function"""
+        toplevel_temporary_list = []
+        for (child, child_widget) in root.children.items():  # Withdraw the toplevel windows
+            if 'toplevel' in child:
+                toplevel_temporary_list.append(child_widget)  # Save temporarily the toplevel objects
+                child_widget.withdraw()
+        root.withdraw()  # Hide the root
         if theme == 'azure-dark' or None:
             root.tk.call("set_theme", "dark")
         elif theme == 'azure-light':
@@ -1226,12 +1290,16 @@ class App:
             myapp.change_theme_arc()
         elif theme == "vista":
             myapp.change_theme_xpnative()
+        root.deiconify()  # After changing the theme, re-draw first the root
+        for toplevel in toplevel_temporary_list:  # Then re-draw the toplevel windows.
+            # Thus, the toplevel will always be on top
+            toplevel.deiconify()
 
 
 if __name__ == "__main__":
     my_parser = argparse.ArgumentParser(add_help=True)
     my_parser.add_argument('--debug', type=str2bool, action='store', const=True, nargs='?', required=False,
-                           default=False, help='If True, it does not load the news.')
+                           default=True, help='If True, it does not load the news.')
     my_parser.add_argument('--bypass', type=str2bool, action='store', required=False, default=False,
                            help='If true, the first time it scrapes, it will use chromedriver')
     args = my_parser.parse_args()
