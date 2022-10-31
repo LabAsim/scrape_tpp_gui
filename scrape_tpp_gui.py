@@ -818,6 +818,7 @@ class FirstPage:
 
     def fill_the_tree_bypass(self):
         # Clear the treeview
+        driver = None
         try:
             for item in self.tree.get_children():
                 self.tree.delete(item)
