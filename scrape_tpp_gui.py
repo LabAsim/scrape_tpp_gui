@@ -1,4 +1,3 @@
-# Version 23/10/2022
 import argparse
 import json
 import os
@@ -202,7 +201,7 @@ class PageReader:
 
     # page_values = []
 
-    def __init__(self, url, header):
+    def __init__(self, url, header, category=None):
         self.news_dict = None
         self.temp_list = None
         self.status_code = None
@@ -210,6 +209,7 @@ class PageReader:
         self.soup = None
         self.headers = header
         self.url = url
+        self.category = category
         self.check_url_and_iterate(self.url, self.headers)
 
     def check_url_and_iterate(self, url: str | list, header):
@@ -268,13 +268,22 @@ class PageReader:
         """
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:  # 12->3.3sec
             # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
-            for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
-                try:
-                    executor.submit(self.iterate_div, div)
-                except Exception as err:
-                    print(f'SubPageReader Error: {err}')
-                    trace_error()
-                    raise err
+            if self.category == 'anaskopisi':
+                for div in self.soup.find_all('div', class_='m-item grid-item col-md-6'):
+                    try:
+                        executor.submit(self.iterate_div_for_anaskopisi, div)
+                    except Exception as err:
+                        print(f'SubPageReader Error: {err}')
+                        trace_error()
+                        raise err
+            else:
+                for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
+                    try:
+                        executor.submit(self.iterate_div, div)
+                    except Exception as err:
+                        print(f'SubPageReader Error: {err}')
+                        trace_error()
+                        raise err
         if debug:
             print(FirstPage.values)
 
@@ -313,6 +322,39 @@ class PageReader:
         FirstPage.values.append(temp_list)
         FirstPage.news_to_open_in_browser.append(temp_list)
         FirstPage.news_total.append(NewsDataclass(url=link, title=title, date=date))
+
+    def iterate_div_for_anaskopisi(self, div: Any):
+        """
+                Iterates div from the soup and scrapes the data for tpp.tv
+
+                :param div: The div object from soup
+                :return: None
+                """
+        temp_list = []  # Contains the
+        title = ""
+        link = ""
+        date = ""
+        text_summary = ""
+        for a in div.find_all('h3'):
+            # print(f'a: {a.text}')
+            for b in a.find_all('a', href=True):
+                # <a href="https://thepressproject.gr/anaskopisi-s08e32-katataxi-eleftherias-tou-typou/">ΑΝΑΣΚΟΠΗΣΗ S08E32: ΚΑΤΑΤΑΞΗ ΕΛΕΥΘΕΡΙΑΣ ΤΟΥ ΤΥΠΟΥ</a>
+                link = b['href'].strip()
+                print(f"b: {b.text} {link}")
+                title = b.text  # .replace("ΑΝΑΣΚΟΠΗΣΗ ", "").strip()
+                temp_list.append(title)
+                temp_list.append(link)
+        for date_div in div.find_all('div', class_='art-meta'):
+            # We do not need to search the span class. The only text of the date_div is the span's text.
+            date = date_div.text.strip()
+            print(f"date lenght: {len(date)}")
+            temp_list.append(date)
+        for text_div in div.find_all('div', class_='art-content'):
+            text_summary = text_div.text
+        FirstPage.values.append(temp_list)
+        FirstPage.news_to_open_in_browser.append(temp_list)
+        FirstPage.news_total.append(NewsDataclass(url=link, title=title, date=date))
+        # print(temp_list)
 
 
 class SubPageReaderBypass:
@@ -789,11 +831,18 @@ class FirstPage:
             print(f'Error in deleting the Tree: {err}')
             trace_error()
         try:
-            feed = PageReader(url=self.url, header=headers())
+            if self.name == 'tpp.tv':  # For the category "anaskopisi"
+                feed = PageReader(url=self.url, header=headers(), category='anaskopisi')
+            else:
+                feed = PageReader(url=self.url, header=headers())
             title_list = [font.measure(d[0]) for d in FirstPage.values]
             date_list = [font.measure(d[2]) for d in FirstPage.values]
             self.tree.column(column='Title', minwidth=100, width=max(title_list), stretch=True)
-            self.tree.column(column='Date', minwidth=150, width=max(date_list), stretch=True)
+            if self.name == 'tpp.tv': # TODO: fix the width of Date for this category
+                self.tree.column(column='Date', width=100, stretch=True) # , minwidth=100
+            else:
+                self.tree.column(column='Date', minwidth=150, width=max(date_list), stretch=True)
+            print(f"max legnth of date: {max(date_list)}")
             print(max(title_list))
             for number, tuple_feed in enumerate(FirstPage.values):
                 self.tree.insert("", tk.END, iid=str(number),
@@ -922,6 +971,7 @@ class App:
         self.notebook_pages(url=list(url_list.values())[3][0], note=self.note, controller=self, name='International')
         self.notebook_pages(url=list(url_list.values())[4][0], note=self.note, controller=self, name='Reportage')
         self.notebook_pages(url=list(url_list.values())[5][0], note=self.note, controller=self, name='Analysis')
+        self.notebook_pages(url='https://thepressproject.gr/tv_show/anaskopisi/', note=self.note, controller=self, name='tpp.tv')
         self.top_label = ttk.Label(self.root, text='The Press Project', cursor='hand2', font='Arial 20')
         self.top_label.pack(side='top', pady=15)
         self.top_label.bind("<Button-1>", lambda e: callback(App.base_url))
@@ -1314,7 +1364,7 @@ class App:
 if __name__ == "__main__":
     my_parser = argparse.ArgumentParser(add_help=True)
     my_parser.add_argument('--debug', type=str2bool, action='store', const=True, nargs='?', required=False,
-                           default=True, help='If True, it does not load the news.')
+                           default=False, help='If True, it does not load the news.')
     my_parser.add_argument('--bypass', type=str2bool, action='store', required=False, default=False,
                            help='If true, the first time it scrapes, it will use chromedriver')
     args = my_parser.parse_args()
