@@ -246,6 +246,6 @@ def cprint(text, to_print_time=True):
     """Prints and timestamps the text"""
     text = str(text)  # Be sure that text is a string.
     if to_print_time:
-        print(f'{get_current_time()}{text}')
+        print(f'{strip_ansi_characters(get_current_time())}{text}')
     elif not to_print_time:
         print(f'{text}')
