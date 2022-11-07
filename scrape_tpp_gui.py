@@ -291,7 +291,7 @@ class PageReader:
         """
         Iterates div from the soup and scrapes the data
 
-        :param div: The div object from soup
+        :param div: The div object from the soup
         :return: None
         """
         temp_list = []
@@ -325,11 +325,11 @@ class PageReader:
 
     def iterate_div_for_anaskopisi(self, div: Any):
         """
-                Iterates div from the soup and scrapes the data for tpp.tv
+        Iterates div from the soup and scrapes the data for tpp.tv
 
-                :param div: The div object from soup
-                :return: None
-                """
+        :param div: The div object from soup
+        :return: None
+        """
         temp_list = []  # Contains the
         title = ""
         link = ""
@@ -340,14 +340,14 @@ class PageReader:
             for b in a.find_all('a', href=True):
                 # <a href="https://thepressproject.gr/anaskopisi-s08e32-katataxi-eleftherias-tou-typou/">ΑΝΑΣΚΟΠΗΣΗ S08E32: ΚΑΤΑΤΑΞΗ ΕΛΕΥΘΕΡΙΑΣ ΤΟΥ ΤΥΠΟΥ</a>
                 link = b['href'].strip()
-                print(f"b: {b.text} {link}")
+                print(f"b: {b.text} {len(b.text)} {link} {len(link)}")
                 title = b.text  # .replace("ΑΝΑΣΚΟΠΗΣΗ ", "").strip()
                 temp_list.append(title)
                 temp_list.append(link)
         for date_div in div.find_all('div', class_='art-meta'):
             # We do not need to search the span class. The only text of the date_div is the span's text.
             date = date_div.text.strip()
-            print(f"date lenght: {len(date)}")
+            print(f"date length: {len(date)}")
             temp_list.append(date)
         for text_div in div.find_all('div', class_='art-content'):
             text_summary = text_div.text
@@ -837,12 +837,14 @@ class FirstPage:
                 feed = PageReader(url=self.url, header=headers())
             title_list = [font.measure(d[0]) for d in FirstPage.values]
             date_list = [font.measure(d[2]) for d in FirstPage.values]
+            print(f"date_list: {date_list}")
             self.tree.column(column='Title', minwidth=100, width=max(title_list), stretch=True)
             if self.name == 'tpp.tv': # TODO: fix the width of Date for this category
-                self.tree.column(column='Date', width=100, stretch=True) # , minwidth=100
+                self.tree.column(column='Date', minwidth=150, width=max(date_list)+20, stretch=False)  # , minwidth=100
+                print("tpp.tv")
             else:
                 self.tree.column(column='Date', minwidth=150, width=max(date_list), stretch=True)
-            print(f"max legnth of date: {max(date_list)}")
+            print(f"max length of date: {max(date_list)}")
             print(max(title_list))
             for number, tuple_feed in enumerate(FirstPage.values):
                 self.tree.insert("", tk.END, iid=str(number),
