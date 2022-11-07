@@ -268,7 +268,8 @@ class PageReader:
         """
         with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:  # 12->3.3sec
             # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
-            if self.category == 'anaskopisi':
+            if self.category in ('Anaskopisi', 'anaskopisi'):
+                print(f"PageReader>scrape_the_soup>{self.category}")
                 for div in self.soup.find_all('div', class_='m-item grid-item col-md-6'):
                     try:
                         executor.submit(self.iterate_div_for_anaskopisi, div)
@@ -831,17 +832,17 @@ class FirstPage:
             print(f'Error in deleting the Tree: {err}')
             trace_error()
         try:
-            if self.name == 'tpp.tv':  # For the category "anaskopisi"
-                feed = PageReader(url=self.url, header=headers(), category='anaskopisi')
+            if self.name.lower() == 'anaskopisi':  # For the category "anaskopisi"
+                feed = PageReader(url=self.url, header=headers(), category=self.name.lower())
             else:
                 feed = PageReader(url=self.url, header=headers())
             title_list = [font.measure(d[0]) for d in FirstPage.values]
             date_list = [font.measure(d[2]) for d in FirstPage.values]
             print(f"date_list: {date_list}")
             self.tree.column(column='Title', minwidth=100, width=max(title_list), stretch=True)
-            if self.name == 'tpp.tv': # TODO: fix the width of Date for this category
+            if self.name == 'anaskopisi':  # TODO: fix the width of Date for this category
                 self.tree.column(column='Date', minwidth=150, width=max(date_list)+20, stretch=False)  # , minwidth=100
-                print("tpp.tv")
+                print("anaskopisi")
             else:
                 self.tree.column(column='Date', minwidth=150, width=max(date_list), stretch=True)
             print(f"max length of date: {max(date_list)}")
@@ -922,13 +923,14 @@ class FirstPage:
             except Exception:
                 trace_error()
 
-    def insert_news_from_page(self, url):
+    def insert_news_from_page(self, url, category=None):
         """
         Inserts the news from the url to the notebook tab sorted based on the Date.
         :param url: The url to scrape
+        :param category: The category to be scraped.
         """
         FirstPage.values.clear()  # Clear the temporary list
-        PageReader(url=url, header=headers())
+        PageReader(url=url, header=headers(), category=category)
         for number, tuple_feed in enumerate(FirstPage.values):
             self.tree.insert("", tk.END,
                              values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
@@ -973,7 +975,10 @@ class App:
         self.notebook_pages(url=list(url_list.values())[3][0], note=self.note, controller=self, name='International')
         self.notebook_pages(url=list(url_list.values())[4][0], note=self.note, controller=self, name='Reportage')
         self.notebook_pages(url=list(url_list.values())[5][0], note=self.note, controller=self, name='Analysis')
-        self.notebook_pages(url='https://thepressproject.gr/tv_show/anaskopisi/', note=self.note, controller=self, name='tpp.tv')
+        self.notebook_pages(url='https://thepressproject.gr/article_type/tv/', note=self.note, controller=self,
+                            name='tpp.tv')
+        self.notebook_pages(url='https://thepressproject.gr/tv_show/anaskopisi/', note=self.note, controller=self,
+                            name='Anaskopisi')
         self.top_label = ttk.Label(self.root, text='The Press Project', cursor='hand2', font='Arial 20')
         self.top_label.pack(side='top', pady=15)
         self.top_label.bind("<Button-1>", lambda e: callback(App.base_url))
@@ -1067,9 +1072,14 @@ class App:
         :return: None
         """
         App.treeview_tab_page_counter[name] += 1  # Add 1 to the default counter
-        url_to_scrape = str(url_list_base_page[name]) + str(App.treeview_tab_page_counter[name])
-        print(f"News will be added to the category {name} from url: {url_to_scrape}")
-        App.page_dict[name].insert_news_from_page(url=url_to_scrape)
+        if name not in ('Anaskopisi', 'anaskopisi'):
+            url_to_scrape = str(url_list_base_page[name]) + str(App.treeview_tab_page_counter[name])
+        else:
+            multiplier = (App.treeview_tab_page_counter[name] - 1) * 20  # The second page needs n=20
+            url_to_scrape = str(url_list_base_page[name]) + str(App.treeview_tab_page_counter[name] * multiplier)
+        print(f"News [counter {App.treeview_tab_page_counter[name]}] will be added to the category {name} "
+              f"from url: {url_to_scrape}")
+        App.page_dict[name].insert_news_from_page(url=url_to_scrape, category=name)
 
     def call_renew_feed(self):
         """Recalls the site and renew the treeview for all tabs"""
