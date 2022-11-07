@@ -980,12 +980,14 @@ class App:
         self.notebook_pages(url=list(url_list.values())[5][0], note=self.note, controller=self, name='Analysis')
         self.notebook_pages(url='https://thepressproject.gr/article_type/tv/', note=self.note, controller=self,
                             name='tpp.tv')
+        self.notebook_pages(url='https://thepressproject.gr/article_type/radio', note=self.note, controller=self,
+                            name='tpp.radio')
         self.notebook_pages(url='https://thepressproject.gr/tv_show/anaskopisi/', note=self.note, controller=self,
                             name='Anaskopisi')
         self.top_label = ttk.Label(self.root, text='The Press Project', cursor='hand2', font='Arial 20')
         self.top_label.pack(side='top', pady=15)
         self.top_label.bind("<Button-1>", lambda e: callback(App.base_url))
-        tktooltip.ToolTip(self.top_label, msg='Click to open ThePressProject site in the browser', delay=0.75)
+        tktooltip.ToolTip(self.top_label, msg='Click to open ThePressProject site in the browser', delay=0.5)
         # Main menu
         self.main_menu = Menu(self.root, font='Arial 16',
                               tearoff=0)  # Tearoff has to be 0, so as the command to start being posted in position 0.
