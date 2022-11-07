@@ -989,6 +989,8 @@ class App:
         self.top_label.pack(side='top', pady=15)
         self.top_label.bind("<Button-1>", lambda e: callback(App.base_url))
         tktooltip.ToolTip(self.top_label, msg='Click to open ThePressProject site in the browser', delay=0.5)
+        self.empty_label_between_top_and_notebook = ttk.Label(self.root, text=" ", font='Arial 16')
+        self.empty_label_between_top_and_notebook.pack(side='top')
         # Main menu
         self.main_menu = Menu(self.root, font='Arial 16',
                               tearoff=0)  # Tearoff has to be 0, so as the command to start being posted in position 0.
