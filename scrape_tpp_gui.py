@@ -1026,6 +1026,12 @@ class App:
                                         command=lambda: self.insert_news_for_a_particular_tab(name='Reportage'))
         self.load_more_news.add_command(label='Analysis', font='Arial 10',
                                         command=lambda: self.insert_news_for_a_particular_tab(name='Analysis'))
+        self.load_more_news.add_command(label='tpp.tv', font='Arial 10',
+                                        command=lambda: self.insert_news_for_a_particular_tab(name='tpp.tv'))
+        self.load_more_news.add_command(label='tpp.radio', font='Arial 10',
+                                        command=lambda: self.insert_news_for_a_particular_tab(name='tpp.radio'))
+        self.load_more_news.add_command(label='Anaskopisi', font='Arial 10',
+                                        command=lambda: self.insert_news_for_a_particular_tab(name='Anaskopisi'))
         # Add the self.load_more_news to self.context
         self.context.add_cascade(label='Load more news', menu=self.load_more_news, underline=0, font='Arial 10')
         # Add more commands
