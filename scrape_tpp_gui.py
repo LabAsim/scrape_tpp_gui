@@ -969,7 +969,7 @@ class App:
         root.geometry(f'{App.x}x{App.y}')
         self.root = root
         self.root.title('The Press Project news feed')
-        self.widgets()
+        self.time_widgets()
         self.note = ttk.Notebook(self.root)
         self.note.pack(side='bottom', fill='both', expand=True)
         # For just the 1st page of Newsroom: list(url_list.values())[0][0]
@@ -1099,7 +1099,7 @@ class App:
         for dictio in App.page_dict.values():
             dictio.renew_feed()
         self.f_time.destroy()
-        self.widgets()
+        self.time_widgets()
         print(f'App>call_renew_feed()')
 
     def call_renew_feed_bypass(self):
@@ -1111,10 +1111,14 @@ class App:
         for dictio in App.page_dict.values():
             dictio.renew_feed_bypass()
         self.f_time.destroy()
-        self.widgets()
+        self.time_widgets()
         print(f'Notebooks renewed')
 
-    def widgets(self):
+    def time_widgets(self):
+        """
+        Constructs the time widget at upper left of the window.
+        :return:
+        """
         # Time frame
         time_now = datetime.now()
         dt = str(time_now.strftime("%d-%m-%Y, %H:%M:%S"))
