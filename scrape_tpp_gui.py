@@ -844,7 +844,8 @@ class FirstPage:
             date_list = [font.measure(d[2]) for d in FirstPage.values]
             print(f"date_list: {date_list}")
             self.tree.column(column='Title', minwidth=100, width=max(title_list), stretch=True)
-            if self.name.lower() == 'anaskopisi':  # If stretch is True, it does not have the proper width
+            if self.name.lower() in ('anaskopisi', 'tpp.radio'):
+                # If stretch is True, it does not have the proper width
                 self.tree.column(column='Date', minwidth=150, width=max(date_list)+30, stretch=False)
             else:
                 self.tree.column(column='Date', minwidth=150, width=max(date_list), stretch=True)
