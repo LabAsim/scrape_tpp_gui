@@ -1077,9 +1077,9 @@ class App:
         App.treeview_tab_page_counter[name] += 1  # Add 1 to the default counter
         if name not in ('Anaskopisi', 'anaskopisi'):
             url_to_scrape = str(url_list_base_page[name]) + str(App.treeview_tab_page_counter[name])
-        else:
-            multiplier = (App.treeview_tab_page_counter[name] - 1) * 20  # The second page needs n=20
-            url_to_scrape = str(url_list_base_page[name]) + str(App.treeview_tab_page_counter[name] * multiplier)
+        else:  # name == Anaskopisi
+            suffix = (App.treeview_tab_page_counter[name] - 1) * 20  # The second page needs n=20
+            url_to_scrape = str(url_list_base_page[name]) + str(suffix)
         print(f"News [counter {App.treeview_tab_page_counter[name]}] will be added to the category {name} "
               f"from url: {url_to_scrape}")
         App.page_dict[name].insert_news_from_page(url=url_to_scrape, category=name)
