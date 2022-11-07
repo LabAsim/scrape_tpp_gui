@@ -823,6 +823,10 @@ class FirstPage:
         self.tree.pack(expand=True, fill='both')
 
     def fill_the_tree(self):
+        """
+        Clears the treeview and then calls PageReader and fills the tree using FirstPage.values (Title, Date).
+        It sorts the news based on Date (firstly, converts the date to unix timestamps).
+        """
         # Clear the treeview
         try:
             for item in self.tree.get_children():
