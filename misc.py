@@ -19,7 +19,8 @@ url_list_base_page = {"Newsroom": "https://thepressproject.gr/article_type/newsr
                       "International": "https://thepressproject.gr/category/international/page/",
                       "Reportage": "https://thepressproject.gr/article_type/report/page/",
                       "Analysis": "https://thepressproject.gr/article_type/analysis/page/",
-                      "tpp.tv": "https://thepressproject.gr/article_type/tv/page/"}
+                      "tpp.tv": "https://thepressproject.gr/article_type/tv/page/",
+                      "Anaskopisi": "https://thepressproject.gr/tv_show/anaskopisi/?n="}
 
 dir_path = os.path.dirname(os.path.realpath(__file__))  # As a one-file executable, this path is a temporary folder.
 
