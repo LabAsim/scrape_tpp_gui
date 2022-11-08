@@ -339,7 +339,8 @@ class PageReader:
         for a in div.find_all('h3'):
             # print(f'a: {a.text}')
             for b in a.find_all('a', href=True):
-                # <a href="https://thepressproject.gr/anaskopisi-s08e32-katataxi-eleftherias-tou-typou/">ΑΝΑΣΚΟΠΗΣΗ S08E32: ΚΑΤΑΤΑΞΗ ΕΛΕΥΘΕΡΙΑΣ ΤΟΥ ΤΥΠΟΥ</a>
+                # <a href="https://thepressproject.gr/anaskopisi-s08e32-katataxi-eleftherias-tou-typou/">
+                # ΑΝΑΣΚΟΠΗΣΗ S08E32: ΚΑΤΑΤΑΞΗ ΕΛΕΥΘΕΡΙΑΣ ΤΟΥ ΤΥΠΟΥ</a>
                 link = b['href'].strip()
                 print(f"b: {b.text} {len(b.text)} {link} {len(link)}")
                 title = b.text  # .replace("ΑΝΑΣΚΟΠΗΣΗ ", "").strip()
@@ -979,12 +980,10 @@ class App:
         self.notebook_pages(url=list(url_list.values())[3][0], note=self.note, controller=self, name='International')
         self.notebook_pages(url=list(url_list.values())[4][0], note=self.note, controller=self, name='Reportage')
         self.notebook_pages(url=list(url_list.values())[5][0], note=self.note, controller=self, name='Analysis')
-        self.notebook_pages(url='https://thepressproject.gr/article_type/tv/', note=self.note, controller=self,
-                            name='tpp.tv')
-        self.notebook_pages(url='https://thepressproject.gr/article_type/radio', note=self.note, controller=self,
-                            name='tpp.radio')
-        self.notebook_pages(url='https://thepressproject.gr/tv_show/anaskopisi/', note=self.note, controller=self,
-                            name='Anaskopisi')
+        self.notebook_pages(url=list(url_list.values())[6][0], note=self.note, controller=self, name='tpp.tv')
+        self.notebook_pages(url=list(url_list.values())[7][0], note=self.note, controller=self, name='tpp.radio')
+        self.notebook_pages(url=list(url_list.values())[8][0], note=self.note, controller=self, name='Anaskopisi')
+        self.notebook_pages(url=list(url_list.values())[9][0], note=self.note, controller=self, name='Culture')
         self.top_label = ttk.Label(self.root, text='The Press Project', cursor='hand2', font='Arial 20')
         self.top_label.pack(side='top', pady=15)
         self.top_label.bind("<Button-1>", lambda e: callback(App.base_url))
