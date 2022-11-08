@@ -49,6 +49,17 @@ headers_list = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/101.0.4951.54 Safari/537.36 Edg/101.0.1210.39",
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36 Edg/102.0.1245.30"]
 
+def parse_arguments():
+    """
+    Parser for commandline arguments.
+    :return: my_parser.parse_args()
+    """
+    my_parser = argparse.ArgumentParser(add_help=True)
+    my_parser.add_argument('--debug', type=str2bool, action='store', const=True, nargs='?', required=False,
+                           default=False, help='If True, it does not load the news.')
+    my_parser.add_argument('--bypass', type=str2bool, action='store', required=False, default=False,
+                           help='If true, the first time it scrapes, it will use chromedriver')
+    return my_parser.parse_args()
 
 def close_tkinter(root):
     if messagebox.askokcancel(title="Quit", message="Do you want to quit?"):
