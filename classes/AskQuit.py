@@ -9,7 +9,7 @@ from misc import dir_path
 
 
 class AskQuit(tk.Toplevel):
-    x = 260
+    x = 240
     y = 110
 
     def __init__(self, parent):
