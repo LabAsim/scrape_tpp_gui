@@ -11,7 +11,11 @@ url_list = {"newsroom": ["https://thepressproject.gr/article_type/newsroom/",
             "report": ["https://thepressproject.gr/article_type/report/",
                        "https://thepressproject.gr/article_type/report/page/2/"],
             "analysis": ["https://thepressproject.gr/article_type/analysis/",
-                         "https://thepressproject.gr/article_type/analysis/page/2/"]}
+                         "https://thepressproject.gr/article_type/analysis/page/2/"],
+            "tpp.tv": ["https://thepressproject.gr/article_type/tv/"],
+            "tpp.radio": ["https://thepressproject.gr/article_type/radio"],
+            "anaskopisi": ["https://thepressproject.gr/tv_show/anaskopisi/"],
+            "culture": ["https://thepressproject.gr/category/culture/"]}
 
 url_list_base_page = {"Newsroom": "https://thepressproject.gr/article_type/newsroom/page/",
                       "Politics": "https://thepressproject.gr/category/politics/page/",
@@ -21,7 +25,8 @@ url_list_base_page = {"Newsroom": "https://thepressproject.gr/article_type/newsr
                       "Analysis": "https://thepressproject.gr/article_type/analysis/page/",
                       "tpp.tv": "https://thepressproject.gr/article_type/tv/page/",
                       "tpp.radio": "https://thepressproject.gr/article_type/radio/page/",
-                      "Anaskopisi": "https://thepressproject.gr/tv_show/anaskopisi/?n="}
+                      "Anaskopisi": "https://thepressproject.gr/tv_show/anaskopisi/?n=",
+                      "Culture": "https://thepressproject.gr/category/culture/page/"}
 
 dir_path = os.path.dirname(os.path.realpath(__file__))  # As a one-file executable, this path is a temporary folder.
 
