@@ -973,7 +973,7 @@ class App:
         self.time_widgets()
         self.note = ttk.Notebook(self.root)
         self.note.pack(side='bottom', fill='both', expand=True)
-        # For just the 1st page of Newsroom: list(url_list.values())[0][0]
+        # For the 1st page of Newsroom: list(url_list.values())[0][0]
         self.notebook_pages(url=list(url_list.values())[0][0], note=self.note, controller=self, name='Newsroom')
         self.notebook_pages(url=list(url_list.values())[1][0], note=self.note, controller=self, name='Politics')
         self.notebook_pages(url=list(url_list.values())[2][0], note=self.note, controller=self, name='Economy')
