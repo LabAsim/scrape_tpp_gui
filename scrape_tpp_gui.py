@@ -266,7 +266,7 @@ class PageReader:
         Scrapes the soup
         :return: None
         """
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:  # 12->3.3sec
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
             # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
             if self.category in ('Anaskopisi', 'anaskopisi'):
                 print(f"PageReader>scrape_the_soup>{self.category}")
