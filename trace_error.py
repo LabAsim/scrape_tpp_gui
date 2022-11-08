@@ -32,6 +32,7 @@ def trace_error(to_print_error=True):
         else:
             with open(error_filepath, 'w+', encoding='utf-8') as file:
                 file.write(f"{strip_ansi_characters(get_current_time())}{line}\n")  # Add \n in the end to format nicely
+    print(f"Errors saved in {error_filepath}")
 
 
 if __name__ == "__main__":
