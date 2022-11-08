@@ -53,6 +53,7 @@ class SubPageReader:
         self.scrape_the_main_article_content()
 
     def connect_to_url(self):
+        """Connects to self.url"""
         print(f"URL >>>>>>>>>>>>>>>>> {self.url}")
         try:
             if not debug:
@@ -63,6 +64,9 @@ class SubPageReader:
             trace_error()
 
     def soup_the_request(self):
+        """
+        Makes a soup from self.r.text
+        """
         try:
             if not debug:
                 self.soup = BeautifulSoup(self.r.text, "html.parser")
