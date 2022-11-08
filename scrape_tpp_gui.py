@@ -593,6 +593,7 @@ class PageReaderBypass:
         except Exception as err:
             print(f'Error fetching the URL: {self.url}'
                   f'\nError: {err}')
+            trace_error()
 
     def soup_the_page_source(self):
         """
@@ -612,7 +613,7 @@ class PageReaderBypass:
         :return: None
         """
         # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
-        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+        '''with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
             # For some reason, chromedriver scrapes only with 1 worker. It also does not scrape without executor at all.
             for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
                 try:
@@ -622,7 +623,15 @@ class PageReaderBypass:
                     print(f'SubPageReader Error: {err}')
                     trace_error()
             if debug:
-                print(FirstPage.values)
+                print(FirstPage.values)'''
+        for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
+            try:
+                self.iterate_div(div)
+            except Exception as err:
+                print(f'SubPageReader Error: {err}')
+                trace_error()
+        if debug:
+            print(FirstPage.values)
 
     def iterate_div(self, div):
         """
@@ -887,15 +896,15 @@ class FirstPage:
         except Exception as err:
             print(f'Error in deleting the Tree: {err}')
         try:
+            # TODO: pass to webdriver all the urls simultaneously and open the urls in separate tabs to scrape faster
             if self.name == "Newsroom":
                 options = uc.ChromeOptions()
                 # options.add_argument("--headless")
                 # options.add_argument("start-minimized")
                 # options.add_argument("--lang=en-US")
-
                 driver = uc.Chrome(use_subprocess=True, options=options)
                 FirstPage.driver = driver
-                driver.set_window_position(-1000, 0)  # Set Chrome off screen
+                driver.set_window_position(-1000, 0)  # Set Chrome off-screen
             else:
                 driver = FirstPage.driver
             feed = PageReaderBypass(url=self.url, name=self.name, driver=driver)
@@ -914,13 +923,15 @@ class FirstPage:
             # Move the sorted dates
             for index, (values, item) in enumerate(rows):
                 self.tree.move(item, '', index)
-            if self.name == 'Analysis':  # After the last page ("Analysis"), close the chromedriver
+            if self.name == 'Culture':  # After the last page ("Analysis"), close the chromedriver
                 # list(App.page_dict.keys())[-1]:
                 driver.close()
                 driver.quit()
-                print(f"FirstPage>fill_the_tree_bypass> {driver} closed")
+                print(f"FirstPage>fill_the_tree_bypass> {driver} closed (self.name: {self.name})")
             if debug:
                 print(f'Treeview was filled {FirstPage.values}')
+        except ValueError:  # Raised from max() in self.tree.column (empty list)
+            trace_error()
         except Exception as err:
             print(f'Loading failed! Error: {err}')
             trace_error()
