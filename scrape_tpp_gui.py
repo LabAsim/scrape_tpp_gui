@@ -15,7 +15,7 @@ import undetected_chromedriver as uc  # pip install undetected-chromedriver
 import sv_ttk
 import concurrent.futures
 from helper_functions import file_exists, center, callback, headers, str2bool, tkinter_theme_calling, \
-    sortby, date_to_unix
+    sortby, date_to_unix, parse_arguments
 from misc import url_list,  url_list_base_page, dir_path
 from trace_error import trace_error
 from classes.NewsDataclass import NewsDataclass
@@ -1391,14 +1391,8 @@ class App:
 
 
 if __name__ == "__main__":
-    my_parser = argparse.ArgumentParser(add_help=True)
-    my_parser.add_argument('--debug', type=str2bool, action='store', const=True, nargs='?', required=False,
-                           default=False, help='If True, it does not load the news.')
-    my_parser.add_argument('--bypass', type=str2bool, action='store', required=False, default=False,
-                           help='If true, the first time it scrapes, it will use chromedriver')
-    args = my_parser.parse_args()
-    debug = args.debug
-    bypass = args.bypass
+    args = parse_arguments()
+    debug, bypass = args.debug, args.bypass
     start = time.perf_counter()
     root = tk.Tk()  # First window
     style = ttk.Style(root)
