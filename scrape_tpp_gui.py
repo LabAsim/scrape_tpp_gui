@@ -897,6 +897,7 @@ class FirstPage:
             print(f'Error in deleting the Tree: {err}')
         try:
             # TODO: pass to webdriver all the urls simultaneously and open the urls in separate tabs to scrape faster
+            # https://www.geeksforgeeks.org/python-opening-multiple-tabs-using-selenium/
             if self.name == "Newsroom":
                 options = uc.ChromeOptions()
                 # options.add_argument("--headless")
@@ -923,7 +924,7 @@ class FirstPage:
             # Move the sorted dates
             for index, (values, item) in enumerate(rows):
                 self.tree.move(item, '', index)
-            if self.name == 'Culture':  # After the last page ("Analysis"), close the chromedriver
+            if self.name == 'Culture':  # After the last page ("Culture"), close the chromedriver
                 # list(App.page_dict.keys())[-1]:
                 driver.close()
                 driver.quit()
@@ -936,7 +937,7 @@ class FirstPage:
             print(f'Loading failed! Error: {err}')
             trace_error()
             try:
-                # After the last page ("Analysis"), close the chromedriver
+                # After the last page ("Culture"), close the chromedriver
                 driver.close()
                 driver.quit()
                 print(f"FirstPage>fill_the_tree_bypass> {driver} closed")
@@ -979,6 +980,7 @@ class App:
         self.theme_menu = None
         self.edit_menu = None
         self.load_more_news = None
+        self.load_more_news_bypass = None
         self.context = None
         self.f_time = None
         self.time = None
@@ -1048,8 +1050,12 @@ class App:
                                         command=lambda: self.insert_news_for_a_particular_tab(name='tpp.radio'))
         self.load_more_news.add_command(label='Anaskopisi', font='Arial 10',
                                         command=lambda: self.insert_news_for_a_particular_tab(name='Anaskopisi'))
+        # "Load more news (bypass)" Menu. It's a submenu of self.context
+        self.load_more_news_bypass = Menu(self.context, font='Arial 10', tearoff=0)  # TODO: finish this menu
         # Add the self.load_more_news to self.context
         self.context.add_cascade(label='Load more news', menu=self.load_more_news, underline=0, font='Arial 10')
+        self.context.add_cascade(label='Load more news (bypass)', menu=self.load_more_news_bypass, underline=0,
+                                 font='Arial 10')
         # Add more commands
         self.context.add_command(label='Renew titles', font='Arial 10', command=self.call_renew_feed)
         self.context.add_command(label='Renew titles (bypass)', font='Arial 10', command=self.call_renew_feed_bypass)
