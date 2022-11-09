@@ -260,3 +260,22 @@ def cprint(text, to_print_time=True):
         print(f'{strip_ansi_characters(get_current_time())}{text}')
     elif not to_print_time:
         print(f'{text}')
+
+
+def is_driver_open(driver) -> bool:
+    """
+    Checks if the webdriver is still open by checking the logs.
+    https://stackoverflow.com/a/52000037
+    :param driver: The webdriver
+    :return: Boolean
+    """
+    disconnected_msg = 'Unable to evaluate script: disconnected: not connected to DevTools\n'
+    log = driver.get_log('driver')
+    if driver:
+        if len(log) != 0:  # This does not catch all other messages.
+            if log[-1]['message'] == disconnected_msg:
+                return True
+            else:
+                return False
+        else:  # No errors, return True.
+            return True
