@@ -204,8 +204,6 @@ class PageReader:
     Firstpage.values, FirstPage.news_to_open_in_browser and FirstPage.news_total.
     """
 
-    # page_values = []
-
     def __init__(self, url, header, category=None):
         self.news_dict = None
         self.temp_list = None
