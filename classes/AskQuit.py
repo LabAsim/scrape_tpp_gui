@@ -12,9 +12,10 @@ class AskQuit(tk.Toplevel):
     x = 240
     y = 110
 
-    def __init__(self, parent):
+    def __init__(self, parent, driver=None):
         super().__init__()
         # self.root = root
+        self.driver = driver
         self.geometry(f'{AskQuit.x}x{AskQuit.y}')  # Here, self is tkinter.Toplevel
         self.parent = parent
         self.grab_set()
@@ -50,6 +51,9 @@ class AskQuit(tk.Toplevel):
         if widget is not None:
             if widget is tk.Tk:
                 print(f'AskQuit>toplevel_quit: Root is now exiting')
+                if self.driver is not None:  # Do not forget to close webdriver
+                    self.driver.close()
+                    self.driver.quit()
                 sys.exit()
             else:
                 self.destroy()
