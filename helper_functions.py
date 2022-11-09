@@ -270,8 +270,8 @@ def is_driver_open(driver) -> bool:
     :return: Boolean
     """
     disconnected_msg = 'Unable to evaluate script: disconnected: not connected to DevTools\n'
-    log = driver.get_log('driver')
     if driver:
+        log = driver.get_log('driver')
         if len(log) != 0:  # This does not catch all other messages.
             if log[-1]['message'] == disconnected_msg:
                 return True
