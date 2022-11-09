@@ -1104,12 +1104,13 @@ class App:
                                                command=lambda: self.insert_news_for_a_particular_tab(name='Culture',
                                                                                                      bypass=True))
         # Add the self.load_more_news to self.context
+        self.context.add_command(label='Renew titles', font='Arial 10', command=self.call_renew_feed)
         self.context.add_cascade(label='Load more news', menu=self.load_more_news, underline=0, font='Arial 10')
+        # Add more commands
+        self.context.add_separator()
+        self.context.add_command(label='Renew titles (bypass)', font='Arial 10', command=self.call_renew_feed_bypass)
         self.context.add_cascade(label='Load more news (bypass)', menu=self.load_more_news_bypass, underline=0,
                                  font='Arial 10')
-        # Add more commands
-        self.context.add_command(label='Renew titles', font='Arial 10', command=self.call_renew_feed)
-        self.context.add_command(label='Renew titles (bypass)', font='Arial 10', command=self.call_renew_feed_bypass)
         self.context.add_separator()
         self.context.add_command(label='Exit', font='Arial 10', command=self.exit_the_program)
         # Add the cascade here. The submenu has to be built first and then be added to the main menu
