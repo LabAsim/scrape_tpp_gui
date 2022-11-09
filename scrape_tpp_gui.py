@@ -711,6 +711,9 @@ class FirstPage:
         self.right_click_menu.add_command(label='Open article in browser', command=self.open_article_link)
         self.right_click_menu.add_command(label='Load more news',
                                           command=lambda: App.insert_news_for_a_particular_tab(self.name))
+        self.right_click_menu.add_command(label='Load more news (bypass)',
+                                          command=lambda: App.insert_news_for_a_particular_tab(self.name,
+                                                                                               bypass=True))
         self.tree.bind('<ButtonRelease-3>', self.post_menu)
         # Bind left double click to post the menu
         self.tree.bind("<Double-1>", self.show_main_article)
@@ -1069,7 +1072,7 @@ class App:
                                         command=lambda: self.insert_news_for_a_particular_tab(name='tpp.radio'))
         self.load_more_news.add_command(label='Anaskopisi', font='Arial 10',
                                         command=lambda: self.insert_news_for_a_particular_tab(name='Anaskopisi'))
-        self.load_more_news.add_command(label='Anaskopisi', font='Arial 10',
+        self.load_more_news.add_command(label='Culture', font='Arial 10',
                                         command=lambda: self.insert_news_for_a_particular_tab(name='Culture'))
         # "Load more news (bypass)" Menu. It's a submenu of self.context
         self.load_more_news_bypass = Menu(self.context, font='Arial 10', tearoff=0)
@@ -1100,7 +1103,7 @@ class App:
         self.load_more_news_bypass.add_command(label='Anaskopisi', font='Arial 10',
                                                command=lambda: self.insert_news_for_a_particular_tab(name='Anaskopisi',
                                                                                                      bypass=True))
-        self.load_more_news_bypass.add_command(label='Anaskopisi', font='Arial 10',
+        self.load_more_news_bypass.add_command(label='Culture', font='Arial 10',
                                                command=lambda: self.insert_news_for_a_particular_tab(name='Culture',
                                                                                                      bypass=True))
         # Add the self.load_more_news to self.context
