@@ -9,13 +9,14 @@ from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 from typing import Any
 import requests
+import selenium
 from bs4 import BeautifulSoup
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
 import undetected_chromedriver as uc  # pip install undetected-chromedriver
 import sv_ttk
 import concurrent.futures
 from helper_functions import file_exists, center, callback, headers, str2bool, tkinter_theme_calling, \
-    sortby, date_to_unix, parse_arguments
+    sortby, date_to_unix, parse_arguments, is_driver_open
 from misc import url_list, url_list_base_page, dir_path
 from trace_error import trace_error
 from classes.NewsDataclass import NewsDataclass
@@ -346,14 +347,14 @@ class PageReader:
                 # <a href="https://thepressproject.gr/anaskopisi-s08e32-katataxi-eleftherias-tou-typou/">
                 # ΑΝΑΣΚΟΠΗΣΗ S08E32: ΚΑΤΑΤΑΞΗ ΕΛΕΥΘΕΡΙΑΣ ΤΟΥ ΤΥΠΟΥ</a>
                 link = b['href'].strip()
-                print(f"b: {b.text} {len(b.text)} {link} {len(link)}")
+                #print(f"b: {b.text} {len(b.text)} {link} {len(link)}")
                 title = b.text  # .replace("ΑΝΑΣΚΟΠΗΣΗ ", "").strip()
                 temp_list.append(title)
                 temp_list.append(link)
         for date_div in div.find_all('div', class_='art-meta'):
             # We do not need to search the span class. The only text of the date_div is the span's text.
             date = date_div.text.strip()
-            print(f"date length: {len(date)}")
+            #print(f"date length: {len(date)}")
             temp_list.append(date)
         for text_div in div.find_all('div', class_='art-content'):
             text_summary = text_div.text
@@ -555,13 +556,14 @@ class PageReaderBypass:
     """
     page_values = []
 
-    def __init__(self, url, name, driver):
+    def __init__(self, url, name, driver, category=None):
         self.news_dict = None
         self.temp_list = None
         self.r = None
         self.name = name
         self.url = url
         self.driver = driver  # driver passed from FirstPage
+        self.category = category
         self.soup = None
         self.check_url_and_iterate(self.url)
 
@@ -630,12 +632,20 @@ class PageReaderBypass:
                     trace_error()
             if debug:
                 print(FirstPage.values)'''
-        for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
-            try:
-                self.iterate_div(div)
-            except Exception as err:
-                print(f'SubPageReader Error: {err}')
-                trace_error()
+        if self.category in ('Anaskopisi', 'anaskopisi'):
+            for div in self.soup.find_all('div', class_='m-item grid-item col-md-6'):
+                try:
+                    self.iterate_div_for_anaskopisi(div)
+                except Exception as err:
+                    print(f'SubPageReader Error: {err}')
+                    trace_error()
+        else:
+            for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
+                try:
+                    self.iterate_div(div)
+                except Exception as err:
+                    print(f'SubPageReader Error: {err}')
+                    trace_error()
         if debug:
             print(FirstPage.values)
 
@@ -673,6 +683,40 @@ class PageReaderBypass:
         FirstPage.values.append(temp_list)
         FirstPage.news_to_open_in_browser.append(temp_list)
         FirstPage.news_total.append(NewsDataclass(url=link, title=title, date=date))
+
+    def iterate_div_for_anaskopisi(self, div: Any):
+        """
+        Iterates div from the soup and scrapes the data for tpp.tv
+
+        :param div: The div object from soup
+        :return: None
+        """
+        temp_list = []  # Contains the
+        title = ""
+        link = ""
+        date = ""
+        text_summary = ""
+        for a in div.find_all('h3'):
+            # print(f'a: {a.text}')
+            for b in a.find_all('a', href=True):
+                # <a href="https://thepressproject.gr/anaskopisi-s08e32-katataxi-eleftherias-tou-typou/">
+                # ΑΝΑΣΚΟΠΗΣΗ S08E32: ΚΑΤΑΤΑΞΗ ΕΛΕΥΘΕΡΙΑΣ ΤΟΥ ΤΥΠΟΥ</a>
+                link = b['href'].strip()
+                #print(f"b: {b.text} {len(b.text)} {link} {len(link)}")
+                title = b.text  # .replace("ΑΝΑΣΚΟΠΗΣΗ ", "").strip()
+                temp_list.append(title)
+                temp_list.append(link)
+        for date_div in div.find_all('div', class_='art-meta'):
+            # We do not need to search the span class. The only text of the date_div is the span's text.
+            date = date_div.text.strip()
+            #print(f"date length: {len(date)}")
+            temp_list.append(date)
+        for text_div in div.find_all('div', class_='art-content'):
+            text_summary = text_div.text
+        FirstPage.values.append(temp_list)
+        FirstPage.news_to_open_in_browser.append(temp_list)
+        FirstPage.news_total.append(NewsDataclass(url=link, title=title, date=date))
+        # print(temp_list)
 
 
 class FirstPage:
@@ -917,7 +961,17 @@ class FirstPage:
                 driver.implicitly_wait(6)
                 driver.set_window_position(-1000, 0)  # Set Chrome off-screen
             else:
-                driver = FirstPage.driver
+                if is_driver_open(FirstPage.driver):
+                    driver = FirstPage.driver
+                else:
+                    options = uc.ChromeOptions()
+                    # options.add_argument("--headless")
+                    # options.add_argument("start-minimized")
+                    # options.add_argument("--lang=en-US")
+                    driver = uc.Chrome(use_subprocess=True, options=options)
+                    FirstPage.driver = driver
+                    driver.implicitly_wait(6)
+                    driver.set_window_position(-1000, 0)  # Set Chrome off-screen
             feed = PageReaderBypass(url=self.url, name=self.name, driver=driver)
             title_list = [font.measure(d[0]) for d in FirstPage.values]
             date_list = [font.measure(d[2]) for d in FirstPage.values]
@@ -965,15 +1019,16 @@ class FirstPage:
         if not bypass:
             PageReader(url=url, header=headers(), category=category)
         else:  # Use webdriver
-            if FirstPage.driver is not None:
-                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name)
+            if is_driver_open(FirstPage.driver):
+                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, category=category)
             else:
+                print("FirstPage>insert_news_from_page>(Re)launching webdriver")
                 options = uc.ChromeOptions()
                 driver = uc.Chrome(use_subprocess=True, options=options)
                 FirstPage.driver = driver
                 driver.set_window_position(-1000, 0)  # Set Chrome off-screen
                 driver.implicitly_wait(6)
-                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name)
+                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, category=category)
         for number, tuple_feed in enumerate(FirstPage.values):
             self.tree.insert("", tk.END,
                              values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
