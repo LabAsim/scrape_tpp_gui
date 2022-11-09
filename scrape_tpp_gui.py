@@ -16,7 +16,7 @@ import sv_ttk
 import concurrent.futures
 from helper_functions import file_exists, center, callback, headers, str2bool, tkinter_theme_calling, \
     sortby, date_to_unix, parse_arguments
-from misc import url_list,  url_list_base_page, dir_path
+from misc import url_list, url_list_base_page, dir_path
 from trace_error import trace_error
 from classes.NewsDataclass import NewsDataclass
 from classes.ToplevelAbout import ToplevelAbout
@@ -395,17 +395,25 @@ class SubPageReaderBypass:
         """
         print(f"SubPageReaderBypass>URL >>>>> {self.url}")
         try:
-            self.options = uc.ChromeOptions()
-            # options.add_argument("--headless")
-            # options.add_argument("start-minimized")
-            self.options.add_argument("--lang=en-US")
-            self.driver = uc.Chrome(use_subprocess=True, options=self.options)
-            self.driver.set_window_position(-1000, 0)  # Set Chrome off-screen
-            self.driver.get(self.url)
-            time.sleep(3.5)
-            self.r = self.driver.page_source
-            self.driver.close()
-            self.driver.quit()
+            if FirstPage.driver is None:
+                self.options = uc.ChromeOptions()
+                # options.add_argument("--headless")
+                # options.add_argument("start-minimized")
+                self.options.add_argument("--lang=en-US")
+                self.driver = uc.Chrome(use_subprocess=True, options=self.options)
+                self.driver.set_window_position(-1000, 0)  # Set Chrome off-screen
+                self.driver.get(self.url)
+                time.sleep(3.5)
+                self.r = self.driver.page_source
+                self.driver.close()
+                self.driver.quit()
+            else:
+                self.driver = FirstPage.driver
+                self.driver.get(self.url)
+                time.sleep(0.75)
+                self.r = self.driver.page_source
+                self.driver.close()
+                self.driver.quit()
         except Exception as err:
             print(f'Error fetching the URL: {self.url}\n\tError: {err}')
 
@@ -539,17 +547,15 @@ class SubPageReaderBypass:
 class PageReaderBypass:
     """
     Reads the html from the main category (Newsroom etc.) url and stores the title, link and date to a Dataclass in
-    FirstPage.news_total
+    FirstPage.news_total and in Firstpage.values.
+
+    :param url: The url to scrape
+    :param name: The name of the category
+    :param driver: The webdriver object
     """
     page_values = []
 
     def __init__(self, url, name, driver):
-        """
-        
-        :param url:
-        :param name:
-        :param driver:
-        """
         self.news_dict = None
         self.temp_list = None
         self.r = None
@@ -677,7 +683,7 @@ class FirstPage:
     values = []  # A temporary list containing lists for each news-link in the form of [title-string, url, date]
     news_to_open_in_browser = []  # Contains all the scraped news in the form of [title-string, url, date]
     news_total = []  # Contains all the dataclasses
-    driver = ""  # The Chromedriver
+    driver = None  # The Chromedriver
 
     def __init__(self, note, name, controller, url, to_bypass):
         self.note = note
@@ -860,7 +866,7 @@ class FirstPage:
             self.tree.column(column='Title', minwidth=100, width=max(title_list), stretch=True)
             if self.name.lower() in ('anaskopisi', 'tpp.radio'):
                 # If stretch is True, it does not have the proper width
-                self.tree.column(column='Date', minwidth=150, width=max(date_list)+30, stretch=False)
+                self.tree.column(column='Date', minwidth=150, width=max(date_list) + 30, stretch=False)
             else:
                 self.tree.column(column='Date', minwidth=150, width=max(date_list), stretch=True)
             print(f"max length of date: {max(date_list)}")
@@ -905,6 +911,7 @@ class FirstPage:
                 # options.add_argument("--lang=en-US")
                 driver = uc.Chrome(use_subprocess=True, options=options)
                 FirstPage.driver = driver
+                driver.implicitly_wait(6)
                 driver.set_window_position(-1000, 0)  # Set Chrome off-screen
             else:
                 driver = FirstPage.driver
@@ -944,14 +951,26 @@ class FirstPage:
             except Exception:
                 trace_error()
 
-    def insert_news_from_page(self, url, category=None):
+    def insert_news_from_page(self, url, category=None, bypass=False):
         """
         Inserts the news from the url to the notebook tab sorted based on the Date.
+        :param bypass: To use webdriver or not.
         :param url: The url to scrape
         :param category: The category to be scraped.
         """
         FirstPage.values.clear()  # Clear the temporary list
-        PageReader(url=url, header=headers(), category=category)
+        if not bypass:
+            PageReader(url=url, header=headers(), category=category)
+        else:  # Use webdriver
+            if FirstPage.driver is not None:
+                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name)
+            else:
+                options = uc.ChromeOptions()
+                driver = uc.Chrome(use_subprocess=True, options=options)
+                FirstPage.driver = driver
+                driver.set_window_position(-1000, 0)  # Set Chrome off-screen
+                driver.implicitly_wait(6)
+                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name)
         for number, tuple_feed in enumerate(FirstPage.values):
             self.tree.insert("", tk.END,
                              values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
@@ -1050,8 +1069,40 @@ class App:
                                         command=lambda: self.insert_news_for_a_particular_tab(name='tpp.radio'))
         self.load_more_news.add_command(label='Anaskopisi', font='Arial 10',
                                         command=lambda: self.insert_news_for_a_particular_tab(name='Anaskopisi'))
+        self.load_more_news.add_command(label='Anaskopisi', font='Arial 10',
+                                        command=lambda: self.insert_news_for_a_particular_tab(name='Culture'))
         # "Load more news (bypass)" Menu. It's a submenu of self.context
-        self.load_more_news_bypass = Menu(self.context, font='Arial 10', tearoff=0)  # TODO: finish this menu
+        self.load_more_news_bypass = Menu(self.context, font='Arial 10', tearoff=0)
+        self.load_more_news_bypass.add_command(label='Newsroom', font='Arial 10',
+                                               command=lambda: self.insert_news_for_a_particular_tab(name='Newsroom',
+                                                                                                     bypass=True))
+        self.load_more_news_bypass.add_command(label='Politics', font='Arial 10',
+                                               command=lambda: self.insert_news_for_a_particular_tab(name='Politics',
+                                                                                                     bypass=True))
+        self.load_more_news_bypass.add_command(label='Economy', font='Arial 10',
+                                               command=lambda: self.insert_news_for_a_particular_tab(name='Economy',
+                                                                                                     bypass=True))
+        self.load_more_news_bypass.add_command(label='International', font='Arial 10',
+                                               command=lambda:
+                                               self.insert_news_for_a_particular_tab(name='International', bypass=True))
+        self.load_more_news_bypass.add_command(label='Reportage', font='Arial 10',
+                                               command=lambda: self.insert_news_for_a_particular_tab(name='Reportage',
+                                                                                                     bypass=True))
+        self.load_more_news_bypass.add_command(label='Analysis', font='Arial 10',
+                                               command=lambda: self.insert_news_for_a_particular_tab(name='Analysis',
+                                                                                                     bypass=True))
+        self.load_more_news_bypass.add_command(label='tpp.tv', font='Arial 10',
+                                               command=lambda: self.insert_news_for_a_particular_tab(name='tpp.tv',
+                                                                                                     bypass=True))
+        self.load_more_news_bypass.add_command(label='tpp.radio', font='Arial 10',
+                                               command=lambda: self.insert_news_for_a_particular_tab(name='tpp.radio',
+                                                                                                     bypass=True))
+        self.load_more_news_bypass.add_command(label='Anaskopisi', font='Arial 10',
+                                               command=lambda: self.insert_news_for_a_particular_tab(name='Anaskopisi',
+                                                                                                     bypass=True))
+        self.load_more_news_bypass.add_command(label='Anaskopisi', font='Arial 10',
+                                               command=lambda: self.insert_news_for_a_particular_tab(name='Culture',
+                                                                                                     bypass=True))
         # Add the self.load_more_news to self.context
         self.context.add_cascade(label='Load more news', menu=self.load_more_news, underline=0, font='Arial 10')
         self.context.add_cascade(label='Load more news (bypass)', menu=self.load_more_news_bypass, underline=0,
@@ -1067,10 +1118,11 @@ class App:
         self.edit_menu = Menu(self.main_menu, tearoff=0)
         # Change theme menu
         self.theme_menu = Menu(self.edit_menu, tearoff=0)
-        self.theme_menu.add_command(label='Azure', command= lambda: self.change_theme('azure'))
+        self.theme_menu.add_command(label='Azure', command=lambda: self.change_theme('azure'))
         # self.theme_menu.add_command(label="Sun valley", command=self.change_theme_sun_valley)
         self.theme_menu.add_command(label='Adapta', command=lambda: self.change_theme('adapta'))
-        self.theme_menu.add_command(label='Aquativo', # https://ttkthemes.readthedocs.io/en/latest/themes.html#radiance-ubuntu
+        self.theme_menu.add_command(label='Aquativo',
+                                    # https://ttkthemes.readthedocs.io/en/latest/themes.html#radiance-ubuntu
                                     command=self.change_theme_aquativo)
         self.theme_menu.add_command(label='Radiance', command=lambda: self.change_theme('radiance'))
         self.theme_menu.add_command(label='Plastik', command=lambda: self.change_theme('plastik'))
@@ -1098,10 +1150,11 @@ class App:
         self.main_menu.add_cascade(label="Help", menu=self.help_menu, underline=0)
 
     @staticmethod
-    def insert_news_for_a_particular_tab(name):
+    def insert_news_for_a_particular_tab(name, bypass=False):
         """
         Saves the number of pages loaded in the particular category to App.treeview_tab_page_counter[name]
         and loads the App.treeview_tab_page_counter[name] + 1.
+        :param bypass: To use webdriver or not.
         :param name: The name of the category as a strings
         :return: None
         """
@@ -1113,7 +1166,7 @@ class App:
             url_to_scrape = str(url_list_base_page[name]) + str(suffix)
         print(f"News [counter {App.treeview_tab_page_counter[name]}] will be added to the category {name} "
               f"from url: {url_to_scrape}")
-        App.page_dict[name].insert_news_from_page(url=url_to_scrape, category=name)
+        App.page_dict[name].insert_news_from_page(url=url_to_scrape, category=name, bypass=bypass)
 
     def call_renew_feed(self):
         """Recalls the site and renew the treeview for all tabs"""
@@ -1350,8 +1403,8 @@ class App:
     def save_theme():
         """Saves the preferred theme"""
         dir_path = os.path.dirname(os.path.realpath(__file__))
-        #print(dir_path)
-        #print(os.path.dirname(os.path.realpath(__file__)))
+        # print(dir_path)
+        # print(os.path.dirname(os.path.realpath(__file__)))
         # https://stackoverflow.com/questions/404744/determining-application-path-in-a-python-exe-generated-by-pyinstaller
         # Determine if the application is a script file or a frozen exe
         if getattr(sys, 'frozen', False):  # TODO: review this
@@ -1423,7 +1476,7 @@ if __name__ == "__main__":
     tkinter_theme_calling(root)
     myapp = App(root=root, to_bypass=bypass)
     # https://stackoverflow.com/questions/111155/how-do-i-handle-the-window-close-event-in-tkinter
-    root.protocol("WM_DELETE_WINDOW", lambda: AskQuit(root))
+    root.protocol("WM_DELETE_WINDOW", lambda: AskQuit(root, FirstPage.driver))
     preferred_theme = myapp.read_theme()  # Reads the theme from the json (if exists)
     myapp.use_theme(preferred_theme)  # Sets the theme. If None, azure-dark is the default.
     center(root)  # Centers tkinter.Tk to screen's height & length
