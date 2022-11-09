@@ -707,7 +707,7 @@ class PageReaderBypass:
         for date_div in div.find_all('div', class_='art-meta'):
             # We do not need to search the span class. The only text of the date_div is the span's text.
             date = date_div.text.strip()
-            #print(f"date length: {len(date)}")
+            print(f"date length: {len(date)}")
             temp_list.append(date)
         for text_div in div.find_all('div', class_='art-content'):
             text_summary = text_div.text
@@ -1047,7 +1047,7 @@ class App:
     base_url = "https://thepressproject.gr/"
     page_dict = {}  # Holds the FirstPage objects
     # Holds the number of the page inserted in each notebook tab (FirstPage).
-    treeview_tab_page_counter = {}  # Default: {'Newsroom: 2'} (as, it loads the news up to the second page)
+    treeview_tab_page_counter = {}  # Default: {'Newsroom: 1'} (as, it loads the news up to the first page)
 
     def __init__(self, root, to_bypass):
         self.help_menu = None
