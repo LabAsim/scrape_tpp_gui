@@ -35,7 +35,7 @@ class ToplevelAbout:
         tktooltip.ToolTip(self.title_label, msg='Click to open the article in the browser', delay=0.5)
         self.empty_label = ttk.Label(self.big_labelframe, text=f"\n")
         self.empty_label.pack(expand=True)
-        text = '\nThePressProject name and all of its content belongs to the ThePressProject team. ' \
+        text = '\nThePressProject name and all of its content belong to the ThePressProject team. ' \
                '\n\nI have no affiliation with the team. This GUI was built only for educational purposes. ' \
                '\n\nThe 3rd party packages used to build this GUΙ have their own licenses. ' \
                'The rest of the code which is written by me, it\'s released under MIT license.' \

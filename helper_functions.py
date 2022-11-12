@@ -265,9 +265,11 @@ def cprint(text, to_print_time=True):
 def is_driver_open(driver) -> bool:
     """
     Checks if the webdriver is still open by checking the logs.
-    https://stackoverflow.com/a/52000037
+
     :param driver: The webdriver
     :return: Boolean
+
+    See also: https://stackoverflow.com/a/52000037
     """
     disconnected_msg = 'Unable to evaluate script: disconnected: not connected to DevTools\n'
     if driver:

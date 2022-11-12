@@ -1,4 +1,3 @@
-import argparse
 import json
 import os
 import sys
@@ -9,7 +8,6 @@ from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 from typing import Any
 import requests
-import selenium
 from bs4 import BeautifulSoup
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
 import undetected_chromedriver as uc  # pip install undetected-chromedriver
