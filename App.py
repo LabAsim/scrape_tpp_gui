@@ -1,33 +1,19 @@
 import json
 import os
 import sys
-import time
 import tkinter as tk
 import tkinter.font
 from datetime import datetime
 from tkinter import Menu, StringVar, ttk
-from typing import Any
-import requests
-from bs4 import BeautifulSoup
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
-import undetected_chromedriver as uc  # pip install undetected-chromedriver
 import sv_ttk
-import concurrent.futures
-from helper_functions import file_exists, center, callback, headers, str2bool, tkinter_theme_calling, \
-    sortby, date_to_unix, parse_arguments, is_driver_open
+from helper_functions import file_exists, callback
 from misc import url_list, url_list_base_page, dir_path
 from FirstPage import FirstPage
-from trace_error import trace_error
-from classes.NewsDataclass import NewsDataclass
 from classes.ToplevelAbout import ToplevelAbout
 from classes.ToplevelSocial import ToplevelSocial
 from classes.ToplevelDonate import ToplevelDonate
 from classes.ToplevelAboutTpp import ToplevelAboutTpp
-from classes.AskQuit import AskQuit
-from classes.ToplevelArticle import ToplevelArticle
-import concurrent.futures
-from PageReader import PageReader
-
 
 class App:
     """Main App"""

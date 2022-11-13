@@ -11,6 +11,7 @@ from SubPageReader import SubPageReader
 from SubPageReaderBypass import SubPageReaderBypass
 from PageReaderBypass import PageReaderBypass
 
+
 class FirstPage:
     """
     A class which controls the tab(s) of the ttk.notebook from the App class.
@@ -21,7 +22,6 @@ class FirstPage:
     news_to_open_in_browser = []  # Contains all the scraped news in the form of [title-string, url, date]
     news_total = []  # Contains all the dataclasses
     driver = None  # The Chromedriver
-
 
     def __init__(self, note, name, controller, url, to_bypass, debug):
         self.font = tkinter.font.Font(size=14)  # To measure the length of the letters
@@ -53,7 +53,7 @@ class FirstPage:
                                           command=lambda: self.controller.insert_news_for_a_particular_tab(self.name))
         self.right_click_menu.add_command(label='Load more news (bypass)',
                                           command=lambda: self.controller.insert_news_for_a_particular_tab(self.name,
-                                                                                               bypass=True))
+                                                                                                           bypass=True))
         self.tree.bind('<ButtonRelease-3>', self.post_menu)
         # Bind left double click to post the menu
         self.tree.bind("<Double-1>", self.show_main_article)
@@ -200,7 +200,8 @@ class FirstPage:
             trace_error()
         try:
             if self.name.lower() == 'anaskopisi':  # For the category "anaskopisi"
-                feed = PageReader(url=self.url, header=headers(), category=self.name.lower(), debug=self.to_bypass, firstpage=self)
+                feed = PageReader(url=self.url, header=headers(), category=self.name.lower(), debug=self.to_bypass,
+                                  firstpage=self)
             else:
                 feed = PageReader(url=self.url, header=headers(), debug=self.to_bypass, firstpage=self)
             title_list = [self.font.measure(d[0]) for d in FirstPage.values]
