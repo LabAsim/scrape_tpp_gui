@@ -1,3 +1,6 @@
+"""
+Main app
+"""
 import time
 import tkinter as tk
 import tkinter.font
