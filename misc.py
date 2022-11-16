@@ -1,3 +1,6 @@
+"""
+Contains the urls of the various categories of ThePressProject site, as well as, the paths to tkinter themes.
+"""
 import os
 
 url_list = {"newsroom": ["https://thepressproject.gr/article_type/newsroom/",
