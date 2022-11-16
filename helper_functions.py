@@ -1,23 +1,16 @@
 import argparse
-import importlib
-import json
 import os.path
 import pathlib
 import random
 import re
-import sys
-import tempfile
 import time
 import webbrowser
 from datetime import datetime, timedelta
 from tkinter import messagebox
-
-import requests
 from colorama import Fore, Style
 from misc import themes_paths
-import importlib.util
-
 import sys
+from source.version.version_module import file_exists
 
 headers_list = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
@@ -153,13 +146,13 @@ def sortby(tree, col, descending):
                                                      int(not descending)))
 
 
-def file_exists(dir_path, name) -> bool:
+'''def file_exists(dir_path, name) -> bool:
     """Returns true if the path exists"""
     path_to_name = pathlib.Path(os.path.join(dir_path, name))
     if path_to_name.exists():
         return True
     else:
-        return False
+        return False'''
 
 
 def headers() -> dict[str, str]:
@@ -293,69 +286,10 @@ def is_driver_open(driver) -> bool:
             return True
 
 
-def check_version():
-    """
-    Checks the version of version.json at the remote repo and compares it with the current version of the application.
-    :return: True if a newer version exists at the remote repo.
-    """
-    version_url = "https://raw.githubusercontent.com/LabAsim/scrape_tpp_gui/main/source/version.json"
-    base_github_release_url = "https://github.com/LabAsim/scrape_tpp_gui/releases/tag/"
-    new_online_version = None
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    # print(dir_path)
-    # print(os.path.dirname(os.path.realpath(__file__)))
-    # https://stackoverflow.com/questions/404744/determining-application-path-in-a-python-exe-generated-by-pyinstaller
-    # Determine if the application is a script file or a frozen exe
-    if getattr(sys, 'frozen', False):
-        print(getattr(sys, 'frozen', False))
-        dir_path = os.path.dirname(os.path.realpath(sys.executable))
-        print("Exe:", dir_path)
-    elif __file__:
-        dir_path = os.path.dirname(__file__)
-        print(f'Script: {dir_path}')
-    print(dir_path)
-    dir_path = os.path.join(dir_path, "source")
-    # Load current version
-    current_version = ''
-    with open(os.path.join(dir_path, "version.json")) as current_version_file:
-        json_data = json.load(current_version_file)
-        current_version = json_data['version']
-    # Convert the string to a datetime obj
-    current_version = current_version.split("-").strip()
-    year = int(current_version[-1])
-    month = int(current_version[1])
-    day = int(current_version[0])
-    current_version = datetime(year, month, day)
-    print(f'Current version: {current_version}')
-    # https://docs.python.org/3/library/tempfile.html#examples
-    online_version = ""
-    with tempfile.TemporaryDirectory() as tempdir:
-        version_file = os.path.join(tempdir, 'version.json')
-        response = requests.get(version_url)
-        # Write response's content to a file
-        with open(version_file, 'wb+') as pyfile:
-            pyfile.write(response.content)
-        print(file_exists(tempdir, "version.json"), version_file)
-        with open(version_file, "rb+") as jsonfile:
-            json_data = json.load(jsonfile)
-            online_version = json_data['version']
-        new_online_version = f"{online_version}"
-        # Convert the string to a datetime obj
-        online_version = online_version.split("-").strip()
-        year = int(online_version[-1])
-        month = int(online_version[1])
-        day = int(online_version[0])
-        online_version = datetime(year, month, day)
-    print(f"Online version: {online_version}")
-    if online_version > current_version:
-        print("A newer version is online.\n"
-              f"See {base_github_release_url + new_online_version}")
-        return True
-    else:
-        print("The application is up to date!")
-        return False
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 
-if __name__ == "__main__":
-    # Example
-    check_version()
+

@@ -33,10 +33,10 @@ url_list_base_page = {"Newsroom": "https://thepressproject.gr/article_type/newsr
 
 dir_path = os.path.dirname(os.path.realpath(__file__))  # As a one-file executable, this path is a temporary folder.
 
-themes_paths = {"azure": os.path.join(dir_path, 'source/azure/azure.tcl'),
-                "plastik": os.path.join(dir_path, 'source/plastik/plastik.tcl'),
-                "radiance": os.path.join(dir_path, 'source/radiance/radiance.tcl'),
-                "aquativo": os.path.join(dir_path, 'source/aquativo/aquativo.tcl'),
-                "adapta": os.path.join(dir_path, 'source/adapta/adapta.tcl'),
-                "yaru": os.path.join(dir_path, 'source/yaru/yaru.tcl'),
-                "arc": os.path.join(dir_path, 'source/arc/arc.tcl')}
+themes_paths = {"azure": os.path.join(dir_path, 'source/themes/azure/azure.tcl'),
+                "plastik": os.path.join(dir_path, 'source/themes/plastik/plastik.tcl'),
+                "radiance": os.path.join(dir_path, 'source/themes/radiance/radiance.tcl'),
+                "aquativo": os.path.join(dir_path, 'source/themes/aquativo/aquativo.tcl'),
+                "adapta": os.path.join(dir_path, 'source/themes/adapta/adapta.tcl'),
+                "yaru": os.path.join(dir_path, 'source/themes/yaru/yaru.tcl'),
+                "arc": os.path.join(dir_path, 'source/themes/arc/arc.tcl')}

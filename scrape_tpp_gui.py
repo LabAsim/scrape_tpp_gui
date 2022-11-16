@@ -5,10 +5,11 @@ import time
 import tkinter as tk
 import tkinter.font
 from tkinter import ttk
-from helper_functions import center, tkinter_theme_calling, parse_arguments
 from App import App
 from FirstPage import FirstPage
 from classes.AskQuit import AskQuit
+from helper_functions import center, tkinter_theme_calling, parse_arguments
+from source.version.version_module import check_new_version
 
 if __name__ == "__main__":
     args = parse_arguments()
@@ -29,4 +30,5 @@ if __name__ == "__main__":
     end = time.perf_counter()
     print(f'Current Style: {root.tk.call("ttk::style", "theme", "use")}')
     print(f'Load in {end - start}')
+    print(check_new_version())
     root.mainloop()
