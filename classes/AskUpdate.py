@@ -2,7 +2,7 @@ import os.path
 import sys
 import tkinter as tk
 from tkinter import ttk
-from scrape_tpp_gui.helper_functions import file_exists, center, callback, headers_list, headers, str2bool
+from scrape_tpp_gui.helper_functions import center
 from PIL import Image, ImageTk
 import PIL.Image
 from scrape_tpp_gui.misc import dir_path
@@ -13,7 +13,7 @@ class AskUpdate(tk.Toplevel):
     """
     A toplevel window for updating the application.
     """
-    x = 240
+    x = 270
     y = 110
 
     def __init__(self, parent, driver=None):
@@ -53,6 +53,11 @@ class AskUpdate(tk.Toplevel):
         cancel_button.pack(side='right', expand=True, pady=10, padx=10)
 
     def download_and_quit(self, path):
+        """
+        Downloads the update to the specific path
+        :param path: The path
+        :return: None
+        """
         download_update(path)
         self.toplevel_quit(widget=self.parent)
 
