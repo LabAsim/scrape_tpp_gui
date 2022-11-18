@@ -7,13 +7,17 @@ from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
 import sv_ttk
-from helper_functions import file_exists, callback
+from scrape_tpp_gui.helper_functions import callback
+from scrape_tpp_gui.source.version.version_module import file_exists
 from misc import url_list, url_list_base_page, dir_path
 from FirstPage import FirstPage
 from classes.ToplevelAbout import ToplevelAbout
 from classes.ToplevelSocial import ToplevelSocial
 from classes.ToplevelDonate import ToplevelDonate
 from classes.ToplevelAboutTpp import ToplevelAboutTpp
+from classes.AskUpdate import AskUpdate
+from source.version.version_module import check_online_version, check_new_version
+
 
 class App:
     """Main App"""
@@ -179,6 +183,8 @@ class App:
         # Create the Help menu on top of main menu
         self.help_menu = Menu(self.main_menu, tearoff=0)
         self.help_menu.add_command(label='About...', font='Arial 10', command=lambda: ToplevelAbout(self, self.root))
+        self.help_menu.add_command(label='Check for updates', font='Arial 10',
+                                   command=self.check_for_updates)  # We do not need the parent here.
         # Add the rest menus as cascades menus on top of main menu
         self.main_menu.add_cascade(label='Edit', menu=self.edit_menu, underline=0)
         self.main_menu.add_cascade(label='TPP', menu=self.tpp_menu, underline=0)
@@ -240,6 +246,10 @@ class App:
         self.f_time.place(x=10, y=10)
         self.time = tk.Label(self.f_time, textvariable=var)
         self.time.pack(side='left')
+
+    def check_for_updates(self):
+        if check_new_version():
+            AskUpdate(parent=None)
 
     def exit_the_program(self):
         """Exits the program"""
