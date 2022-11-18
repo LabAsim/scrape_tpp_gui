@@ -1,6 +1,7 @@
 import json
 import os
 import pathlib
+import re
 import tempfile
 from datetime import datetime
 import requests
@@ -20,11 +21,11 @@ def check_new_version():
     Note that the version.json is located in a temporary file when the script runs as a .py file or as one-file exe.
     :return: True if a newer version exists at the remote repo.
     """
-    version_url = "https://raw.githubusercontent.com/LabAsim/scrape_tpp_gui/main/source/version.json"
+    version_url = "https://raw.githubusercontent.com/LabAsim/scrape_tpp_gui/main/source/version/version.json"
     base_github_release_url = "https://github.com/LabAsim/scrape_tpp_gui/releases/tag/"
     new_online_version = None
     dir_path = os.path.dirname(os.path.realpath(__file__))  # A temporary dir both in .py file and one-file exe.
-    print(f"1.check_version: {dir_path}")
+    print(f"check_version(): {dir_path}")
     # Load current version
     current_version = ''
     with open(os.path.join(dir_path, "version.json")) as current_version_file:
@@ -42,12 +43,22 @@ def check_new_version():
     with tempfile.TemporaryDirectory() as tempdir:
         version_file = os.path.join(tempdir, 'version.json')
         response = requests.get(version_url)
+        response_code = str(response.status_code)
+        # Check that the response code is not in 20x
+        if re.search(response_code, "20[0-3]"): # https://stackoverflow.com/a/16575064
+            if response_code == "204":
+                print("The target url for the new version is empty")
+                return "The target url for the new version is empty"
+            else:
+                print(f"Wrong url provided for the new version")
+                return "Wrong url provided for the new version"
         # Write response's content to a file
         with open(version_file, 'wb+') as pyfile:
             pyfile.write(response.content)
         print(file_exists(tempdir, "version.json"), version_file)
-        with open(version_file, "rb+") as jsonfile:
+        with open(version_file, "r", encoding='utf-8') as jsonfile:
             json_data = json.load(jsonfile)
+            # json_data = json.loads(jsonfile.read())  # Alternative https://stackoverflow.com/a/58647394
             online_version = json_data['version'].strip()
         new_online_version = f"{online_version}"
         # Convert the string to a datetime obj
@@ -58,7 +69,7 @@ def check_new_version():
         online_version = datetime(year, month, day)
     print(f"Online version: {online_version}")
     if online_version > current_version:
-        print("A newer version is online.\n"
+        print("A new version is online.\n"
               f"See {base_github_release_url + new_online_version}")
         return True
     else:
