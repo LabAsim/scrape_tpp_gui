@@ -8,9 +8,9 @@ import webbrowser
 from datetime import datetime, timedelta
 from tkinter import messagebox
 from colorama import Fore, Style
-from misc import themes_paths
+from scrape_tpp_gui.misc import themes_paths
 import sys
-from source.version.version_module import file_exists
+from scrape_tpp_gui.source.version.version_module import file_exists  # Other modules, import file_exists from here
 
 headers_list = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Safari/537.36 Edge/12.246",
