@@ -2,6 +2,7 @@
 Contains the urls of the various categories of ThePressProject site, as well as, the paths to tkinter themes.
 """
 import os
+import sys
 
 url_list = {"newsroom": ["https://thepressproject.gr/article_type/newsroom/",
                          "https://thepressproject.gr/article_type/newsroom/page/2/"],
@@ -32,6 +33,9 @@ url_list_base_page = {"Newsroom": "https://thepressproject.gr/article_type/newsr
                       "Culture": "https://thepressproject.gr/category/culture/page/"}
 
 dir_path = os.path.dirname(os.path.realpath(__file__))  # As a one-file executable, this path is a temporary folder.
+
+if getattr(sys, 'frozen', False):
+    dir_path = os.path.dirname(os.path.realpath(dir_path))
 
 themes_paths = {"azure": os.path.join(dir_path, 'source/themes/azure/azure.tcl'),
                 "plastik": os.path.join(dir_path, 'source/themes/plastik/plastik.tcl'),
