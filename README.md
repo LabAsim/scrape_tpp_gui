@@ -6,7 +6,7 @@ This is my first project in order to learn Python.
 I have built it to access the news faster and in a more aggregated way than just reading the site.
 It scrapes the news categories of [thepressproject.gr](https://thepressproject.gr/) site.
 
-It has been tested in Python 3.10. It heavily relies on 3rd party packages.
+It has been tested in Python 3.10 and Windows 10. It heavily relies on 3rd party packages.
 
 
 ## Table of Contents
@@ -52,19 +52,26 @@ The GUI:
 
 The script can be converted to an .exe by running in your terminal: 
 
-	py scrape_tpp_gui_pyinstaller.py 
+	cd {path/to/scrape_tpp_gui_folder}
+    py scrape_tpp_gui_pyinstaller.py 
 
+You should also convert updater.py to updater.exe to use **check for updates** command in the menu. Currently, auto-updating does not work as a py script.
 
-Note that the folders images & source, as well as, the .exe must be in the **same directory** in order the .exe to successfully run.
+    cd {path/to/updater_folder}
+    py pyinstaller_updater.py
+
+Note that the folders images, classes & source, as well as, the .exe must be in the **same directory** in order the .exe to successfully run, when bundled with the option "onedir".
 
 ## Credits
 
 Thanks to all the 3rd party packages maintainers and the StackOverflow users.
+
 ## Donate
 
 Do not forget to donate monthly to [ThePressProject team](https://community.thepressproject.gr/?lang=en). Recurrent monthly donation/funding is the only way for a truly independent journalism to exist. 
 
 ## License
+
 ThePressProject Trademark, name and all of its content belong to the ThePressProject team. 
 The 3rd party packages have their own licenses.
 All the code written by me is released under the MIT license.
