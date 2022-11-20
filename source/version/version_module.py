@@ -1,3 +1,6 @@
+"""
+A module containing functions to cross-check the current against the online version.
+"""
 import json
 import os
 import pathlib
