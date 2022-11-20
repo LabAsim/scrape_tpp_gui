@@ -1,6 +1,11 @@
-import json
+"""
+A function to trace errors from traceback
+"""
 import os.path
+import sys
 import traceback
+parent_folder = os.path.dirname(__file__)
+sys.path.append(parent_folder)
 from helper_functions import file_exists, cprint, get_current_time, strip_ansi_characters
 from misc import dir_path
 
