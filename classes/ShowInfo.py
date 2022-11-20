@@ -53,7 +53,7 @@ class ShowInfo(tk.Toplevel):
         """
         Constructs the window.
         """
-        self.title("Quit")
+        self.title("Up-to-date")
         askquit_topframe = ttk.Frame(self.big_frame)
         askquit_topframe.pack(side='top', expand=True)
         valuelabel = ttk.Label(askquit_topframe, text=f"{self.info}")
