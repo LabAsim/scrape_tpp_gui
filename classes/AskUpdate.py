@@ -23,10 +23,8 @@ class AskUpdate(tk.Toplevel):
     x = 290
     y = 110
 
-    def __init__(self, controller, root, driver=None):
+    def __init__(self, controller, root):
         super().__init__()
-        # self.root = root
-        self.driver = driver
         self.geometry(f'{AskUpdate.x}x{AskUpdate.y}')  # Here, self is tkinter.Toplevel
         self.controller = controller
         self.root = root
@@ -37,7 +35,7 @@ class AskUpdate(tk.Toplevel):
         self.setActive()
         center(self, self.root)
         dir_path = os.path.dirname(os.path.realpath(__file__))  # The relative is like this: ./classes
-        if getattr(sys, 'frozen', False):  # TODO: review this
+        if getattr(sys, 'frozen', False):
             print(getattr(sys, 'frozen', False))
             dir_path = os.path.dirname(os.path.realpath(sys.executable))
             print("Exe:", dir_path)
@@ -46,7 +44,6 @@ class AskUpdate(tk.Toplevel):
             print(f'Script: {dir_path}')
         self.dir_path = dir_path  # The directory containing the executable. See above for the real folder.
         print(self.dir_path)
-        time.sleep(5)
 
     def initUI(self):
         """
@@ -74,8 +71,7 @@ class AskUpdate(tk.Toplevel):
 
     def download_and_quit(self):
         """
-        Downloads the update to the specific path
-        :param path: The path
+        Downloads the update to the same folder as the running executable.
         :return: None
         """
         current_pid = os.getpid()
@@ -84,34 +80,29 @@ class AskUpdate(tk.Toplevel):
         children_of_current.append(current_process)
         current_own_process = {child.name(): child.pid for child in children_of_current}
         print(f'tk.TK() processes: {current_own_process}')
+
         # Open updater.exe
         parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # It's a temp dir.
         bat_file = os.path.join(parent_dir, 'source\\updater\\start_updater.bat')
         path_to_the_exe = os.path.join(parent_dir, 'source\\updater\\updater.exe')
         str_dump = f'''
-                            \nstart "" "{path_to_the_exe}" --path {self.dir_path} --parentpid {current_pid}
-                            \nexit
-                        '''  # --path {}
+                        \nstart "" "{path_to_the_exe}" --path {self.dir_path} --parentpid {current_pid}
+                        \nexit
+                    '''
         with open(bat_file, 'w+') as file:
             file.write(str_dump)
             print(f"file is written: {bat_file}")
 
-        # cmd_arguments_updating_process = []
+        # Multiprocessing Process does not survive sys.exit() from main Process. It needs subprocess Popen
+        # See: https://stackoverflow.com/questions/21665341/python-multiprocessing-and-independence-of-children-processes
         try:
-            updating_process = subprocess.Popen(bat_file)
+            subprocess.Popen(bat_file)
             print(f"Updating process started from {path_to_the_exe}")
         except Exception as err:
             print(err)
             time.sleep(2)
-        '''if True:
-            # Multiprocessing Process does not survive sys.exit() from main Process. It needs subprocess Popen
-            # See: https://stackoverflow.com/questions/21665341/python-multiprocessing-and-independence-of-children-processes
-            updating_process = mp.Process(target=start_updating_process, name='updating_process',
-                                          daemon=False,
-                                          args=(f'{pathlib.Path.home()}p',
-                                                f'{current_pid}'))
-            updating_process.start()'''
-        # download_update(path)
+        else:  # Destroy AskUpdate toplevel
+            self.toplevel_quit()
         '''if self.controller:
             self.controller.exit_the_program()
         else:
