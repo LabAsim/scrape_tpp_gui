@@ -7,10 +7,12 @@ from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
 import sv_ttk
+
 from scrape_tpp_gui.helper_functions import callback
 from scrape_tpp_gui.source.version.version_module import file_exists
 from misc import url_list, url_list_base_page, dir_path
 from FirstPage import FirstPage
+from classes.ShowInfo import ShowInfo
 from classes.ToplevelAbout import ToplevelAbout
 from classes.ToplevelSocial import ToplevelSocial
 from classes.ToplevelDonate import ToplevelDonate
@@ -251,6 +253,7 @@ class App:
         if check_new_version():
             AskUpdate(controller=self, root=self.root)
         else:  # TODO:
+            ShowInfo(controller=self, root=self.root, info='The application is up-to-date!')
             pass
 
     def exit_the_program(self):

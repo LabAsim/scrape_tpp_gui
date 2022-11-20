@@ -11,6 +11,7 @@ parent_folder = os.path.dirname(__file__)
 parent_of_parent_folder = os.path.dirname(parent_folder)
 sys.path.append(parent_of_parent_folder)
 from helper_functions import center
+from classes.ShowInfo import ShowInfo
 from PIL import Image, ImageTk
 import PIL.Image
 #from misc import dir_path
@@ -114,9 +115,6 @@ class AskUpdate(tk.Toplevel):
         if widget is not None:
             if widget is tk.Tk:
                 print(f'AskQuit>toplevel_quit: Root is now exiting')
-                if self.driver is not None:  # Do not forget to close webdriver
-                    self.driver.close()
-                    self.driver.quit()
                 sys.exit()
             else:
                 self.destroy()
