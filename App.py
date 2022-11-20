@@ -184,7 +184,7 @@ class App:
         self.help_menu = Menu(self.main_menu, tearoff=0)
         self.help_menu.add_command(label='About...', font='Arial 10', command=lambda: ToplevelAbout(self, self.root))
         self.help_menu.add_command(label='Check for updates', font='Arial 10',
-                                   command=self.check_for_updates)  # We do not need the parent here.
+                                   command=self.check_for_updates)
         # Add the rest menus as cascades menus on top of main menu
         self.main_menu.add_cascade(label='Edit', menu=self.edit_menu, underline=0)
         self.main_menu.add_cascade(label='TPP', menu=self.tpp_menu, underline=0)
@@ -249,7 +249,9 @@ class App:
 
     def check_for_updates(self):
         if check_new_version():
-            AskUpdate(parent=None)
+            AskUpdate(controller=self, root=self.root)
+        else:  # TODO:
+            pass
 
     def exit_the_program(self):
         """Exits the program"""
