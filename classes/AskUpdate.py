@@ -1,33 +1,52 @@
 import os.path
+import pathlib
+import subprocess
 import sys
+import time
 import tkinter as tk
 from tkinter import ttk
-from scrape_tpp_gui.helper_functions import center
+import psutil
+
+parent_folder = os.path.dirname(__file__)
+parent_of_parent_folder = os.path.dirname(parent_folder)
+sys.path.append(parent_of_parent_folder)
+from helper_functions import center
 from PIL import Image, ImageTk
 import PIL.Image
-from scrape_tpp_gui.misc import dir_path
-from scrape_tpp_gui.source.updater.updater import download_update
+#from misc import dir_path
 
 
 class AskUpdate(tk.Toplevel):
     """
     A toplevel window for updating the application.
     """
-    x = 270
+    x = 290
     y = 110
 
-    def __init__(self, parent, driver=None):
+    def __init__(self, controller, root, driver=None):
         super().__init__()
         # self.root = root
         self.driver = driver
         self.geometry(f'{AskUpdate.x}x{AskUpdate.y}')  # Here, self is tkinter.Toplevel
-        self.parent = parent
+        self.controller = controller
+        self.root = root
         self.grab_set()
         self.big_frame = ttk.Frame(self)
         self.big_frame.pack(expand=True, fill='both')
         self.initUI()
         self.setActive()
-        center(self, self.parent)
+        center(self, self.root)
+        dir_path = os.path.dirname(os.path.realpath(__file__))  # The relative is like this: ./classes
+        if getattr(sys, 'frozen', False):  # TODO: review this
+            print(getattr(sys, 'frozen', False))
+            dir_path = os.path.dirname(os.path.realpath(sys.executable))
+            print("Exe:", dir_path)
+        elif __file__:
+            dir_path = os.path.dirname(__file__)
+            print(f'Script: {dir_path}')
+        self.dir_path = dir_path  # The directory containing the executable. See above for the real folder.
+        print(self.dir_path)
+        time.sleep(5)
 
     def initUI(self):
         """
@@ -36,9 +55,10 @@ class AskUpdate(tk.Toplevel):
         self.title("Quit")
         askquit_topframe = ttk.Frame(self.big_frame)
         askquit_topframe.pack(side='top', expand=True)
-        valueLabel = ttk.Label(askquit_topframe, text="Do you want to download the update?")
-        valueLabel.pack(side='right', expand=True)
-        image = Image.open(os.path.join(dir_path, "images/questionmark.png"))
+        valuelabel = ttk.Label(askquit_topframe, text="A new update was found."
+                                                      "\nDo you want to download the update?")
+        valuelabel.pack(side='right', expand=True)
+        image = Image.open(os.path.join(parent_of_parent_folder, "images/questionmark.png"))
         image = image.resize(
             (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), PIL.Image.ANTIALIAS)
         image = ImageTk.PhotoImage(image)
@@ -47,19 +67,55 @@ class AskUpdate(tk.Toplevel):
         image_label.image = image
         buttons_frame = ttk.Frame(self.big_frame)
         buttons_frame.pack(side='bottom', expand=True)
-        ok_button = ttk.Button(buttons_frame, text="Ok", command=lambda: self.download_and_quit(dir_path))
+        ok_button = ttk.Button(buttons_frame, text="Ok", command=self.download_and_quit)
         ok_button.pack(side='left', expand=True, pady=10, padx=10)
         cancel_button = ttk.Button(buttons_frame, text="Cancel", command=self.destroy)
         cancel_button.pack(side='right', expand=True, pady=10, padx=10)
 
-    def download_and_quit(self, path):
+    def download_and_quit(self):
         """
         Downloads the update to the specific path
         :param path: The path
         :return: None
         """
-        download_update(path)
-        self.toplevel_quit(widget=self.parent)
+        current_pid = os.getpid()
+        current_process = psutil.Process(current_pid)
+        children_of_current = current_process.children(recursive=True)
+        children_of_current.append(current_process)
+        current_own_process = {child.name(): child.pid for child in children_of_current}
+        print(f'tk.TK() processes: {current_own_process}')
+        # Open updater.exe
+        parent_dir = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))  # It's a temp dir.
+        bat_file = os.path.join(parent_dir, 'source\\updater\\start_updater.bat')
+        path_to_the_exe = os.path.join(parent_dir, 'source\\updater\\updater.exe')
+        str_dump = f'''
+                            \nstart "" "{path_to_the_exe}" --path {self.dir_path} --parentpid {current_pid}
+                            \nexit
+                        '''  # --path {}
+        with open(bat_file, 'w+') as file:
+            file.write(str_dump)
+            print(f"file is written: {bat_file}")
+
+        # cmd_arguments_updating_process = []
+        try:
+            updating_process = subprocess.Popen(bat_file)
+            print(f"Updating process started from {path_to_the_exe}")
+        except Exception as err:
+            print(err)
+            time.sleep(2)
+        '''if True:
+            # Multiprocessing Process does not survive sys.exit() from main Process. It needs subprocess Popen
+            # See: https://stackoverflow.com/questions/21665341/python-multiprocessing-and-independence-of-children-processes
+            updating_process = mp.Process(target=start_updating_process, name='updating_process',
+                                          daemon=False,
+                                          args=(f'{pathlib.Path.home()}p',
+                                                f'{current_pid}'))
+            updating_process.start()'''
+        # download_update(path)
+        '''if self.controller:
+            self.controller.exit_the_program()
+        else:
+            self.toplevel_quit()'''
 
     def toplevel_quit(self, widget=None):
         """how to bind a messagebox to toplevel window in python
@@ -91,5 +147,5 @@ class AskUpdate(tk.Toplevel):
 if __name__ == "__main__":
     root = tk.Tk()
     center(root)
-    AskUpdate(parent=None)
+    AskUpdate(controller=None, root=root)
     root.mainloop()
