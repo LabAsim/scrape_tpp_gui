@@ -7,6 +7,7 @@ from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
 import sv_ttk
+import undetected_chromedriver
 
 from scrape_tpp_gui.helper_functions import callback
 from scrape_tpp_gui.source.version.version_module import file_exists
@@ -18,6 +19,7 @@ from classes.ToplevelSocial import ToplevelSocial
 from classes.ToplevelDonate import ToplevelDonate
 from classes.ToplevelAboutTpp import ToplevelAboutTpp
 from classes.AskUpdate import AskUpdate
+from scrape_tpp_gui.trace_error import trace_error
 from source.version.version_module import check_online_version, check_new_version
 
 
@@ -264,6 +266,14 @@ class App:
 
     def exit_the_program(self):
         """Exits the program"""
+        if FirstPage.driver is not None:
+            try:
+                FirstPage.driver.close()
+                FirstPage.driver.quit()
+                print("App>exit_the_program>Driver closed")
+            except Exception as err:
+                print(err)
+                trace_error()
         self.root.destroy()
         print(f'App>exit_the_program()')
         sys.exit()
