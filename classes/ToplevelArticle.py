@@ -25,6 +25,7 @@ class ToplevelArticle:
         self.url = newsclass.url
         self.summary = tk.StringVar(value=newsclass.summary)
         self.operation = operation
+        self.root = root
         self.toplevelarticle = tk.Toplevel()
         self.toplevelarticle.title(f'The Press Project article: {self.title}')
         self.toplevelarticle.protocol("WM_DELETE_WINDOW", lambda: AskQuit(self.toplevelarticle))
@@ -82,7 +83,7 @@ class ToplevelArticle:
         self.menu.add_command(label='Copy', font='Arial 10', command=self.copy_text_to_clipboard)
         self.text.bind('<ButtonRelease-3>', self.post_menu)  # Menu is posted in self.text
         self.text1.bind('<ButtonRelease-3>', self.post_menu)
-        center(self.toplevelarticle, root)
+        center(self.toplevelarticle, self.root)
 
     def post_menu(self, event):
         """Posts the right click menu at the cursor's coordinates"""
