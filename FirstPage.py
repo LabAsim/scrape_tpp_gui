@@ -1,3 +1,6 @@
+"""
+A class containing the notebook tabs (ttk.notebook).
+"""
 import tkinter as tk
 import tkinter.font
 from tkinter import Menu, ttk
@@ -60,6 +63,11 @@ class FirstPage:
         self.tree.bind("<Double-1>", self.show_main_article)
 
     def post_menu(self, event):
+        """
+        Posts the menu at right click.
+        :param event: Mouse click from bind method of the widget
+        :return: None
+        """
         self.right_click_menu.post(event.x_root, event.y_root)
 
     def show_main_article(self, event):
@@ -80,7 +88,7 @@ class FirstPage:
                     print(f'FirstPage>show_main_article>Content exists: Main content: '
                           f'\n{class_.main_content}')
                     count += 1
-                    ToplevelArticle(class_, operation='main_article', root=self.controller)
+                    ToplevelArticle(class_, operation='main_article', root=self.root)
                 else:
                     print(f'SubPageReader to be called')
                     added_new = SubPageReader(url=class_.url, header=headers(), debug=self.debug, firstpage=self)
@@ -112,7 +120,7 @@ class FirstPage:
                     print(f'FirstPage>show_main_article_bypass>Content exists: Main content: '
                           f'\n{class_.main_content}')
                     count += 1
-                    ToplevelArticle(class_, operation='main_article', root=self.controller)
+                    ToplevelArticle(class_, operation='main_article', root=self.root)
                 else:
                     print(f'FirstPage>show_main_article_bypass>SubPageReaderBypass to be called')
                     added_new = SubPageReaderBypass(url=class_.url, header=None, firstpage=self)
@@ -129,7 +137,7 @@ class FirstPage:
                     # after appending the newsclass to the same list
                     FirstPage.news_total.insert(number, newsclass)  # Insert the newsclass to same index as class_
                     FirstPage.news_total.remove(class_)
-                    ToplevelArticle(newsclass, operation='main_article', root=self.controller)
+                    ToplevelArticle(newsclass, operation='main_article', root=self.root)
 
     def open_article_link(self):
         #  Solution: https://stackoverflow.com/questions/30614279/tkinter-treeview-get-selected-item-values
@@ -270,7 +278,7 @@ class FirstPage:
                     FirstPage.driver = driver
                     driver.implicitly_wait(6)
                     driver.set_window_position(-1000, 0)  # Set Chrome off-screen
-            feed = PageReaderBypass(url=self.url, name=self.name, driver=driver, firstpage=self)
+            feed = PageReaderBypass(url=self.url, name=self.name, driver=driver, firstpage=self, debug=self.debug)
             title_list = [self.font.measure(d[0]) for d in FirstPage.values]
             date_list = [self.font.measure(d[2]) for d in FirstPage.values]
             self.tree.column(column='Title', minwidth=100, width=max(title_list), stretch=True)
@@ -318,7 +326,8 @@ class FirstPage:
             PageReader(url=url, header=headers(), category=category, debug=self.debug, firstpage=self)
         else:  # Use webdriver
             if is_driver_open(FirstPage.driver):
-                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, category=category, firstpage=self)
+                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, category=category, firstpage=self,
+                                 debug=self.debug)
             else:
                 print("FirstPage>insert_news_from_page>(Re)launching webdriver")
                 options = uc.ChromeOptions()
@@ -326,7 +335,8 @@ class FirstPage:
                 FirstPage.driver = driver
                 driver.set_window_position(-1000, 0)  # Set Chrome off-screen
                 driver.implicitly_wait(6)
-                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, category=category, firstpage=self)
+                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, category=category, firstpage=self,
+                                 debug=self.debug)
         for number, tuple_feed in enumerate(FirstPage.values):
             self.tree.insert("", tk.END,
                              values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
