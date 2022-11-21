@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import time
 import tkinter as tk
 import tkinter.font
 from datetime import datetime
@@ -259,7 +260,11 @@ class App:
         :param startup:
         """
         if check_new_version():
-            AskUpdate(controller=self, root=self.root)
+            if not startup:
+                AskUpdate(controller=self, root=self.root)
+            else:  # Delay 8 secs the prompt window, not to be shown immediately after startup
+                self.root.after(8000, lambda: AskUpdate(controller=self, root=self.root))
+
         else:
             if not startup:
                 ShowInfo(controller=self, root=self.root, info='The application is up-to-date!')
