@@ -71,13 +71,15 @@ class App:
         self.root.config(menu=self.main_menu)
         # Create the rest menus
         self.create_menu()
+        # Check for updates at startup
+        self.check_for_updates(startup=True)
 
     def notebook_pages(self, url, note, controller, name):
         """
         Initiates and stores all the pages of the notebook (FirstPage class) in App.page_dict
         """
         App.page_dict[name] = FirstPage(note=note, name=name, controller=self, url=url, to_bypass=self.bypass,
-                                        debug=self.debug)
+                                        debug=self.debug, root=self.root)
         if name not in App.treeview_tab_page_counter:
             App.treeview_tab_page_counter[name] = 1
 
@@ -249,12 +251,16 @@ class App:
         self.time = tk.Label(self.f_time, textvariable=var)
         self.time.pack(side='left')
 
-    def check_for_updates(self):
+    def check_for_updates(self, startup=False):
+        """
+        Checks for a new version at the remote repository.
+        :param startup:
+        """
         if check_new_version():
             AskUpdate(controller=self, root=self.root)
-        else:  # TODO:
-            ShowInfo(controller=self, root=self.root, info='The application is up-to-date!')
-            pass
+        else:
+            if not startup:
+                ShowInfo(controller=self, root=self.root, info='The application is up-to-date!')
 
     def exit_the_program(self):
         """Exits the program"""
