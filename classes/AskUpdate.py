@@ -46,7 +46,7 @@ class AskUpdate(tk.Toplevel):
             print(f'Script: {dir_path}')
         self.dir_path = dir_path  # The directory containing the executable. See above for the real folder.
         print(self.dir_path)
-        center(self, self.root)
+        center(self)  # Center according to the screen's x,y, not self.root's.
 
     def initUI(self):
         """
