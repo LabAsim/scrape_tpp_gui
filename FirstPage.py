@@ -23,11 +23,12 @@ class FirstPage:
     news_total = []  # Contains all the dataclasses
     driver = None  # The Chromedriver
 
-    def __init__(self, note, name, controller, url, to_bypass, debug):
+    def __init__(self, note, name, controller, url, to_bypass, debug, root=None):
         self.font = tkinter.font.Font(size=14)  # To measure the length of the letters
         self.note = note
         self.name = name
-        self.controller = controller  # The controller is the root
+        self.controller = controller  # The controller is the App class
+        self.root = root
         self.url = url
         self.to_bypass = to_bypass
         self.debug = debug
@@ -82,7 +83,7 @@ class FirstPage:
                     ToplevelArticle(class_, operation='main_article', root=self.controller)
                 else:
                     print(f'SubPageReader to be called')
-                    added_new = SubPageReader(url=class_.url, header=headers(), debug=self.debug)
+                    added_new = SubPageReader(url=class_.url, header=headers(), debug=self.debug, firstpage=self)
                     data = added_new.data_to_return
                     print(f'length of SubPageReader: {len(data)}'
                           f'\nData from SubPageReader: {data}')
@@ -93,7 +94,7 @@ class FirstPage:
                     self.tree.item(current, values=(self.tree.item(current)['values'][0], newsclass.title))
                     print(f'Main content: \n{newsclass.main_content}')
                     count += 1
-                    ToplevelArticle(newsclass, operation='main_article', root=self.controller)
+                    ToplevelArticle(newsclass, operation='main_article', root=self.root)
                     # Remove the Dataclass not containing main_content and summary
                     # after appending the newsclass to the same list
                     FirstPage.news_total.insert(number, newsclass)  # Insert the newsclass to same index as class_
