@@ -52,7 +52,7 @@ class AskUpdate(tk.Toplevel):
         """
         Constructs the window.
         """
-        self.title("Quit")
+        self.title("Update")
         askquit_topframe = ttk.Frame(self.big_frame)
         askquit_topframe.pack(side='top', expand=True)
         valuelabel = ttk.Label(askquit_topframe, text="A new update was found."
