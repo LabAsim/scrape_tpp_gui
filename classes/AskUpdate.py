@@ -1,5 +1,7 @@
+"""
+A toplevel asking the user to update the application
+"""
 import os.path
-import pathlib
 import subprocess
 import sys
 import time
@@ -34,7 +36,6 @@ class AskUpdate(tk.Toplevel):
         self.big_frame.pack(expand=True, fill='both')
         self.initUI()
         self.setActive()
-        center(self, self.root)
         dir_path = os.path.dirname(os.path.realpath(__file__))  # The relative is like this: ./classes
         if getattr(sys, 'frozen', False):
             print(getattr(sys, 'frozen', False))
@@ -45,6 +46,7 @@ class AskUpdate(tk.Toplevel):
             print(f'Script: {dir_path}')
         self.dir_path = dir_path  # The directory containing the executable. See above for the real folder.
         print(self.dir_path)
+        center(self, self.root)
 
     def initUI(self):
         """
