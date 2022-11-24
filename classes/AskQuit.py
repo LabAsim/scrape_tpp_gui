@@ -15,6 +15,8 @@ class AskQuit(tk.Toplevel):
     def __init__(self, parent, driver=None):
         super().__init__()
         # self.root = root
+        self.images_dir_path = None
+        self.path_of_images()
         self.driver = driver
         self.geometry(f'{AskQuit.x}x{AskQuit.y}')  # Here, self is tkinter.Toplevel
         self.parent = parent
@@ -31,7 +33,7 @@ class AskQuit(tk.Toplevel):
         askquit_topframe.pack(side='top', expand=True)
         valueLabel = ttk.Label(askquit_topframe, text="Do you want to quit?")
         valueLabel.pack(side='right', expand=True)
-        image = Image.open(os.path.join(dir_path, "images/questionmark.png"))
+        image = Image.open(self.images_dir_path)
         image = image.resize(
             (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), PIL.Image.ANTIALIAS)
         image = ImageTk.PhotoImage(image)
@@ -70,3 +72,8 @@ class AskQuit(tk.Toplevel):
         self.big_frame.lift()
         self.big_frame.focus_force()
         self.big_frame.grab_set()
+
+    def path_of_images(self):
+        current_dir_path = os.path.dirname(os.path.realpath(__file__))
+        parent_of_current_dir = os.path.dirname(current_dir_path)
+        self.images_dir_path = os.path.join(parent_of_current_dir, "images/questionmark.png")
