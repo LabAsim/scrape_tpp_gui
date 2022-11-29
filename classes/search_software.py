@@ -1,5 +1,5 @@
 """
-
+A module containing a Class to search both registry and windows PATH.
 """
 import os
 import pathlib

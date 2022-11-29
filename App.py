@@ -22,7 +22,8 @@ from classes.ToplevelAboutTpp import ToplevelAboutTpp
 from classes.AskUpdate import AskUpdate
 from scrape_tpp_gui.trace_error import trace_error
 from source.version.version_module import check_online_version, check_new_version
-
+from classes.search_software import InstalledSoftware
+from classes.webdriver_user_interaction import WarningDoesNotExists
 
 class App:
     """Main App"""
@@ -153,6 +154,8 @@ class App:
         self.context.add_cascade(label='Load more news', menu=self.load_more_news, underline=0, font='Arial 10')
         # Add more commands
         self.context.add_separator()
+        # TODO: Before try bypass commands, check for chromedriver in PATH. If it does not exists, prompt google url to download
+
         self.context.add_command(label='Renew titles (bypass)', font='Arial 10', command=self.call_renew_feed_bypass)
         self.context.add_cascade(label='Load more news (bypass)', menu=self.load_more_news_bypass, underline=0,
                                  font='Arial 10')
@@ -197,8 +200,7 @@ class App:
         self.main_menu.add_cascade(label='TPP', menu=self.tpp_menu, underline=0)
         self.main_menu.add_cascade(label="Help", menu=self.help_menu, underline=0)
 
-    @staticmethod
-    def insert_news_for_a_particular_tab(name, bypass=False):
+    def insert_news_for_a_particular_tab(self, name, bypass=False):
         """
         Saves the number of pages loaded in the particular category to App.treeview_tab_page_counter[name]
         and loads the App.treeview_tab_page_counter[name] + 1.
@@ -206,6 +208,9 @@ class App:
         :param name: The name of the category as a strings
         :return: None
         """
+        if not bypass:  # Need to check here.
+            if not self.check_for_chrome_and_chromedriver():  # If it returns False (=>Either does not exists)
+                return  # Just break the function
         App.treeview_tab_page_counter[name] += 1  # Add 1 to the default counter
         if name not in ('Anaskopisi', 'anaskopisi'):
             url_to_scrape = str(url_list_base_page[name]) + str(App.treeview_tab_page_counter[name])
@@ -229,6 +234,7 @@ class App:
         """
         Renews the treeview for all tabs by using Chromedriver
         """
+        self.check_for_chrome_and_chromedriver()
         print(f'App>call_renew_feed_bypass()')
         FirstPage.news_total.clear()  # Clear needs to be called here, just once. Not in Firstpage via renew_feed()
         for dictio in App.page_dict.values():
@@ -236,6 +242,19 @@ class App:
         self.f_time.destroy()
         self.time_widgets()
         print(f'Notebooks renewed')
+
+    def check_for_chrome_and_chromedriver(self):
+        """
+        Checks if Chrome is installed and then, checks if chromedriver is in PATH.
+        :return:
+        """
+        program_to_find = InstalledSoftware('chrome')
+        if len(program_to_find.installed_programs) == 0:
+            WarningDoesNotExists(root=self.root, controller=self, info="Chrome is not installed")
+            return False
+        elif not InstalledSoftware.program_exists('chromedriver'):
+            WarningDoesNotExists(root=self.root, controller=self, info="Chromedriver is not in PATH", x=265, y=130)
+            return False
 
     def time_widgets(self):
         """

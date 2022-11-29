@@ -240,12 +240,14 @@ class FirstPage:
             trace_error()
 
     def renew_feed_bypass(self):
+        # TODO: Before try bypass commands, check for chromedriver in PATH. If it does not exists, prompt google url to download
         FirstPage.values.clear()
         FirstPage.news_to_open_in_browser.clear()
         self.fill_the_tree_bypass()
         print(f"FirstPage>renew_feed_bypass(): Tree renewed")
 
     def fill_the_tree_bypass(self):
+        # TODO: Before try bypass commands, check for chromedriver in PATH. If it does not exists, prompt google url to download
         # Clear the treeview
         driver = None
         try:
@@ -323,6 +325,7 @@ class FirstPage:
         """
         FirstPage.values.clear()  # Clear the temporary list
         if not bypass:
+            # TODO: Before try bypass commands, check for chromedriver in PATH. If it does not exists, prompt google url to download
             PageReader(url=url, header=headers(), category=category, debug=self.debug, firstpage=self)
         else:  # Use webdriver
             if is_driver_open(FirstPage.driver):
