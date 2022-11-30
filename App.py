@@ -23,7 +23,7 @@ from classes.AskUpdate import AskUpdate
 from scrape_tpp_gui.trace_error import trace_error
 from source.version.version_module import check_online_version, check_new_version
 from classes.search_software import InstalledSoftware
-from classes.webdriver_user_interaction import WarningDoesNotExists
+from classes.WarningDoesNotExists import WarningDoesNotExists
 
 class App:
     """Main App"""
@@ -209,7 +209,7 @@ class App:
         :return: None
         """
         if not bypass:  # Need to check here.
-            if not self.check_for_chrome_and_chromedriver():  # If it returns False (=>Either does not exists)
+            if self.check_for_chrome_and_chromedriver() is False:  # If it returns False (=>Either does not exists)
                 return  # Just break the function
         App.treeview_tab_page_counter[name] += 1  # Add 1 to the default counter
         if name not in ('Anaskopisi', 'anaskopisi'):
@@ -234,7 +234,8 @@ class App:
         """
         Renews the treeview for all tabs by using Chromedriver
         """
-        self.check_for_chrome_and_chromedriver()
+        if self.check_for_chrome_and_chromedriver() is False:
+            return  # Break the function
         print(f'App>call_renew_feed_bypass()')
         FirstPage.news_total.clear()  # Clear needs to be called here, just once. Not in Firstpage via renew_feed()
         for dictio in App.page_dict.values():
@@ -250,10 +251,11 @@ class App:
         """
         program_to_find = InstalledSoftware('chrome')
         if len(program_to_find.installed_programs) == 0:
-            WarningDoesNotExists(root=self.root, controller=self, info="Chrome is not installed")
+            WarningDoesNotExists(root=self.root, controller=self, info="Chrome is not installed", program='chrome')
             return False
         elif not InstalledSoftware.program_exists('chromedriver'):
-            WarningDoesNotExists(root=self.root, controller=self, info="Chromedriver is not in PATH", x=265, y=130)
+            WarningDoesNotExists(root=self.root, controller=self, info="Chromedriver is not in PATH", x=275, y=130,
+                                 program='chromedriver')
             return False
 
     def time_widgets(self):
