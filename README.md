@@ -8,7 +8,8 @@ It scrapes the news categories of [thepressproject.gr](https://thepressproject.g
 
 It has been tested in Python 3.10 and Windows 10. It heavily relies on 3rd party packages.
 
-**Important Note**: Unfortunately, the Updater.exe inside one-file executable scraper_tpp_gui.exe is flagged as a threat by Avira antivirus, althought it does not contain, of course, any malware. 
+**Important Note**: Unfortunately, the updater.exe inside the one-file executable scraper_tpp_gui.exe is flagged 
+as a threat by Avira antivirus, although it does not contain, of course, any malware. 
 
 ## Table of Contents
 - [Dependencies](#dependencies)
