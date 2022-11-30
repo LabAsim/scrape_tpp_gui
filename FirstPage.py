@@ -109,6 +109,12 @@ class FirstPage:
                     FirstPage.news_total.remove(class_)
 
     def show_main_article_bypass(self):
+        """
+        Launches webdriver and scrapes the article.
+        :return: None
+        """
+        if self.controller.check_for_chrome_and_chromedriver() is False:  # Needs to be first
+            return  # Just stop the function
         current = self.tree.focus()
         current_article = self.tree.item(current)['values'][1]  # [0] is the Date
         print(f'current: {current_article}')
@@ -241,6 +247,8 @@ class FirstPage:
 
     def renew_feed_bypass(self):
         # TODO: Before try bypass commands, check for chromedriver in PATH. If it does not exists, prompt google url to download
+        if self.controller.check_for_chrome_and_chromedriver() is False:
+            return  # Just stop the function
         FirstPage.values.clear()
         FirstPage.news_to_open_in_browser.clear()
         self.fill_the_tree_bypass()
@@ -328,6 +336,8 @@ class FirstPage:
             # TODO: Before try bypass commands, check for chromedriver in PATH. If it does not exists, prompt google url to download
             PageReader(url=url, header=headers(), category=category, debug=self.debug, firstpage=self)
         else:  # Use webdriver
+            if self.controller.check_for_chrome_and_chromedriver() is False:  # Needs to be first here
+                return  # Just stop the function
             if is_driver_open(FirstPage.driver):
                 PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, category=category, firstpage=self,
                                  debug=self.debug)
