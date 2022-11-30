@@ -208,7 +208,8 @@ class App:
         :param name: The name of the category as a strings
         :return: None
         """
-        if not bypass:  # Need to check here.
+        print("App>insert_news_for_a_particular_tab")
+        if bypass:  # Need to check here.
             if self.check_for_chrome_and_chromedriver() is False:  # If it returns False (=>Either does not exists)
                 return  # Just break the function
         App.treeview_tab_page_counter[name] += 1  # Add 1 to the default counter
