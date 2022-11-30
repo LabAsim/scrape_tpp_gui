@@ -8,6 +8,7 @@ It scrapes the news categories of [thepressproject.gr](https://thepressproject.g
 
 It has been tested in Python 3.10 and Windows 10. It heavily relies on 3rd party packages.
 
+**Important Note**: Unfortunately, the Updater.exe inside one-file executable scraper_tpp_gui.exe is flagged as a threat by Avira antivirus, althought it does not contain, of course, any malware. 
 
 ## Table of Contents
 - [Dependencies](#dependencies)
@@ -33,7 +34,7 @@ The usage is pretty straightforward.
 
 The GUI automatically loads all the news titles and their date. The user can renew the titles through menu>renew titles.
 
-If no news are loaded, try to renew titles via menu>renew titles(bypass). It requires Chromedriver and Chrome in order 
+If no news was loaded, try to renew titles via menu>renew titles(bypass). It requires Chromedriver and Chrome in order 
 to bypass Cloudflare bot protection. A Chrome window will be launched off the screen to access the news (headless mode
 gets detected by Cloudflare).
 
