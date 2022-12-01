@@ -160,12 +160,12 @@ def create_and_start_bat(path_to_dir):
         subprocess.Popen(bat_file)
         print(f"Bat is started")
         with open(os.path.join(pathlib.Path.home(), "test.txt"), 'a+') as file:
-            file.write(f"\nBat is started")
+            file.write(f"\nBat is started from {bat_file}")
     except BaseException as err:
-        print(err)
+        print(f'create_and_start_bat> {err}')
     finally:  # Remove the bat file
+        time.sleep(2)
         os.remove(bat_file)
-
 
 def parse_arguments():
     """
@@ -199,5 +199,9 @@ if __name__ == "__main__":
         time.sleep(10)
     except BaseException as err:
         print(err)
-
         time.sleep(10)
+    finally:
+        print()
+        for sec in range(5, 0, -1):
+            print(f"Ending In {sec}")
+            time.sleep(1)
