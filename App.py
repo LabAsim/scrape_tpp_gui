@@ -154,8 +154,6 @@ class App:
         self.context.add_cascade(label='Load more news', menu=self.load_more_news, underline=0, font='Arial 10')
         # Add more commands
         self.context.add_separator()
-        # TODO: Before try bypass commands, check for chromedriver in PATH. If it does not exists, prompt google url to download
-
         self.context.add_command(label='Renew titles (bypass)', font='Arial 10', command=self.call_renew_feed_bypass)
         self.context.add_cascade(label='Load more news (bypass)', menu=self.load_more_news_bypass, underline=0,
                                  font='Arial 10')
@@ -255,7 +253,7 @@ class App:
             WarningDoesNotExists(root=self.root, controller=self, info="Chrome is not installed", program='chrome')
             return False
         elif not InstalledSoftware.program_exists('chromedriver'):
-            WarningDoesNotExists(root=self.root, controller=self, info="Chromedriver is not in PATH", x=275, y=130,
+            WarningDoesNotExists(root=self.root, controller=self, info="Chromedriver is not in PATH", x=350, y=140,
                                  program='chromedriver')
             return False
 
