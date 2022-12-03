@@ -27,7 +27,7 @@ class PageReader:
 
     def check_url_and_iterate(self, url: str | list, header):
         """
-        Checks if the url is a list of urls or a url and then proceeds.
+        Checks if the url is a list of urls or an url and then proceeds.
         :param url: The url to connect to
         :param header:
         :return:
@@ -91,6 +91,7 @@ class PageReader:
                         trace_error()
                         raise err
             else:
+                print(f"PageReader>scrape_the_soup>{self.category}")
                 for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
                     try:
                         executor.submit(self.iterate_div, div)
