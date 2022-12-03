@@ -57,17 +57,7 @@ class App:
         self.time_widgets()
         self.note = ttk.Notebook(self.root)
         self.note.pack(side='bottom', fill='both', expand=True)
-        # For the 1st page of Newsroom: list(url_list.values())[0][0]
-        self.notebook_pages(url=list(url_list.values())[0][0], note=self.note, controller=self, name='Newsroom')
-        self.notebook_pages(url=list(url_list.values())[1][0], note=self.note, controller=self, name='Politics')
-        self.notebook_pages(url=list(url_list.values())[2][0], note=self.note, controller=self, name='Economy')
-        self.notebook_pages(url=list(url_list.values())[3][0], note=self.note, controller=self, name='International')
-        self.notebook_pages(url=list(url_list.values())[4][0], note=self.note, controller=self, name='Reportage')
-        self.notebook_pages(url=list(url_list.values())[5][0], note=self.note, controller=self, name='Analysis')
-        self.notebook_pages(url=list(url_list.values())[6][0], note=self.note, controller=self, name='tpp.tv')
-        self.notebook_pages(url=list(url_list.values())[7][0], note=self.note, controller=self, name='tpp.radio')
-        self.notebook_pages(url=list(url_list.values())[8][0], note=self.note, controller=self, name='Anaskopisi')
-        self.notebook_pages(url=list(url_list.values())[9][0], note=self.note, controller=self, name='Culture')
+        self.create_the_notebook_pages()
         self.top_label = ttk.Label(self.root, text='The Press Project', cursor='hand2', font='Arial 20')
         self.top_label.pack(side='top', pady=15)
         self.top_label.bind("<Button-1>", lambda e: callback(App.base_url))
@@ -82,6 +72,22 @@ class App:
         self.create_menu()
         # Check for updates at startup
         self.check_for_updates(startup=self.check_updates_at_startup, from_menu=False)
+
+    def create_the_notebook_pages(self):
+        """
+        Creates the notebook pages.
+        """
+        # For the 1st page of Newsroom: list(url_list.values())[0][0]
+        self.notebook_pages(url=list(url_list.values())[0][0], note=self.note, controller=self, name='Newsroom')
+        self.notebook_pages(url=list(url_list.values())[1][0], note=self.note, controller=self, name='Politics')
+        self.notebook_pages(url=list(url_list.values())[2][0], note=self.note, controller=self, name='Economy')
+        self.notebook_pages(url=list(url_list.values())[3][0], note=self.note, controller=self, name='International')
+        self.notebook_pages(url=list(url_list.values())[4][0], note=self.note, controller=self, name='Reportage')
+        self.notebook_pages(url=list(url_list.values())[5][0], note=self.note, controller=self, name='Analysis')
+        self.notebook_pages(url=list(url_list.values())[6][0], note=self.note, controller=self, name='tpp.tv')
+        self.notebook_pages(url=list(url_list.values())[7][0], note=self.note, controller=self, name='tpp.radio')
+        self.notebook_pages(url=list(url_list.values())[8][0], note=self.note, controller=self, name='Anaskopisi')
+        self.notebook_pages(url=list(url_list.values())[9][0], note=self.note, controller=self, name='Culture')
 
     def notebook_pages(self, url, note, controller, name):
         """
