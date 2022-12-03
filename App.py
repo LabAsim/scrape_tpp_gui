@@ -9,8 +9,7 @@ from tkinter import Menu, StringVar, ttk
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
 import sv_ttk
 import undetected_chromedriver
-
-from scrape_tpp_gui.helper_functions import callback
+from scrape_tpp_gui.helper_functions import callback, str2bool
 from scrape_tpp_gui.source.version.version_module import file_exists
 from misc import url_list, url_list_base_page, dir_path
 from FirstPage import FirstPage
@@ -24,6 +23,8 @@ from scrape_tpp_gui.trace_error import trace_error
 from source.version.version_module import check_online_version, check_new_version
 from classes.search_software import InstalledSoftware
 from classes.WarningDoesNotExists import WarningDoesNotExists
+from classes.settings import SettingsTopLevel
+
 
 class App:
     """Main App"""
@@ -35,6 +36,7 @@ class App:
     treeview_tab_page_counter = {}  # Default: {'Newsroom: 1'} (as, it loads the news up to the first page)
 
     def __init__(self, root, to_bypass, debug):
+        self.dir_path = self.find_current_dir_path()
         self.help_menu = None
         self.tpp_menu = None
         self.theme_menu = None
@@ -44,6 +46,8 @@ class App:
         self.context = None
         self.f_time = None
         self.time = None
+        self.settings_dict = self.read_settings()
+        self.check_updates_at_startup = self.settings_dict['auto_update_at_startup']  # Boolean
         root.geometry(f'{App.x}x{App.y}')
         self.root = root
         self.bypass = to_bypass
@@ -76,7 +80,7 @@ class App:
         # Create the rest menus
         self.create_menu()
         # Check for updates at startup
-        self.check_for_updates(startup=True)
+        self.check_for_updates(startup=self.check_updates_at_startup)
 
     def notebook_pages(self, url, note, controller, name):
         """
@@ -157,6 +161,11 @@ class App:
         self.context.add_command(label='Renew titles (bypass)', font='Arial 10', command=self.call_renew_feed_bypass)
         self.context.add_cascade(label='Load more news (bypass)', menu=self.load_more_news_bypass, underline=0,
                                  font='Arial 10')
+        # Settings
+        self.context.add_separator()
+        self.context.add_command(label='Settings', font='Arial 10',
+                                 command=lambda: SettingsTopLevel(root=self.root, controller=self))
+        # Exit
         self.context.add_separator()
         self.context.add_command(label='Exit', font='Arial 10', command=self.exit_the_program)
         # Add the cascade here. The submenu has to be built first and then be added to the main menu
@@ -250,10 +259,10 @@ class App:
         """
         program_to_find = InstalledSoftware('chrome')
         if len(program_to_find.installed_programs) == 0:
-            WarningDoesNotExists(root=self.root, controller=self, info="Chrome is not installed", program='chrome')
+            WarningDoesNotExists(root=self.root, controller=self, info="Chrome is not installed!", program='chrome')
             return False
         elif not InstalledSoftware.program_exists('chromedriver'):
-            WarningDoesNotExists(root=self.root, controller=self, info="Chromedriver is not in PATH", x=350, y=140,
+            WarningDoesNotExists(root=self.root, controller=self, info="Chromedriver is not found!", x=370, y=170,
                                  program='chromedriver')
             return False
 
@@ -277,7 +286,7 @@ class App:
     def check_for_updates(self, startup=False):
         """
         Checks for a new version at the remote repository.
-        :param startup:
+        :param startup: Boolean: If true, calls AskUpdate.
         """
         if check_new_version():
             if not startup:
@@ -287,7 +296,17 @@ class App:
 
         else:
             if not startup:
-                ShowInfo(controller=self, root=self.root, info='The application is up-to-date!')
+                self.root.after(1000,
+                                lambda: ShowInfo(controller=self,
+                                                 root=self.root, info='The application is up-to-date!'))
+
+    def post_settings(self):
+        """
+        Settings
+        # TODO fill details
+        :return:
+        """
+        pass
 
     def exit_the_program(self):
         """Exits the program"""
@@ -302,6 +321,21 @@ class App:
         self.root.destroy()
         print(f'App>exit_the_program()')
         sys.exit()
+
+    def find_current_dir_path(self):
+        """
+        Finds and returns the path of the directory of the running .py script or .exe .
+        """
+
+        if getattr(sys, 'frozen', False):
+            print(getattr(sys, 'frozen', False))
+            self.dir_path = os.path.dirname(os.path.realpath(sys.executable))
+            print("Exe:", self.dir_path)
+            return self.dir_path
+        elif __file__:
+            self.dir_path = os.path.dirname(__file__)
+            print(f'Script: {self.dir_path}')
+            return self.dir_path
 
     def change_theme(self, theme: str):
         """
@@ -502,9 +536,10 @@ class App:
             print("Exe:", dir_path)
         elif __file__:
             dir_path = os.path.dirname(__file__)
+
             print(f'Script: {dir_path}')
         print(dir_path)
-        with open(os.path.join(dir_path, "tpp.json"), "w+", encoding='utf-8') as file:
+        with open(os.path.join(dir_path, "settings.json"), "w+", encoding='utf-8') as file:
             json_data = {'theme': self.root.tk.call("ttk::style", "theme", "use")}
             json.dump(json_data, file, indent=4)
             print(f"Theme saved to {os.path.join(dir_path, 'tpp.json')}")
@@ -512,8 +547,15 @@ class App:
     @staticmethod
     def read_theme() -> str | None:
         """Reads the preferred theme"""
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        if file_exists(name="tpp.json", dir_path=dir_path):
+        dir_path = str
+        if getattr(sys, 'frozen', False):
+            print(getattr(sys, 'frozen', False))
+            dir_path = os.path.dirname(os.path.realpath(sys.executable))
+            print("Exe:", dir_path)
+        elif __file__:
+            dir_path = os.path.dirname(__file__)
+            print(f'Script: {dir_path}')
+        if file_exists(name="settings.json", dir_path=dir_path):
             with open(os.path.join(dir_path, "tpp.json"), "r+", encoding='utf-8') as file:
                 json_data = json.load(file)
                 print(json_data)
@@ -550,3 +592,17 @@ class App:
         for toplevel in toplevel_temporary_list:  # Then re-draw the toplevel windows.
             # Thus, the toplevel will always be on top
             toplevel.deiconify()
+
+    def read_settings(self) -> dict | None:
+        """
+        Reads the settings from `settings.json`.
+        :return: A dictionary with the settings.
+
+        """
+
+        if file_exists(name="settings.json", dir_path=self.dir_path):
+            with open(os.path.join(self.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
+                json_data = json.load(file)
+                print(json_data)
+                return json_data
+        return None
