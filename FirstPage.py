@@ -27,6 +27,7 @@ class FirstPage:
     driver = None  # The Chromedriver
 
     def __init__(self, note, name, controller, url, to_bypass, debug, root=None):
+        self.right_click_menu = None
         self.font = tkinter.font.Font(size=14)  # To measure the length of the letters
         self.note = note
         self.name = name
@@ -48,6 +49,17 @@ class FirstPage:
             self.fill_the_tree()
         else:  # self.to_bypass = True ==> Uses chromedriver
             self.fill_the_tree_bypass()
+        self.create_menu()
+        # Bind the right click with self.post_menu()
+        self.tree.bind('<ButtonRelease-3>', self.post_menu)
+        # Bind left double click to post the menu
+        self.tree.bind("<Double-1>", self.show_main_article)
+
+    def create_menu(self):
+        """
+        The menu to emerge with right click
+        :return: None
+        """
         # Menu emerging on the right click only
         self.right_click_menu = Menu(font='Arial 10', tearoff=0)
         self.right_click_menu.add_command(label='Show article', command=self.show_main_article)
@@ -58,9 +70,6 @@ class FirstPage:
         self.right_click_menu.add_command(label='Load more news (bypass)',
                                           command=lambda: self.controller.insert_news_for_a_particular_tab(self.name,
                                                                                                            bypass=True))
-        self.tree.bind('<ButtonRelease-3>', self.post_menu)
-        # Bind left double click to post the menu
-        self.tree.bind("<Double-1>", self.show_main_article)
 
     def post_menu(self, event):
         """
