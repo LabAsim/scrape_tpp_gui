@@ -19,15 +19,16 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from zipfile import ZipFile
 
-from scrape_tpp_gui.helper_functions import str2bool
+from scrape_tpp_gui.helper_functions import str2bool, tkinter_theme_calling, center
 
+# import scrape_tpp_gui.helper_functions.center
 parent_folder = os.path.dirname(__file__)
 parent_of_parent_folder = os.path.dirname(parent_folder)
 sys.path.append(parent_of_parent_folder)
 sys.path.append(parent_folder)
+
 from classes.search_software import InstalledSoftware
 import xml.etree.ElementTree as ET
-from helper_functions import center
 
 
 class WarningDoesNotExists(tk.Toplevel):
@@ -38,7 +39,7 @@ class WarningDoesNotExists(tk.Toplevel):
     url_chromedriver = 'https://sites.google.com/chromium.org/driver/'
     path_to_desktop = os.path.join(pathlib.Path.home(), 'Desktop')
 
-    def __init__(self, root, controller, info, program: str, x=260, y=125):
+    def __init__(self, root, controller, info, program: str, x=270, y=125):
         super().__init__()
         self.geometry(f'{x}x{y}')  # Here, self is tkinter.Toplevel
         self.controller = controller
@@ -51,11 +52,11 @@ class WarningDoesNotExists(tk.Toplevel):
         self.installed_software = None
         self.path_to_home = pathlib.Path.home()
         self.path_to_desktop = os.path.join(self.path_to_home, 'Desktop')
-        self.grab_set()
         self.big_frame = ttk.Frame(self)
         self.big_frame.pack(expand=True, fill='both')
         self.initUI()
         self.setActive()
+        self.grab_set()
         center(self, self.root)
         dir_path = os.path.dirname(os.path.realpath(__file__))  # The relative is like this: ./classes
         if getattr(sys, 'frozen', False):
@@ -73,9 +74,9 @@ class WarningDoesNotExists(tk.Toplevel):
         Constructs the window.
         """
         self.title("Warning")
-        askquit_topframe = ttk.Frame(self.big_frame)
-        askquit_topframe.pack(side='top', expand=True)
-        valuelabel = ttk.Label(askquit_topframe, text=f"{self.info}")
+        _topframe = ttk.Frame(self.big_frame)
+        _topframe.pack(side='top', expand=True)
+        valuelabel = ttk.Label(_topframe, text=f"{self.info}")
         valuelabel.pack(side='right', expand=True)
         if self.program == 'other':
             image = Image.open(os.path.join(parent_of_parent_folder, "images/warning/warning_sign1.png"))
@@ -84,7 +85,7 @@ class WarningDoesNotExists(tk.Toplevel):
         image = image.resize(
             (int(self.winfo_width() * 60), int(self.winfo_height() * 60)), PIL.Image.ANTIALIAS)
         image = ImageTk.PhotoImage(image)
-        image_label = ttk.Label(askquit_topframe, image=image)
+        image_label = ttk.Label(_topframe, image=image)
         image_label.pack(side='left', expand=True, padx=10, pady=1)
         image_label.image = image
         buttons_frame = ttk.Frame(self.big_frame)
@@ -125,7 +126,7 @@ class WarningDoesNotExists(tk.Toplevel):
         """
         the_version_of_chromedriver_to_download = self.check_chrome_version()
         self.download_compatible_chromedriver(version=the_version_of_chromedriver_to_download)
-        self.locate_unzin_and_add_chromedriver_to_path()
+        self.locate_unzip_and_add_chromedriver_to_path()
 
     def check_chrome_version(self):
         """
@@ -145,13 +146,6 @@ class WarningDoesNotExists(tk.Toplevel):
                 text = google_api_respone.text
                 xml_file = os.path.join(pathlib.Path.home(), 'response.xml')
                 current_chrome_version_first_numbers = current_chrome_version.split('.')[0]
-                '''root_tree = ET.fromstring(text)
-                tree = ET.ElementTree(root_tree)
-                tree.write(os.path.join(pathlib.Path.home(), 'response_tree.xml'))
-                print(f'tree>{tree.getroot().text}')
-
-                for thing in root_tree.findall('./Contents'):
-                    print(thing.text)'''
                 with open(xml_file, 'w+') as file:
                     file.write(text)
                 ET.register_namespace('', 'http://doc.s3.amazonaws.com/2006-03-01')
@@ -168,13 +162,9 @@ class WarningDoesNotExists(tk.Toplevel):
                                     chromedriver_version = child_child.text.split('.')[0]
                                     if chromedriver_version == current_chrome_version_first_numbers:
                                         print(f"Chromedriver version: {chromedriver_version} from {child_child.text}")
-                                        # Split 107.0.5304.18/chromedriver_win32.zip and return the first part
+                                        # Example: Split '107.0.5304.18/chromedriver_win32.zip' and
+                                        # return the first part
                                         return child_child.text.split('/')[0]
-
-                # print(_root.text)
-                # contents = ET.SubElement(_root, 'Contents')
-                # print(contents.text)
-                # print(root)
         except Exception as err:
             print(f"{err}")
             raise
@@ -193,7 +183,7 @@ class WarningDoesNotExists(tk.Toplevel):
             file.write(response.content)
             print(f"Chromedriver saved to {chromedriver_path}")
 
-    def locate_unzin_and_add_chromedriver_to_path(self):
+    def locate_unzip_and_add_chromedriver_to_path(self):
         """
         It creates a folder in Home if it does not exist, unzips there the chromedriver and
         then adds the folder to PATH.
@@ -241,9 +231,10 @@ class WarningDoesNotExists(tk.Toplevel):
         else:
             # Warn the users that they need to grant admin rights to the process
             WarningDoesNotExists(controller=self.controller, root=self.root,
-                                 info='You have to run the application with administrator'
+                                 info='You have to run the application with administrator '
                                       '\nrights to complete the process.',
-                                 program='Other', x=350, y=140)
+                                 program='Other', x=375, y=140)
+            self.toplevel_quit()
 
     def url_target_version(self, version):
         """Returns the url of `version`"""
@@ -351,10 +342,13 @@ class WarningDoesNotExists(tk.Toplevel):
 if __name__ == "__main__":
     root = tk.Tk()
     center(root)
+    tkinter_theme_calling(root)
     warning = WarningDoesNotExists(controller=None, root=root, info='Chromedriver is not installed',
-                                   program='chromedriver', x=330, y=170)
+                                   program='chromedriver', x=370, y=170)
     version_of_chromedriver_to_download = warning.check_chrome_version()
     print(version_of_chromedriver_to_download)
     warning.download_compatible_chromedriver(version_of_chromedriver_to_download)
+    # warning = WarningDoesNotExists(controller=None, root=root, info='Chromedriver is not installed',
+    #                               program='chrome')
     # WarningDoesNotExists(controller=None, root=root, info='Chromedriver is not installed', program='Chromedriver')
     root.mainloop()
