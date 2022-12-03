@@ -21,6 +21,7 @@ class FirstPage:
     """
 
     header = ('Date', 'Title', 'Summary')
+    # TODO: Find all FirstPage.values and convert them to self.values
     values = []  # A temporary list containing lists for each news-link in the form of [title-string, url, date]
     news_to_open_in_browser = []  # Contains all the scraped news in the form of [title-string, url, date]
     news_total = []  # Contains all the dataclasses
@@ -45,8 +46,10 @@ class FirstPage:
         self.f1.pack(side='top', expand=True, fill='both', padx=2, pady=2)
         self.tree = ttk.Treeview(self.f1, columns=FirstPage.header, show='headings')
         self.setup_tree()
+        # Call fill_the_tree() with note.after, to allow tkinter main window to be shown
+        # and then the notebooks to be filled. It does not save time for the overall loading of the app.
         if not self.to_bypass:  # To use BeautifulSoup
-            self.fill_the_tree()
+            self.note.after(1000, lambda: self.fill_the_tree())
         else:  # self.to_bypass = True ==> Uses chromedriver
             self.fill_the_tree_bypass()
         self.create_menu()
@@ -199,6 +202,7 @@ class FirstPage:
                 self.tree.heading(column=head, text=f'{head}')
                 self.tree.column(column=head, stretch=True)
         # Clear the list because otherwise it will contain duplicates
+        self.values = []
         FirstPage.values = []
         vsb = ttk.Scrollbar(self.tree, orient="vertical", command=self.tree.yview)
         hsb = ttk.Scrollbar(self.tree, orient="horizontal", command=self.tree.xview)
@@ -214,6 +218,7 @@ class FirstPage:
         Clears the treeview and then calls PageReader and fills the tree using FirstPage.values (Title, Date).
         It sorts the news based on Date (firstly, converts the date to unix timestamps).
         """
+        print(f"FirstPage>fill_the_tree()>name: {self.name}")
         # Clear the treeview
         try:
             for item in self.tree.get_children():
@@ -228,8 +233,8 @@ class FirstPage:
                                   firstpage=self)
             else:
                 feed = PageReader(url=self.url, header=headers(), debug=self.to_bypass, firstpage=self)
-            title_list = [self.font.measure(d[0]) for d in FirstPage.values]
-            date_list = [self.font.measure(d[2]) for d in FirstPage.values]
+            title_list = [self.font.measure(d[0]) for d in self.values]
+            date_list = [self.font.measure(d[2]) for d in self.values]
             print(f"date_list: {date_list}")
             self.tree.column(column='Title', minwidth=100, width=max(title_list), stretch=True)
             if self.name.lower() in ('anaskopisi', 'tpp.radio'):
@@ -239,7 +244,7 @@ class FirstPage:
                 self.tree.column(column='Date', minwidth=150, width=max(date_list), stretch=True)
             print(f"max length of date: {max(date_list)}")
             print(max(title_list))
-            for number, tuple_feed in enumerate(FirstPage.values):
+            for number, tuple_feed in enumerate(self.values):
                 self.tree.insert("", tk.END, iid=str(number),
                                  values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
             # Sort the rows of column with heading "Date"
@@ -249,7 +254,7 @@ class FirstPage:
             for index, (values, item) in enumerate(rows):
                 self.tree.move(item, '', index)
             if self.debug:
-                print(f'Treeview was filled {FirstPage.values}')
+                print(f'Treeview was filled {self.values}')
         except Exception as err:
             print(f'Loading failed! Error: {err}')
             trace_error()
@@ -258,6 +263,7 @@ class FirstPage:
         if self.controller.check_for_chrome_and_chromedriver() is False:
             return  # Just stop the function
         FirstPage.values.clear()
+        self.values.clear()
         FirstPage.news_to_open_in_browser.clear()
         self.fill_the_tree_bypass()
         print(f"FirstPage>renew_feed_bypass(): Tree renewed")
@@ -337,7 +343,7 @@ class FirstPage:
         :param url: The url to scrape
         :param category: The category to be scraped.
         """
-        FirstPage.values.clear()  # Clear the temporary list
+        self.values.clear()  # Clear the temporary list
         if not bypass:
             PageReader(url=url, header=headers(), category=category, debug=self.debug, firstpage=self)
         else:  # Use webdriver
@@ -355,7 +361,7 @@ class FirstPage:
                 driver.implicitly_wait(6)
                 PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, category=category, firstpage=self,
                                  debug=self.debug)
-        for number, tuple_feed in enumerate(FirstPage.values):
+        for number, tuple_feed in enumerate(self.values):
             self.tree.insert("", tk.END,
                              values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
         # Sort the rows of column with heading "Date"
