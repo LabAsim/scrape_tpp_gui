@@ -246,7 +246,6 @@ class FirstPage:
             trace_error()
 
     def renew_feed_bypass(self):
-        # TODO: Before try bypass commands, check for chromedriver in PATH. If it does not exists, prompt google url to download
         if self.controller.check_for_chrome_and_chromedriver() is False:
             return  # Just stop the function
         FirstPage.values.clear()
@@ -255,7 +254,6 @@ class FirstPage:
         print(f"FirstPage>renew_feed_bypass(): Tree renewed")
 
     def fill_the_tree_bypass(self):
-        # TODO: Before try bypass commands, check for chromedriver in PATH. If it does not exists, prompt google url to download
         # Clear the treeview
         driver = None
         try:
@@ -297,7 +295,6 @@ class FirstPage:
             for number, tuple_feed in enumerate(FirstPage.values):
                 self.tree.insert("", tk.END, iid=str(number),
                                  values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
-            # print(f"App.page_dict {list(App.page_dict.keys())[-1]}")  # TODO: remove it
             # Sort the rows of column with heading "Date"
             rows = [(self.tree.set(item, 'Date').lower(), item) for item in self.tree.get_children('')]
             rows.sort(key=date_to_unix, reverse=True)
@@ -333,7 +330,6 @@ class FirstPage:
         """
         FirstPage.values.clear()  # Clear the temporary list
         if not bypass:
-            # TODO: Before try bypass commands, check for chromedriver in PATH. If it does not exists, prompt google url to download
             PageReader(url=url, header=headers(), category=category, debug=self.debug, firstpage=self)
         else:  # Use webdriver
             if self.controller.check_for_chrome_and_chromedriver() is False:  # Needs to be first here
