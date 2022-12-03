@@ -296,7 +296,9 @@ class App:
 
         else:
             if not startup:
-                self.root.after(1000,
+                ShowInfo(controller=self, root=self.root, info='The application is up-to-date!')
+            else:
+                self.root.after(3000,
                                 lambda: ShowInfo(controller=self,
                                                  root=self.root, info='The application is up-to-date!'))
 

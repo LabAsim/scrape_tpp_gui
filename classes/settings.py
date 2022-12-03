@@ -31,9 +31,11 @@ class SettingsTopLevel(tk.Toplevel):
         self.controller = controller
         self.x = x
         self.y = y
+        self.set_variables_from_settings()
         self.create_ui()
         # self.grab_set()
         self.set_active()
+        center(self, self.root)
 
     def create_ui(self):
         """
@@ -60,7 +62,6 @@ class SettingsTopLevel(tk.Toplevel):
                                                    style="Switch.TCheckbutton")
 
         self.check_update_button.pack(padx=5, pady=10)
-        self.check_update_button_variable.set(False)
 
     def check_button_save(self):
         """
@@ -106,12 +107,12 @@ class SettingsTopLevel(tk.Toplevel):
                     json_data.update(save_settings_to_dump)
             with open(os.path.join(dir_path, "settings.json"), "w+", encoding='utf-8') as file:
                 json.dump(json_data, file, indent=4)
-                print(f"Settings saved in: {os.path.join(dir_path, 'tpp.json')}")
+                print(f"Settings saved in: {os.path.join(dir_path, 'settings.json')}")
         else:  # Settings.json does not exist.
             with open(os.path.join(dir_path, "settings.json"), "w+", encoding='utf-8') as file:
                 json_data = save_settings_to_dump
                 json.dump(json_data, file, indent=4)
-                print(f"Settings saved in: {os.path.join(dir_path, 'tpp.json')}")
+                print(f"Settings saved in: {os.path.join(dir_path, 'settings.json')}")
 
     def read_settings_from_file(self):
         """
@@ -130,10 +131,10 @@ class SettingsTopLevel(tk.Toplevel):
         return None
 
     def set_variables_from_settings(self):
-        '''
+        """
         Reads the file and sets all the variables and their user-defined values from the file.
         :return: None
-        '''
+        """
         self.settings_from_file = self.read_settings_from_file()
         if self.settings_from_file:  # It is not None, thus
             self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])
