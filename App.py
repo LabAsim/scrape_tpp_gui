@@ -46,8 +46,9 @@ class App:
         self.context = None
         self.f_time = None
         self.time = None
-        self.settings_dict = self.read_settings()
-        self.check_updates_at_startup = self.settings_dict['auto_update_at_startup']  # Boolean
+        self.settings_dict = {}
+        self.check_updates_at_startup = False  # It changes after reading and setting the variables from the json file.
+        self.set_settings_after_reading()
         root.geometry(f'{App.x}x{App.y}')
         self.root = root
         self.bypass = to_bypass
@@ -80,7 +81,7 @@ class App:
         # Create the rest menus
         self.create_menu()
         # Check for updates at startup
-        self.check_for_updates(startup=self.check_updates_at_startup)
+        self.check_for_updates(startup=self.check_updates_at_startup, from_menu=False)
 
     def notebook_pages(self, url, note, controller, name):
         """
@@ -283,22 +284,23 @@ class App:
         self.time = tk.Label(self.f_time, textvariable=var)
         self.time.pack(side='left')
 
-    def check_for_updates(self, startup=False):
+    def check_for_updates(self, from_menu=True, startup=False):
         """
         Checks for a new version at the remote repository.
-        :param startup: Boolean: If true, calls AskUpdate.
+        :param from_menu:
+        :param startup: Boolean: If true, calls AskUpdate at startup.
         """
         if check_new_version():
-            if not startup:
+            if from_menu:
                 AskUpdate(controller=self, root=self.root)
-            else:  # Delay 8 secs the prompt window, not to be shown immediately after startup
+            if startup:  # Delay 8 secs the prompt window, not to be shown immediately after startup
                 self.root.after(8000, lambda: AskUpdate(controller=self, root=self.root))
 
-        else:
-            if not startup:
+        else:  # There is not a new version.
+            if from_menu:
                 ShowInfo(controller=self, root=self.root, info='The application is up-to-date!')
-            else:
-                self.root.after(3000,
+            if startup:
+                self.root.after(8000,
                                 lambda: ShowInfo(controller=self,
                                                  root=self.root, info='The application is up-to-date!'))
 
@@ -606,5 +608,15 @@ class App:
             with open(os.path.join(self.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
                 json_data = json.load(file)
                 print(json_data)
+
                 return json_data
         return None
+
+    def set_settings_after_reading(self):
+        """
+        After loading the `settings.json`, it reads all the variables.
+        :return: None
+        """
+        self.settings_dict = self.read_settings()
+        if self.settings_dict:
+            self.check_updates_at_startup = self.settings_dict['auto_update_at_startup']  # Boolean

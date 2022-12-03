@@ -40,7 +40,7 @@ class SettingsTopLevel(tk.Toplevel):
     def create_ui(self):
         """
         Constructs the User Interface
-        :return:
+        :return: None
         """
 
         self.title("Settings")
