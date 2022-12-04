@@ -19,6 +19,10 @@ class SettingsTopLevel(tk.Toplevel):
 
     def __init__(self, root, controller, x=500, y=500):
         super().__init__()
+        self.transparency_text_label = None
+        self.transparency_scale = None
+        self.transparency_progressbar = None
+        self.transparency_frame = None
         self.dir_path = self.find_the_path_of_main()
         self.save_button = None
         self.save_button_frame = None
@@ -26,6 +30,7 @@ class SettingsTopLevel(tk.Toplevel):
         self.checkbutton_frame = None
         self.big_frame = None
         self.check_update_button_variable = tk.BooleanVar(value=True)
+        self.transparency_percentage = tk.IntVar()
         self.settings_from_file = None
         self.root = root
         self.controller = controller
@@ -39,7 +44,7 @@ class SettingsTopLevel(tk.Toplevel):
 
     def create_ui(self):
         """
-        Constructs the User Interface
+        Constructs the User Interface  for the Settings window.
         :return: None
         """
 
@@ -60,8 +65,40 @@ class SettingsTopLevel(tk.Toplevel):
                                                    variable=self.check_update_button_variable,
                                                    onvalue=True, offvalue=False,
                                                    style="Switch.TCheckbutton")
-
         self.check_update_button.pack(padx=5, pady=10)
+        # Transparency frame, scale, progressbar, label with text
+        self.transparency_frame = ttk.LabelFrame(self.big_frame, text="Transparency")
+        self.transparency_frame.pack(side='bottom', pady=5, padx=5)
+        self.transparency_scale = ttk.Scale(self.transparency_frame,
+                                            from_=100, to=0,
+                                            variable=self.transparency_percentage,
+                                            command=self.update_transparency_scale)
+        self.transparency_scale.pack(side='left', padx=(20, 10), pady=(10, 10))
+        self.transparency_progressbar = ttk.Progressbar(self.transparency_frame,
+                                                        maximum=100, variable=self.transparency_percentage,
+                                                        value=0,
+                                                        mode="determinate")
+        self.transparency_progressbar.pack(side='right', padx=(10, 20), pady=(10, 10))
+        self.transparency_text_label = ttk.Label(self.transparency_frame, text=self.get_scale_value())
+        self.transparency_text_label.pack(side='bottom')
+
+    def update_transparency_scale(self, event):
+        """
+        Sets the `self.transparency_percentage` based on the scale's value.
+        :param event: Moving the scale.
+        :return: None.
+        """
+        current_percentage_of_scale = int(self.transparency_scale.get())
+        self.transparency_percentage.set(current_percentage_of_scale)
+        self.transparency_text_label['text'] = self.get_scale_value()
+
+    def get_scale_value(self):
+        """
+        Returns the string to be displayed in the label below the scale-progressbar.
+        :return: The percentage of transparency based on the scale (determined by the user).
+        """
+        print(f"Transparency: {int(self.transparency_scale['value'])}%")
+        return f"{int(self.transparency_scale['value'])}%"
 
     def check_button_save(self):
         """
@@ -96,7 +133,9 @@ class SettingsTopLevel(tk.Toplevel):
             dir_path = os.path.dirname(dir_path)
             print(f'Script: {dir_path}')
         print(dir_path)
-        save_settings_to_dump = {'auto_update_at_startup': self.check_button_save()}
+        save_settings_to_dump = {'auto_update_at_startup': self.check_button_save(),
+                                 'transparency_percentage': int(self.transparency_scale.get())}
+        # TODO: read the 'transparency_percentage' from main App and implement its value
         if file_exists(name="settings.json", dir_path=dir_path):
             json_data = ''
             with open(os.path.join(dir_path, "settings.json"), "r+", encoding='utf-8') as file:
@@ -136,7 +175,8 @@ class SettingsTopLevel(tk.Toplevel):
         :return: None
         """
         self.settings_from_file = self.read_settings_from_file()
-        if self.settings_from_file:  # It is not None, thus
+        # Assure that it is not None.
+        if self.settings_from_file:
             self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])
 
     def find_the_path_of_main(self) -> str:
