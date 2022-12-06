@@ -96,8 +96,8 @@ class AskUpdate(tk.Toplevel):
             file.write(str_dump)
             print(f"file is written: {bat_file}")
 
-        # Multiprocessing Process does not survive sys.exit() from main Process. It needs subprocess Popen
-        # See: https://stackoverflow.com/questions/21665341/python-multiprocessing-and-independence-of-children-processes
+        # Multiprocessing Process does not survive sys.exit() from main Process. It needs subprocess.Popen .
+        # See:https://stackoverflow.com/questions/21665341/python-multiprocessing-and-independence-of-children-processes
         try:
             subprocess.Popen(bat_file)
             print(f"Updating process started from {path_to_the_exe}")
@@ -106,10 +106,6 @@ class AskUpdate(tk.Toplevel):
             time.sleep(2)
         else:  # Destroy AskUpdate toplevel
             self.toplevel_quit()
-        '''if self.controller:
-            self.controller.exit_the_program()
-        else:
-            self.toplevel_quit()'''
 
     def toplevel_quit(self, widget=None):
         """how to bind a messagebox to toplevel window in python

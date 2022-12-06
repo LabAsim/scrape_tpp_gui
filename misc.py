@@ -36,7 +36,7 @@ dir_path = os.path.dirname(os.path.realpath(__file__))  # As a one-file executab
 
 if getattr(sys, 'frozen', False):
     dir_path = os.path.dirname(os.path.realpath(dir_path))
-
+#  See: https://github.com/rdbende/Azure-ttk-theme/commit/646ffb16119c60673270b7f26ee0bff67693c145#diff-b335630551682c19a781afebcf4d07bf978fb1f8ac04c6bf87428ed5106870f5R13#
 themes_paths = {"azure": os.path.join(dir_path, 'source/themes/azure/azure.tcl'),
                 "plastik": os.path.join(dir_path, 'source/themes/plastik/plastik.tcl'),
                 "radiance": os.path.join(dir_path, 'source/themes/radiance/radiance.tcl'),

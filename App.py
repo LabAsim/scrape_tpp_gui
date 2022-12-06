@@ -37,6 +37,7 @@ class App:
 
     def __init__(self, root, to_bypass, debug):
         self.dir_path = self.find_current_dir_path()
+        self.transparency = None
         self.help_menu = None
         self.tpp_menu = None
         self.theme_menu = None
@@ -48,7 +49,7 @@ class App:
         self.time = None
         self.settings_dict = {}
         self.check_updates_at_startup = False  # It changes after reading and setting the variables from the json file.
-        self.set_settings_after_reading()
+        self.set_class_variables_from_settings_after_reading()
         root.geometry(f'{App.x}x{App.y}')
         self.root = root
         self.bypass = to_bypass
@@ -72,6 +73,8 @@ class App:
         self.create_menu()
         # Check for updates at startup
         self.check_for_updates(startup=self.check_updates_at_startup, from_menu=False)
+        # Load transparency settings at startup
+        self.apply_settings()
 
     def create_the_notebook_pages(self):
         """
@@ -347,6 +350,10 @@ class App:
             print(f'Script: {self.dir_path}')
             return self.dir_path
 
+    ###################
+    # Theme functions #
+    ###################
+
     def change_theme(self, theme: str):
         """
         Changes the theme of the tkinter based on the theme's name passed.
@@ -603,6 +610,10 @@ class App:
             # Thus, the toplevel will always be on top
             toplevel.deiconify()
 
+    ######################
+    # Settings functions #
+    ######################
+
     def read_settings(self) -> dict | None:
         """
         Reads the settings from `settings.json`.
@@ -614,11 +625,10 @@ class App:
             with open(os.path.join(self.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
                 json_data = json.load(file)
                 print(json_data)
-
                 return json_data
         return None
 
-    def set_settings_after_reading(self):
+    def set_class_variables_from_settings_after_reading(self):
         """
         After loading the `settings.json`, it reads all the variables.
         :return: None
@@ -626,3 +636,18 @@ class App:
         self.settings_dict = self.read_settings()
         if self.settings_dict:
             self.check_updates_at_startup = self.settings_dict['auto_update_at_startup']  # Boolean
+            # It's a float, it does not need conversion from percentage.
+            self.transparency = self.settings_dict['transparency']
+
+    def set_transparency(self):
+        """
+        Sets the transparency using the value from settings.json
+        """
+        self.root.attributes('-alpha', self.transparency)
+
+    def apply_settings(self):
+        """
+        Apply all settings.
+        :return: None
+        """
+        self.set_transparency()

@@ -18,7 +18,10 @@ class SettingsTopLevel(tk.Toplevel):
     """
 
     def __init__(self, root, controller, x=500, y=500):
-        super().__init__()
+        self.button_frame = None
+        self.apply_button = None
+        self.apply_button_frame = None
+        self.parent_inhrenent = super().__init__()
         self.transparency_text_label = None
         self.transparency_scale = None
         self.transparency_progressbar = None
@@ -36,11 +39,15 @@ class SettingsTopLevel(tk.Toplevel):
         self.controller = controller
         self.x = x
         self.y = y
-        self.set_variables_from_settings()
         self.create_ui()
+        self.set_class_variables_from_settings()
         # self.grab_set()
         self.set_active()
         center(self, self.root)
+        # Apply the loaded settings
+        self.apply_settings()
+        # Assure that the transparency of this Toplevel is 0%
+        self.attributes('-alpha', 1)
 
     def create_ui(self):
         """
@@ -51,16 +58,23 @@ class SettingsTopLevel(tk.Toplevel):
         self.title("Settings")
         self.big_frame = ttk.Frame(self)
         self.big_frame.pack(expand=True, fill='both')
+        self.button_frame = ttk.Frame(self.big_frame)
+        self.button_frame.pack(side='bottom', fill='both')
+        # Apply button
+        self.apply_button_frame = ttk.Frame(self.button_frame)
+        self.apply_button_frame.pack(side='left')
+        self.apply_button = ttk.Button(self.apply_button_frame, text=f"Apply", command=self.apply_settings)
+        self.apply_button.pack(pady=10, padx=(50, 0))
         # Save button
-        self.save_button_frame = ttk.Frame(self.big_frame)
-        self.save_button_frame.pack(side='bottom')
+        self.save_button_frame = ttk.Frame(self.button_frame)
+        self.save_button_frame.pack(side='right')
         self.save_button = ttk.Button(self.save_button_frame, text=f"Save", command=self.save_all_settings)
-        self.save_button.pack(side='bottom', expand=True, pady=10, padx=10, )
+        self.save_button.pack(pady=10, padx=(0, 50))
         # Check buttons
         # This style applies only in Azure ttk Theme
         self.checkbutton_frame = ttk.LabelFrame(self.big_frame, text="Update", padding=(20, 10))
         self.checkbutton_frame.pack(padx=(20, 10), pady=(20, 10), side='top')
-        self.check_update_button = ttk.Checkbutton(self.checkbutton_frame, text="Prompt auto-update at startup",
+        self.check_update_button = ttk.Checkbutton(self.checkbutton_frame, text="Check for updates at startup",
                                                    command=self.check_button_save,
                                                    variable=self.check_update_button_variable,
                                                    onvalue=True, offvalue=False,
@@ -120,10 +134,10 @@ class SettingsTopLevel(tk.Toplevel):
     def save_all_settings(self):
         """
         Saves all settings to `settings.json`.
-        :return:
+        :return: None
         """
         dir_path = str
-        if getattr(sys, 'frozen', False):  # TODO: review this
+        if getattr(sys, 'frozen', False):
             print(getattr(sys, 'frozen', False))
             dir_path = os.path.dirname(os.path.realpath(sys.executable))
             print("Exe:", dir_path)
@@ -133,9 +147,10 @@ class SettingsTopLevel(tk.Toplevel):
             dir_path = os.path.dirname(dir_path)
             print(f'Script: {dir_path}')
         print(dir_path)
+        # Saves transparency as a decimal (not percentage)
         save_settings_to_dump = {'auto_update_at_startup': self.check_button_save(),
-                                 'transparency_percentage': int(self.transparency_scale.get())}
-        # TODO: read the 'transparency_percentage' from main App and implement its value
+                                 'transparency': int(self.transparency_scale.get()) / 100}
+        # TODO: read the 'transparency' from main App and implement its value
         if file_exists(name="settings.json", dir_path=dir_path):
             json_data = ''
             with open(os.path.join(dir_path, "settings.json"), "r+", encoding='utf-8') as file:
@@ -169,15 +184,32 @@ class SettingsTopLevel(tk.Toplevel):
                 return json_data
         return None
 
-    def set_variables_from_settings(self):
+    def set_class_variables_from_settings(self):
         """
-        Reads the file and sets all the variables and their user-defined values from the file.
+        Reads the file and sets all the class variables and their user-defined values from the file.
         :return: None
         """
         self.settings_from_file = self.read_settings_from_file()
         # Assure that it is not None.
         if self.settings_from_file:
             self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])
+            # self.transparency_scale['value'] = self.settings_from_file['transparency']
+            # self.transparency_scale.set('0.9')
+            # Sets the IntVar the percentage from the settings
+            self.transparency_percentage.set(self.settings_from_file['transparency'] * 100)
+            # Updates the text in the label
+            self.update_transparency_scale(event=None)
+            print(f"{self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])}"
+                  f"\n{self.transparency_scale['value']}")
+
+    def apply_settings(self):
+        """
+        This functions applies the loaded settings (saved as class variables).
+        :return: None
+        """
+        # The setting for auto-update does not need to be applied here. It makes no difference.
+        # Sets the transparency of the root. Convert to decimal (i.e. 67% = 1 - 67/100 = 0.33)
+        self.root.attributes('-alpha', (1 - int(self.transparency_percentage.get()) / 100))
 
     def find_the_path_of_main(self) -> str:
         """
@@ -199,5 +231,5 @@ class SettingsTopLevel(tk.Toplevel):
 if __name__ == "__main__":
     root = tk.Tk()
     tkinter_theme_calling(root)
-    SettingsTopLevel(controller=None, root=root)
+    top = SettingsTopLevel(controller=None, root=root)
     root.mainloop()

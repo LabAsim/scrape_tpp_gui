@@ -46,11 +46,14 @@ class FirstPage:
         self.f1.pack(side='top', expand=True, fill='both', padx=2, pady=2)
         self.tree = ttk.Treeview(self.f1, columns=FirstPage.header, show='headings')
         self.setup_tree()
-        # Call fill_the_tree() with note.after, to allow tkinter main window to be shown
+        # Calls fill_the_tree() with note.after, to allow tkinter main window to be shown
         # and then the notebooks to be filled. It does not save time for the overall loading of the app.
+        # Alternative: just call self.fill_the_tree() and wait everything to load and after that
+        # the main window will be visible.
         if not self.to_bypass:  # To use BeautifulSoup
             self.note.after(1000, lambda: self.fill_the_tree())
-        else:  # self.to_bypass = True ==> Uses chromedriver
+        # self.to_bypass = True ==> Uses chromedriver
+        else:
             self.fill_the_tree_bypass()
         self.create_menu()
         # Bind the right click with self.post_menu()
@@ -168,12 +171,6 @@ class FirstPage:
                 callback(class_.url)
                 print(f'Firstpage>Called: {class_} {class_.url}')
                 count += 1
-        '''for _ in FirstPage.news_to_open_in_browser:
-            if current_article in _:
-                if count == 0:  # Open just one tab, even though the link exists in more than one tuple
-                    callback(_[1])  # dictionary['link']
-                    count += 1
-                    print(f'Called:{_} {_[1]}')'''
 
     def renew_feed(self):
         FirstPage.values.clear()
