@@ -635,9 +635,16 @@ class App:
         """
         self.settings_dict = self.read_settings()
         if self.settings_dict:
-            self.check_updates_at_startup = self.settings_dict['auto_update_at_startup']  # Boolean
-            # It's a float, it does not need conversion from percentage.
-            self.transparency = self.settings_dict['transparency']
+
+            # Even if the file exists, if the dictionary key does not exist, return self.settings as None
+
+            try:
+                self.check_updates_at_startup = self.settings_dict['auto_update_at_startup']  # Boolean
+                # It's a float, it does not need conversion from percentage.
+                self.transparency = self.settings_dict['transparency']
+            except KeyError:
+                self.settings_dict = None
+                return None
 
     def set_transparency(self):
         """
@@ -650,4 +657,6 @@ class App:
         Apply all settings.
         :return: None
         """
-        self.set_transparency()
+        # Assure that self.settings_dict = self.read_settings() is not None (=No file found).
+        if self.settings_dict:
+            self.set_transparency()

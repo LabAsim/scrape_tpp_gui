@@ -6,9 +6,8 @@ import os
 import sys
 import tkinter as tk
 from tkinter import ttk
-from typing import AnyStr
 
-from scrape_tpp_gui.helper_functions import str2bool, tkinter_theme_calling, center
+from scrape_tpp_gui.helper_functions import tkinter_theme_calling, center
 from scrape_tpp_gui.source.version.version_module import file_exists
 
 
@@ -18,10 +17,10 @@ class SettingsTopLevel(tk.Toplevel):
     """
 
     def __init__(self, root, controller, x=500, y=500):
+        super().__init__()
         self.button_frame = None
         self.apply_button = None
         self.apply_button_frame = None
-        self.parent_inhrenent = super().__init__()
         self.transparency_text_label = None
         self.transparency_scale = None
         self.transparency_progressbar = None
@@ -190,17 +189,21 @@ class SettingsTopLevel(tk.Toplevel):
         :return: None
         """
         self.settings_from_file = self.read_settings_from_file()
+
         # Assure that it is not None.
         if self.settings_from_file:
-            self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])
-            # self.transparency_scale['value'] = self.settings_from_file['transparency']
-            # self.transparency_scale.set('0.9')
-            # Sets the IntVar the percentage from the settings
-            self.transparency_percentage.set(self.settings_from_file['transparency'] * 100)
-            # Updates the text in the label
-            self.update_transparency_scale(event=None)
-            print(f"{self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])}"
-                  f"\n{self.transparency_scale['value']}")
+            # Even if the file exists, if the dictionary key does not exist, return self.settings as None
+            try:
+                self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])
+                # Sets the IntVar the percentage from the settings
+                self.transparency_percentage.set(self.settings_from_file['transparency'] * 100)
+                # Updates the text in the label
+                self.update_transparency_scale(event=None)
+                print(f"{self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])}"
+                      f"\n{self.transparency_scale['value']}")
+            except KeyError:
+                self.settings_from_file = None
+                return None
 
     def apply_settings(self):
         """
