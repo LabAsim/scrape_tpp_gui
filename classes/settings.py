@@ -146,10 +146,9 @@ class SettingsTopLevel(tk.Toplevel):
             dir_path = os.path.dirname(dir_path)
             print(f'Script: {dir_path}')
         print(dir_path)
-        # Saves transparency as a decimal (not percentage)
+        # Saves desired transparency as a decimal (not percentage). To use it, subtract it from 1.
         save_settings_to_dump = {'auto_update_at_startup': self.check_button_save(),
                                  'transparency': int(self.transparency_scale.get()) / 100}
-        # TODO: read the 'transparency' from main App and implement its value
         if file_exists(name="settings.json", dir_path=dir_path):
             json_data = ''
             with open(os.path.join(dir_path, "settings.json"), "r+", encoding='utf-8') as file:

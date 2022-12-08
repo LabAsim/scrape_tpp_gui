@@ -196,7 +196,7 @@ class App:
         self.theme_menu.add_command(label='Arc', command=lambda: self.change_theme('arc'))
         self.theme_menu.add_command(label='XP native', command=lambda: self.change_theme('xpnative'))
         self.edit_menu.add_cascade(label='Change theme', font='Arial 10', menu=self.theme_menu, underline=0)
-        self.edit_menu.add_command(label='Save theme', font='Arial 10', command=App.save_theme, underline=0)
+        self.edit_menu.add_command(label='Save theme', font='Arial 10', command=self.save_theme, underline=0)
         # TPP menu
         self.tpp_menu = Menu(self.main_menu, tearoff=0)
         self.tpp_menu.add_command(label='About ThePressProject', font='Arial 10',
@@ -335,7 +335,7 @@ class App:
         print(f'App>exit_the_program()')
         sys.exit()
 
-    def find_current_dir_path(self):
+    def find_current_dir_path(self) -> str | os.PathLike:
         """
         Finds and returns the path of the directory of the running .py script or .exe .
         """
@@ -541,25 +541,28 @@ class App:
             print(err)
 
     def save_theme(self):
-        """Saves the preferred theme"""
-        dir_path = os.path.dirname(os.path.realpath(__file__))
-        # print(dir_path)
-        # print(os.path.dirname(os.path.realpath(__file__)))
-        # https://stackoverflow.com/questions/404744/determining-application-path-in-a-python-exe-generated-by-pyinstaller
-        # Determine if the application is a script file or a frozen exe
-        if getattr(sys, 'frozen', False):  # TODO: review this
-            print(getattr(sys, 'frozen', False))
-            dir_path = os.path.dirname(os.path.realpath(sys.executable))
-            print("Exe:", dir_path)
-        elif __file__:
-            dir_path = os.path.dirname(__file__)
+        """Saves the preferred theme to settings.json"""
 
-            print(f'Script: {dir_path}')
-        print(dir_path)
-        with open(os.path.join(dir_path, "settings.json"), "w+", encoding='utf-8') as file:
-            json_data = {'theme': self.root.tk.call("ttk::style", "theme", "use")}
-            json.dump(json_data, file, indent=4)
-            print(f"Theme saved to {os.path.join(dir_path, 'tpp.json')}")
+        print(self.dir_path)
+        settings_file_path = os.path.join(self.dir_path, "settings.json")
+        current_theme = self.root.tk.call("ttk::style", "theme", "use")
+        save_settings_to_dump = {'theme': current_theme}
+        if file_exists(dir_path=self.dir_path, name='settings.json'):
+            json_data = ''
+            with open(os.path.join(self.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
+                json_data = json.load(file)
+                if len(json_data) == 0:  # To avoid empty string in the text file
+                    json_data = save_settings_to_dump
+                else:
+                    json_data.update(save_settings_to_dump)
+            with open(os.path.join(self.dir_path, "settings.json"), "w+", encoding='utf-8') as file:
+                json.dump(json_data, file, indent=4)
+                print(f"Theme {current_theme} saved in: {settings_file_path}")
+        else:
+            with open(os.path.join(self.dir_path, "settings.json"), "w+", encoding='utf-8') as file:
+                json_data = {'theme': current_theme}
+                json.dump(json_data, file, indent=4)
+                print(f"Theme saved to {os.path.join(self.dir_path, 'settings.json')}")
 
     @staticmethod
     def read_theme() -> str | None:
@@ -573,10 +576,13 @@ class App:
             dir_path = os.path.dirname(__file__)
             print(f'Script: {dir_path}')
         if file_exists(name="settings.json", dir_path=dir_path):
-            with open(os.path.join(dir_path, "tpp.json"), "r+", encoding='utf-8') as file:
+            with open(os.path.join(dir_path, "settings.json"), "r+", encoding='utf-8') as file:
                 json_data = json.load(file)
                 print(json_data)
-                return json_data['theme']
+                if 'theme' in json_data:
+                    return json_data['theme']
+                else:
+                    return None
         return None
 
     def use_theme(self, theme):
@@ -628,20 +634,23 @@ class App:
                 return json_data
         return None
 
-    def set_class_variables_from_settings_after_reading(self):
+    def set_class_variables_from_settings_after_reading(self) -> None:
         """
         After loading the `settings.json`, it reads all the variables.
         :return: None
         """
         self.settings_dict = self.read_settings()
         if self.settings_dict:
-
             # Even if the file exists, if the dictionary key does not exist, return self.settings as None
-
             try:
                 self.check_updates_at_startup = self.settings_dict['auto_update_at_startup']  # Boolean
-                # It's a float, it does not need conversion from percentage.
+                # It's a float, it does not need conversion from percentage. It depicts the proportion of transparency
+                # that the user wants. It needs to be subtracted from 1 in order to be used.
+                # i.e. self.root.attributes('-alpha', 1 - 0.02) => 2% transparency
                 self.transparency = self.settings_dict['transparency']
+                print(f"Settings passed: "
+                      f"\n\tauto_update_at_startup: {self.settings_dict['auto_update_at_startup']}"
+                      f"\n\ttransparency: {self.settings_dict['transparency']}")
             except KeyError:
                 self.settings_dict = None
                 return None
@@ -650,7 +659,7 @@ class App:
         """
         Sets the transparency using the value from settings.json
         """
-        self.root.attributes('-alpha', self.transparency)
+        self.root.attributes('-alpha', 1-self.transparency)
 
     def apply_settings(self):
         """
