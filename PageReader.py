@@ -71,7 +71,7 @@ class PageReader:
             if not self.debug:
                 self.soup = BeautifulSoup(request.text, "html.parser")  # Otherwise, self.r.text
         except Exception as err:
-            print(f'Could not parse the xml: {self.url}'
+            print(f'Could not parse the html: {self.url}'
                   f'\nError: {err}')
 
     def scrape_the_soup(self):
@@ -136,7 +136,7 @@ class PageReader:
                 temp_list.append(date_child)
         self.firstpage.values.append(temp_list)
         self.firstpage.news_to_open_in_browser.append(temp_list)
-        self.firstpage.news_total.append(NewsDataclass(url=link, title=title, date=date))
+        self.firstpage.news_total.append(NewsDataclass(url=link, title=title, date=date, category=self.category))
 
     def iterate_div_for_anaskopisi(self, div: Any):
         """
@@ -169,5 +169,5 @@ class PageReader:
             text_summary = text_div.text
         self.firstpage.values.append(temp_list)
         self.firstpage.news_to_open_in_browser.append(temp_list)
-        self.firstpage.news_total.append(NewsDataclass(url=link, title=title, date=date))
+        self.firstpage.news_total.append(NewsDataclass(url=link, title=title, date=date, category=self.category))
         # print(temp_list)
