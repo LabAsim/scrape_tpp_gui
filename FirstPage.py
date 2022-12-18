@@ -21,7 +21,6 @@ class FirstPage:
     """
 
     header = ('Date', 'Title', 'Summary')
-    # TODO: Find all FirstPage.values and convert them to self.values
     values = []  # A temporary list containing lists for each news-link in the form of [title-string, url, date]
     news_to_open_in_browser = []  # Contains all the scraped news in the form of [title-string, url, date]
     news_total = []  # Contains all the dataclasses
@@ -112,8 +111,8 @@ class FirstPage:
                           f'\nData from SubPageReader: {data}')
                     newsclass = NewsDataclass(url=data[0], date=data[2],
                                               title=data[1], summary=data[3],
-                                              main_content=data[4])
-
+                                              main_content=data[4], author=data[5], author_url=data[6],
+                                              category=self.name)
                     self.tree.item(current, values=(self.tree.item(current)['values'][0], newsclass.title))
                     print(f'Main content: \n{newsclass.main_content}')
                     count += 1
@@ -150,7 +149,8 @@ class FirstPage:
                           f'\nData from SubPageReaderBypass: {data}')
                     newsclass = NewsDataclass(url=data[0], date=data[2],
                                               title=data[1], summary=data[3],
-                                              main_content=data[4])
+                                              main_content=data[4], author=data[5], author_url=data[6],
+                                              category=self.name)
                     self.tree.item(current, values=(self.tree.item(current)['values'][0], newsclass.title))
                     print(f'Main content: \n{newsclass.main_content}')
                     count += 1
@@ -229,7 +229,8 @@ class FirstPage:
                 feed = PageReader(url=self.url, header=headers(), category=self.name.lower(), debug=self.to_bypass,
                                   firstpage=self)
             else:
-                feed = PageReader(url=self.url, header=headers(), debug=self.to_bypass, firstpage=self)
+                feed = PageReader(url=self.url, header=headers(), debug=self.to_bypass, firstpage=self,
+                                  category=self.name.lower())
             title_list = [self.font.measure(d[0]) for d in self.values]
             date_list = [self.font.measure(d[2]) for d in self.values]
             print(f"date_list: {date_list}")
@@ -347,7 +348,7 @@ class FirstPage:
             if self.controller.check_for_chrome_and_chromedriver() is False:  # Needs to be first here
                 return  # Just stop the function
             if is_driver_open(FirstPage.driver):
-                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, category=category, firstpage=self,
+                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, firstpage=self,
                                  debug=self.debug)
             else:
                 print("FirstPage>insert_news_from_page>(Re)launching webdriver")
@@ -356,7 +357,7 @@ class FirstPage:
                 FirstPage.driver = driver
                 driver.set_window_position(-1000, 0)  # Set Chrome off-screen
                 driver.implicitly_wait(6)
-                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, category=category, firstpage=self,
+                PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, firstpage=self,
                                  debug=self.debug)
         for number, tuple_feed in enumerate(self.values):
             self.tree.insert("", tk.END,
