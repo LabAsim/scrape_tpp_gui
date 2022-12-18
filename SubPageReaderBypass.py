@@ -10,7 +10,7 @@ class SubPageReaderBypass:
     Reads the url html and returns SubPageReaderBypass.data_to_return
     """
     dict_subpage = {}
-    data_to_return = []  # a list with 5 strings: Url, Title, Date, Subtitle summary, Main content
+    data_to_return = []  # A list with 7 strings: Url, Title, Date, Subtitle summary, Main content, Author, Author's url
 
     def __init__(self, url, header, firstpage):
         self.r = None
@@ -30,6 +30,7 @@ class SubPageReaderBypass:
         self.scrape_the_date()
         self.scrape_the_summary()
         self.scrape_the_main_content()
+        self.scrape_author()
 
     def open_url_with_Chromedriver(self):
         """
@@ -180,8 +181,51 @@ class SubPageReaderBypass:
         if len(SubPageReaderBypass.data_to_return) < 5:  # It should contain Url + Title + Date + Summary + Main_content
             SubPageReaderBypass.data_to_return.append(" ")
 
+    def scrape_author(self) -> None:
+
+        """
+        Scrapes the author and the author's url, if it exists (otherwise, it's an empty string).
+        :return: None
+
+        Example scraped:
+            b:<a class="author url fn" href="https://thepressproject.gr/author/panos/" rel="author" title="Posts by Παναγιώτης Παπαδομανωλάκης">Παναγιώτης Παπαδομανωλάκης</a>
+            b author:Παναγιώτης Παπαδομανωλάκης
+            b[href]: https://thepressproject.gr/author/panos/
+            b['rel']: ['author']
+        """
+        author = ''
+        author_url = ''
+        try:
+            for number, a in enumerate(self.soup.find_all('div', class_="article-author")):
+                count = 0
+                if number == 0:
+                    print(f'a class: {a}'
+                          f'\na class text: {a.text.strip()}')
+                    author_list = a.find_all('a', href=True, rel=True)
+                    # For the pages that they do not contain a particular author (only 'The Press Project').
+                    if len(author_list) == 0:
+                        author = a.text.strip()
+                        SubPageReaderBypass.data_to_return.append(author)
+                        SubPageReaderBypass.data_to_return.append('None')
+                    # There is an author.
+                    else:
+                        for b in author_list:
+                            print(f'b:{b}'
+                                  f'\nb author:{b.text.strip()}'
+                                  f'\nb[href]: {b["href"].strip()}'
+                                  f"\nb['rel']: {b['rel']}")
+                            author = b.text
+                            author_url = b["href"].strip()
+                            SubPageReaderBypass.data_to_return.append(author)
+                            SubPageReaderBypass.data_to_return.append(author_url)
+        except Exception as err:
+            print(err)
+            trace_error()
+
     @staticmethod
     def return_url_tuple(url, header):
         """Returns a list with 5 strings: Url, Title, Date, Subtitle summary, Main content"""
         SubPageReaderBypass(url=url, header=header)
         return SubPageReaderBypass.data_to_return
+
+    #TODO: add author / author url
