@@ -1,9 +1,12 @@
 import json
 import os
+import re
 import sys
 import time
+import sqlite3
 import tkinter as tk
 import tkinter.font
+import unicodedata
 from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
@@ -175,6 +178,9 @@ class App:
         self.context.add_separator()
         self.context.add_command(label='Settings', font='Arial 10',
                                  command=lambda: SettingsTopLevel(root=self.root, controller=self))
+        # Save to db
+        self.context.add_separator()
+        self.context.add_command(label='Save to db', font='Arial 10', command=self.save_dataclasses_to_sqlite)
         # Exit
         self.context.add_separator()
         self.context.add_command(label='Exit', font='Arial 10', command=self.exit_the_program)
@@ -349,6 +355,105 @@ class App:
             self.dir_path = os.path.dirname(__file__)
             print(f'Script: {self.dir_path}')
             return self.dir_path
+
+    def save_dataclasses_to_sqlite(self):
+        """
+        Saves scraped dataclasses to a sqlite db.
+        Currently, dataclass contains:      date: Any
+                                            url: str = ''
+                                            main_content: str = ''
+                                            summary: str = ''
+                                            title: str = ''
+        See also:
+            Official docs: https://docs.python.org/3/library/sqlite3.html
+            UPSERT process: https://stackoverflow.com/a/4330694 & https://www.sqlite.org/draft/lang_UPSERT.html
+        """
+        db_path = os.path.join(self.dir_path, 'tpp.db')
+        con = sqlite3.connect(db_path)
+        try:
+            cur = con.cursor()
+            # Do not use ID AUTO INCREMENT.
+            cur.execute("""
+                        CREATE TABLE IF NOT EXISTS news(
+                            id TEXT PRIMARY KEY,
+                            date TEXT NOT NULL, 
+                            url TEXT NOT NULL,
+                            main_content BLOB,
+                            summary BLOB,
+                            title TEXT NOT NULL,
+                            author TEXT,
+                            author_url TEXT,
+                            date_unix INT,
+                            category TEXT);
+                        """)
+            # https://www.sqlitetutorial.net/sqlite-update/
+            # Examples for IGNORE https://database.guide/how-on-conflict-works-in-sqlite/
+            # ON CONFLICT: https://stackoverflow.com/questions/69961193/how-to-get-on-conflict-ignore-working-in-sqlite
+            for number, _dataclass in enumerate(FirstPage.news_total):
+                tuple_dataclass = _dataclass.return_as_tuple()
+                #  It needs a primary key incorporating both category and url.
+                text_id = tuple_dataclass[8] + '+' + tuple_dataclass[1]
+                if number <= 5:
+                    print(f'FirstPage.news_total: \n\t{tuple_dataclass}')
+                    print(f'tuple for the db: {tuple_dataclass[1:3:1]}')
+                cur.execute("""PRAGMA encoding = 'UTF-8';""")
+                con.commit()
+                # https://www.sqlite.org/autoinc.html
+                # FIXME: This does not avoid SQL injections. Find a better way to insert the updates
+                cur.execute(f"""
+                        INSERT INTO news VALUES('{text_id}',?,?,?,?,?,?,?,?,?)
+                        ON CONFLICT(news.id) DO UPDATE SET
+                            date = '{tuple_dataclass[0]}',
+                            main_content ='{tuple_dataclass[2]}',
+                            summary = '{tuple_dataclass[3]}',
+                            author = '{tuple_dataclass[5]}',
+                            author_url = '{tuple_dataclass[6]}',
+                            category = '{tuple_dataclass[8]}';
+                        """, tuple_dataclass) # if tuple_dataclass[6] in (" ",) else "None"
+                # Remember to commit the transaction after executing INSERT.
+                con.commit()
+                with open('example.txt', 'a+', encoding="utf-8") as file:
+                    file.write(f"""
+                        INSERT INTO news VALUES('{text_id}','{tuple_dataclass[0]}','{tuple_dataclass[1]}',
+                        '{tuple_dataclass[2]}', '{tuple_dataclass[3]}', '{tuple_dataclass[4]}',
+                        '{tuple_dataclass[5]}','{tuple_dataclass[6]}','{tuple_dataclass[7]}',
+                        '{tuple_dataclass[8]})
+                        ON CONFLICT(news.url) DO UPDATE SET
+                            date = '{str(tuple_dataclass[0])}',
+                            main_content = '{str(tuple_dataclass[2])}',
+                            summary = '{str(tuple_dataclass[3])}',
+                            author = '{tuple_dataclass[5]}',,
+                            author_url = '{tuple_dataclass[6]}',
+                            category = '{tuple_dataclass[8]}';
+                        """)
+            cur.execute("""SELECT * FROM news ORDER BY date_unix DESC""")
+            for number, a in enumerate(cur.fetchall()):
+                if number <= 5:
+                    print(f'Fetched from db: {a}')
+
+        except (sqlite3.Error, sqlite3.DatabaseError, UnicodeEncodeError, Exception) as err:
+            trace_error()
+            print(err)
+        finally:
+            con.close()
+
+    def strip_ansi_characters(self, text=''):
+        """https://stackoverflow.com/questions/48782529/exclude-ansi-escape-sequences-from-output-log-file"""
+        try:
+            # ansi_re = re.compile(r'[^\x00-\x7F]+')
+            # return re.sub(r'[^\x00-\x7F]+', ' ', text)
+            '''text = text.encode("ascii", "ignore")
+                        text = text.decode()
+                        print(text)
+                        return text'''
+            ansi_re = re.compile(r'\x1b\[[0-9;]*m')
+            re.sub(ansi_re, ' ', text)
+            ansi_re = re.compile(r'(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]')
+            unicodedata.normalize('NFKD', text)
+            return re.sub(ansi_re, ' ', text)
+
+        except re.error as err:
+            print(err)
 
     ###################
     # Theme functions #
@@ -659,7 +764,7 @@ class App:
         """
         Sets the transparency using the value from settings.json
         """
-        self.root.attributes('-alpha', 1-self.transparency)
+        self.root.attributes('-alpha', 1 - self.transparency)
 
     def apply_settings(self):
         """

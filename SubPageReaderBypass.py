@@ -227,5 +227,3 @@ class SubPageReaderBypass:
         """Returns a list with 5 strings: Url, Title, Date, Subtitle summary, Main content"""
         SubPageReaderBypass(url=url, header=header)
         return SubPageReaderBypass.data_to_return
-
-    #TODO: add author / author url
