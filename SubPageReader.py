@@ -3,12 +3,13 @@ from bs4 import BeautifulSoup
 from trace_error import trace_error
 from PageReader import PageReader
 
+
 class SubPageReader:
     """
     Reads the url html and returns SubPageReader.data_to_return
     """
     dict_subpage = {}
-    data_to_return = []  # a list with 5 strings: Url, Title, Date, Subtitle summary, Main content
+    data_to_return = []  # A list with 7 strings: Url, Title, Date, Subtitle summary, Main content, Author, Author's url
 
     def __init__(self, url, header, firstpage, debug):
         self.status_code = None
@@ -28,6 +29,7 @@ class SubPageReader:
         self.scrape_the_date()
         self.scrape_the_summary()
         self.scrape_the_main_article_content()
+        self.scrape_author()
 
     def connect_to_url(self):
         """Connects to self.url"""
@@ -93,7 +95,7 @@ class SubPageReader:
                                 date = a.text.replace("\nΑναρτήθηκε", "").split(':')[0].strip()
                                 _a.append(date)
                                 SubPageReader.data_to_return.append(date)
-                                print(date)
+                                print(f'SubPageReader>scrape_the_date>date: {date}')
                                 count += 1
                     else:
                         # SubPageReader.dict_subpage[self.url].append(a.text.strip().split(':')[0].strip())
@@ -103,13 +105,13 @@ class SubPageReader:
                                     date = a.text.replace("\nΑναρτήθηκε", "").split(':')[0].strip()
                                     _a.append(date)
                                     SubPageReader.data_to_return.append(date)
-                                    print(date)
+                                    print(f'SubPageReader>scrape_the_date>date: {date}')
                                     count += 1
                                 else:
                                     date = a.text.split(':')[0].strip()
                                     _a.append(date)
                                     SubPageReader.data_to_return.append(date)
-                                    print(date)
+                                    print(f'SubPageReader>scrape_the_date>date: {date}')
                                     count += 1
         except Exception as err:
             print(f'SubPageReader article-date Error: {err}')
@@ -161,6 +163,47 @@ class SubPageReader:
             raise err
         if len(SubPageReader.data_to_return) < 5:  # It should contain Url + Title + Date + Summary + Main_content
             SubPageReader.data_to_return.append(" ")
+
+    def scrape_author(self) -> None:
+
+        """
+        Scrapes the author and the author's url, if it exists (otherwise, it's an empty string).
+        :return: None
+
+        Example scraped:
+            b:<a class="author url fn" href="https://thepressproject.gr/author/panos/" rel="author" title="Posts by Παναγιώτης Παπαδομανωλάκης">Παναγιώτης Παπαδομανωλάκης</a>
+            b author:Παναγιώτης Παπαδομανωλάκης
+            b[href]: https://thepressproject.gr/author/panos/
+            b['rel']: ['author']
+        """
+        author = ''
+        author_url = ''
+        try:
+            for number, a in enumerate(self.soup.find_all('div', class_="article-author")):
+                count = 0
+                if number == 0:
+                    print(f'a class: {a}'
+                          f'\na class text: {a.text.strip()}')
+                    author_list = a.find_all('a', href=True, rel=True)
+                    # For the pages that they do not contain a particular author (only 'The Press Project').
+                    if len(author_list) == 0:
+                        author = a.text.strip()
+                        SubPageReader.data_to_return.append(author)
+                        SubPageReader.data_to_return.append('None')
+                    # There is an author.
+                    else:
+                        for b in author_list:
+                            print(f'b:{b}'
+                                  f'\nb author:{b.text.strip()}'
+                                  f'\nb[href]: {b["href"].strip()}'
+                                  f"\nb['rel']: {b['rel']}")
+                            author = b.text
+                            author_url = b["href"].strip()
+                            SubPageReader.data_to_return.append(author)
+                            SubPageReader.data_to_return.append(author_url)
+        except Exception as err:
+            print(err)
+            trace_error()
 
     @staticmethod
     def return_url_list(url, header):
