@@ -2,6 +2,7 @@ import json
 import os
 import re
 import sys
+import threading
 import time
 import sqlite3
 import tkinter as tk
@@ -27,6 +28,7 @@ from source.version.version_module import check_online_version, check_new_versio
 from classes.search_software import InstalledSoftware
 from classes.WarningDoesNotExists import WarningDoesNotExists
 from classes.settings import SettingsTopLevel
+from source.classes.loading import LoadingWindow
 
 
 class App:
@@ -50,6 +52,7 @@ class App:
         self.context = None
         self.f_time = None
         self.time = None
+        self.loading_status = True
         self.settings_dict = {}
         self.check_updates_at_startup = False  # It changes after reading and setting the variables from the json file.
         self.set_class_variables_from_settings_after_reading()
@@ -57,6 +60,12 @@ class App:
         self.root = root
         self.bypass = to_bypass
         self.debug = debug
+        # Start a thread for the loading window without blocking the rest of the program
+        # See here: https://stackoverflow.com/a/67097216
+        thr = threading.Thread(target=self.loading_window)
+
+        #thr.daemon = True
+        thr.start()
         self.root.title('The Press Project news feed')
         self.time_widgets()
         self.note = ttk.Notebook(self.root)
@@ -76,8 +85,20 @@ class App:
         self.create_menu()
         # Check for updates at startup
         self.check_for_updates(startup=self.check_updates_at_startup, from_menu=False)
-        # Load transparency settings at startup
-        self.apply_settings()
+
+        # Load transparency settings at startup from LoadingWindow!
+
+    def loading_window(self):
+        """
+        Just calls the LoadingWindow.
+        :return: None
+        """
+        # LoadingWindow can inherit either from tk.TK() or tk.Toplevel. If tk.Tk() is chosen, call loading_tk.mainloop()
+        # TODO: find a way to start the tk.TK instead of Toplevel and not user .after in FirstPage
+        loading_tk = LoadingWindow(root=self.root, controller=self)
+        if LoadingWindow is tk.Tk:
+            loading_tk.mainloop()
+
 
     def create_the_notebook_pages(self):
         """

@@ -51,6 +51,7 @@ class FirstPage:
         # the main window will be visible.
         if not self.to_bypass:  # To use BeautifulSoup
             self.note.after(1000, lambda: self.fill_the_tree())
+            #self.fill_the_tree()
         # self.to_bypass = True ==> Uses chromedriver
         else:
             self.fill_the_tree_bypass()
@@ -253,6 +254,9 @@ class FirstPage:
                 self.tree.move(item, '', index)
             if self.debug:
                 print(f'Treeview was filled {self.values}')
+            # Set self.root.LOADING_STATUS to false
+            if self.name.lower() == 'culture':
+                self.controller.loading_status = False
         except Exception as err:
             print(f'Loading failed! Error: {err}')
             trace_error()

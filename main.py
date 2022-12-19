@@ -19,6 +19,9 @@ if __name__ == "__main__":
     debug, bypass = args.debug, args.bypass
     start = time.perf_counter()
     root = tk.Tk()  # First window
+    # Hide the main window. Only thw LoadingWindow from App will be shown
+    root.withdraw()
+    root.attributes('-alpha', 0.0)
     style = ttk.Style(root)
     # A solution in order to measure the length of the titles
     # https://stackoverflow.com/questions/30950925/tkinter-getting-screen-text-unit-width-not-pixels
