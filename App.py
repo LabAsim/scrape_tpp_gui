@@ -364,6 +364,10 @@ class App:
                                             main_content: str = ''
                                             summary: str = ''
                                             title: str = ''
+                                            author: str = ''
+                                            author_url: str = ''
+                                            date_unix: Any = 'To_change'
+                                            category: str = ''
         See also:
             Official docs: https://docs.python.org/3/library/sqlite3.html
             UPSERT process: https://stackoverflow.com/a/4330694 & https://www.sqlite.org/draft/lang_UPSERT.html
@@ -372,6 +376,8 @@ class App:
         con = sqlite3.connect(db_path)
         try:
             cur = con.cursor()
+            cur.execute("""PRAGMA encoding = 'UTF-8';""")
+            con.commit()
             # Do not use ID AUTO INCREMENT.
             cur.execute("""
                         CREATE TABLE IF NOT EXISTS news(
@@ -386,6 +392,7 @@ class App:
                             date_unix INT,
                             category TEXT);
                         """)
+            con.commit()
             # https://www.sqlitetutorial.net/sqlite-update/
             # Examples for IGNORE https://database.guide/how-on-conflict-works-in-sqlite/
             # ON CONFLICT: https://stackoverflow.com/questions/69961193/how-to-get-on-conflict-ignore-working-in-sqlite
@@ -393,23 +400,29 @@ class App:
                 tuple_dataclass = _dataclass.return_as_tuple()
                 #  It needs a primary key incorporating both category and url.
                 text_id = tuple_dataclass[8] + '+' + tuple_dataclass[1]
+                # Create a tuple with all the values to be passed in SQL statement
+                list_to_insert = [text_id]
+                for a in tuple_dataclass:
+                    list_to_insert.append(a)
+                for a in (tuple_dataclass[0], tuple_dataclass[2], tuple_dataclass[3],
+                          tuple_dataclass[5], tuple_dataclass[6], tuple_dataclass[8]):
+                    list_to_insert.append(a)
                 if number <= 5:
                     print(f'FirstPage.news_total: \n\t{tuple_dataclass}')
                     print(f'tuple for the db: {tuple_dataclass[1:3:1]}')
-                cur.execute("""PRAGMA encoding = 'UTF-8';""")
-                con.commit()
-                # https://www.sqlite.org/autoinc.html
-                # FIXME: This does not avoid SQL injections. Find a better way to insert the updates
+
+                # On how to insert properly placeholders in SQL statements, see
+                # https://docs.python.org/3/library/sqlite3.html#how-to-use-placeholders-to-bind-values-in-sql-queries
                 cur.execute(f"""
-                        INSERT INTO news VALUES('{text_id}',?,?,?,?,?,?,?,?,?)
+                        INSERT INTO news VALUES(?,?,?,?,?,?,?,?,?,?)
                         ON CONFLICT(news.id) DO UPDATE SET
-                            date = '{tuple_dataclass[0]}',
-                            main_content ='{tuple_dataclass[2]}',
-                            summary = '{tuple_dataclass[3]}',
-                            author = '{tuple_dataclass[5]}',
-                            author_url = '{tuple_dataclass[6]}',
-                            category = '{tuple_dataclass[8]}';
-                        """, tuple_dataclass) # if tuple_dataclass[6] in (" ",) else "None"
+                            date = ?,
+                            main_content = ?,
+                            summary = ?,
+                            author = ?,
+                            author_url = ?,
+                            category = ?;
+                        """, list_to_insert)
                 # Remember to commit the transaction after executing INSERT.
                 con.commit()
                 with open('example.txt', 'a+', encoding="utf-8") as file:
