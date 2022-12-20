@@ -8,7 +8,10 @@ import PIL.Image
 from misc import dir_path
 
 
-class AskQuit(tk.Toplevel):
+class AskQuit(tk.Tk):
+    """
+    A class for asking the user if he/she wants to quit and close the current window.
+    """
     x = 240
     y = 110
 
