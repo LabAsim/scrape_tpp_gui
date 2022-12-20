@@ -8,7 +8,7 @@ import PIL.Image
 from misc import dir_path
 
 
-class AskQuit(tk.Tk):
+class AskQuit(tk.Toplevel):
     """
     A class for asking the user if he/she wants to quit and close the current window.
     """
@@ -77,6 +77,9 @@ class AskQuit(tk.Tk):
         self.big_frame.grab_set()
 
     def path_of_images(self):
+        """
+        Finds the path to the question-mark file.
+        """
         current_dir_path = os.path.dirname(os.path.realpath(__file__))
         parent_of_current_dir = os.path.dirname(current_dir_path)
-        self.images_dir_path = os.path.join(parent_of_current_dir, "images/questionmark.png")
+        self.images_dir_path = os.path.join(parent_of_current_dir, "source\\multimedia\\images\\questionmark.png")
