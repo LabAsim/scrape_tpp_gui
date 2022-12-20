@@ -4,6 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 from PIL import Image, ImageTk
 import tktooltip
+
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
@@ -20,11 +21,12 @@ class ToplevelDonate:
 
     def __init__(self, controller, root, dir_path):
         self.controller = controller
-        self.dir_path = os.path.join(dir_path, 'images')
+        self.dir_path = self.find_the_path_of_main()
         self.topleveldonate = tk.Toplevel()
         self.topleveldonate.title("Donate to TPP")
         # First image
-        self.img_dorea = ImageTk.PhotoImage(Image.open(os.path.join(self.dir_path, 'dorea.jpg')))
+        self.img_dorea = ImageTk.PhotoImage(Image.open(os.path.join(self.dir_path,
+                                                                    'source\\multimedia\\images\\tpp\\dorea.jpg')))
         self.label_dorea = ttk.Label(self.topleveldonate, image=self.img_dorea, cursor='hand2')
         # Image needs to re declared. See notes from the first answer.
         # https://stackoverflow.com/questions/23901168/how-do-i-insert-a-jpeg-image-into-a-python-tkinter-window
@@ -33,7 +35,8 @@ class ToplevelDonate:
         self.label_dorea.bind('<Button-1>', lambda e: callback(ToplevelDonate.donation_urls[0]))
         tktooltip.ToolTip(self.label_dorea, msg='Click to make a one-time donation', delay=0.5)
         # Second image
-        self.img_monthly = ImageTk.PhotoImage(Image.open(os.path.join(self.dir_path, "mhniaia.jpg")))
+        self.img_monthly = ImageTk.PhotoImage(Image.open(os.path.join(self.dir_path,
+                                                                      "source\\multimedia\\images\\tpp\\mhniaia.jpg")))
         self.label_monthly = ttk.Label(self.topleveldonate, image=self.img_monthly, cursor='hand2')
         # Image needs to re declared. See notes from the first answer.
         # https://stackoverflow.com/questions/23901168/how-do-i-insert-a-jpeg-image-into-a-python-tkinter-window
@@ -42,7 +45,8 @@ class ToplevelDonate:
         self.label_monthly.bind('<Button-1>', lambda e: callback(ToplevelDonate.donation_urls[1]))
         tktooltip.ToolTip(self.label_monthly, msg='Click to make a recurrent monthly donation', delay=0.5)
         # Third image
-        self.img_annually = ImageTk.PhotoImage(Image.open(os.path.join(self.dir_path, "ethsia.jpg")))
+        self.img_annually = ImageTk.PhotoImage(Image.open(os.path.join(self.dir_path,
+                                                                       "source\\multimedia\\images\\tpp\\ethsia.jpg")))
         self.label_annually = ttk.Label(self.topleveldonate, image=self.img_annually, cursor='hand2')
         # Image needs to re declared. See notes from the first answer.
         # https://stackoverflow.com/questions/23901168/how-do-i-insert-a-jpeg-image-into-a-python-tkinter-window
@@ -52,9 +56,27 @@ class ToplevelDonate:
         tktooltip.ToolTip(self.label_annually, msg='Click to make a recurrent annual donation', delay=0.5)
         center(self.topleveldonate, root)
 
+    def find_the_path_of_main(self) -> str:
+        """
+        Returns The path of the directory of main.py or the .exe
+        :return: The path of the directory of main.py or the .exe
+        """
+        if getattr(sys, 'frozen', False):
+            print(getattr(sys, 'frozen', False))
+            # The temporary path of the file when the app runs as an .exe
+            self.dir_path = os.path.dirname(os.path.dirname(__file__))
+            print("Exe:", self.dir_path)
+            return self.dir_path
+        elif __file__:
+            self.dir_path = os.path.dirname(__file__)  # We need the parent of this directory
+            self.dir_path = os.path.dirname(self.dir_path)
+            print(f'Script: {self.dir_path}')
+            return self.dir_path
+
 
 if __name__ == "__main__":
     from misc import dir_path
+
     root = tk.Tk()
     center(root)
     ToplevelDonate(controller=None, root=root, dir_path=dir_path)
