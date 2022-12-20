@@ -2,6 +2,7 @@
 Main app
 """
 import multiprocessing as mp
+import threading
 import time
 import tkinter as tk
 import tkinter.font
@@ -19,7 +20,7 @@ if __name__ == "__main__":
     debug, bypass = args.debug, args.bypass
     start = time.perf_counter()
     root = tk.Tk()  # First window
-    # Hide the main window. Only thw LoadingWindow from App will be shown
+    # Hide the main window. Only thε LoadingWindow from App will be shown
     root.withdraw()
     root.attributes('-alpha', 0.0)
     style = ttk.Style(root)
