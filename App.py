@@ -63,8 +63,6 @@ class App:
         # Start a thread for the loading window without blocking the rest of the program
         # See here: https://stackoverflow.com/a/67097216
         thr = threading.Thread(target=self.loading_window)
-
-        #thr.daemon = True
         thr.start()
         self.root.title('The Press Project news feed')
         self.time_widgets()
@@ -96,9 +94,9 @@ class App:
         # LoadingWindow can inherit either from tk.TK() or tk.Toplevel. If tk.Tk() is chosen, call loading_tk.mainloop()
         # TODO: find a way to start the tk.TK instead of Toplevel and not user .after in FirstPage
         loading_tk = LoadingWindow(root=self.root, controller=self)
-        if LoadingWindow is tk.Tk:
+        print("App>loading_window called")
+        if isinstance(loading_tk, tk.Tk):
             loading_tk.mainloop()
-
 
     def create_the_notebook_pages(self):
         """
@@ -737,19 +735,19 @@ class App:
         elif theme == 'azure-light':
             self.root.tk.call("set_theme", "light")
         elif theme == 'radiance':
-            self.root.change_theme_radiance()
+            self.change_theme_radiance()
         elif theme == 'aquativo':
-            self.root.change_theme_aquativo()
+            self.change_theme_aquativo()
         elif theme == "plastik":
-            self.root.change_theme_plastik()
+            self.change_theme_plastik()
         elif theme == "adapta":
-            self.root.change_theme_adapta()
+            self.change_theme_adapta()
         elif theme == "yaru":
-            self.root.change_theme_yaru()
+            self.change_theme_yaru()
         elif theme == "arc":
-            self.root.change_theme_arc()
+            self.change_theme_arc()
         elif theme == "vista":
-            self.root.change_theme_xpnative()
+            self.change_theme_xpnative()
         self.root.deiconify()  # After changing the theme, re-draw first the root
         for toplevel in toplevel_temporary_list:  # Then re-draw the toplevel windows.
             # Thus, the toplevel will always be on top
