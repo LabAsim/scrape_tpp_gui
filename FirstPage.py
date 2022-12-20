@@ -50,8 +50,8 @@ class FirstPage:
         # Alternative: just call self.fill_the_tree() and wait everything to load and after that
         # the main window will be visible.
         if not self.to_bypass:  # To use BeautifulSoup
-            self.note.after(1000, lambda: self.fill_the_tree())
-            #self.fill_the_tree()
+            # Alternative: self.note.after(75, lambda: self.fill_the_tree())
+            self.fill_the_tree()
         # self.to_bypass = True ==> Uses chromedriver
         else:
             self.fill_the_tree_bypass()
