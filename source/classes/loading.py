@@ -68,10 +68,10 @@ class LoadingWindow(tk.Toplevel):
             time.sleep(0.125)
         else:
             print(f"LoadingWindow: self.controller.loading_status set: {self.controller.loading_status}")
-            self.root.deiconify()
             # Load transparency settings at startup
             # Here, it's the first time the user's settings are applied (it will call self.set_transparency() in App)
             self.controller.apply_settings()
+            self.root.deiconify()
             print(f"LoadingWindow>check_loading_status>settings applied")
             self.attributes('-alpha', 0.0)
             self.toplevel_quit()
@@ -81,7 +81,7 @@ class LoadingWindow(tk.Toplevel):
         Creates the User Interface
         """
 
-        self.title("Loading")
+        self.title("The Press Project news feed")
         self.askquit_topframe = ttk.Frame(self.big_frame)
         self.askquit_topframe.pack(side='top', expand=True)
         self.valueLabel = ttk.Label(self.askquit_topframe, text="Loading..")
