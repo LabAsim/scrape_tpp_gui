@@ -147,7 +147,8 @@ class LoadingWindow(tk.Toplevel):
         elif theme == "vista":
             self.change_theme_xpnative()
         else:
-            self.change_theme_azure()
+            # Call azure dark. Do not use the function.
+            self.root.tk.call("set_theme", "dark")
         self.deiconify()  # After changing the theme, re-draw first the root
         for toplevel in toplevel_temporary_list:  # Then re-draw the toplevel windows.
             # Thus, the toplevel will always be on top
