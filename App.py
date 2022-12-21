@@ -794,6 +794,7 @@ class App:
     def set_class_variables_from_settings_after_reading(self) -> None:
         """
         After loading the `settings.json`, it reads all the variables.
+        If the settings file is not found, it implements default values.
         :return: None
         """
         self.settings_dict = self.read_settings()
@@ -811,6 +812,15 @@ class App:
             except KeyError:
                 self.settings_dict = None
                 return None
+        # There is not a settings.json. Apply default settings
+        else:
+            # Prompt update window at startup
+            self.check_updates_at_startup = True
+            # 0% transparency
+            self.transparency = 0.0
+            # Assign the values to settings dict
+            self.settings_dict = {'auto_update_at_startup': self.check_updates_at_startup,
+                                  'transparency': self.transparency}
 
     def set_transparency(self):
         """
@@ -823,6 +833,6 @@ class App:
         Apply all settings.
         :return: None
         """
-        # Assure that self.settings_dict = self.read_settings() is not None (=No file found).
+        # Assure that self.settings_dict is not None.
         if self.settings_dict:
             self.set_transparency()
