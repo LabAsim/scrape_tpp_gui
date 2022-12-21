@@ -2,10 +2,10 @@ import os.path
 import sys
 import tkinter as tk
 from tkinter import ttk
-from helper_functions import file_exists, center, callback, headers_list, headers, str2bool
+from scrape_tpp_gui.helper_functions import file_exists, center, callback, headers_list, headers, str2bool
 from PIL import Image, ImageTk
 import PIL.Image
-from misc import dir_path
+from scrape_tpp_gui.misc import dir_path
 
 
 class AskQuit(tk.Toplevel):
@@ -22,6 +22,10 @@ class AskQuit(tk.Toplevel):
         self.path_of_images()
         self.driver = driver
         self.geometry(f'{AskQuit.x}x{AskQuit.y}')  # Here, self is tkinter.Toplevel
+        self.minsize(width=AskQuit.x, height=AskQuit.y)
+        self.maxsize(width=AskQuit.x, height=AskQuit.y)
+        # Disable maximize / minimize button
+        self.resizable(width=False, height=False)
         self.parent = parent
         self.grab_set()
         self.big_frame = ttk.Frame(self)

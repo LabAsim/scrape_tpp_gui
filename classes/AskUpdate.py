@@ -29,6 +29,10 @@ class AskUpdate(tk.Toplevel):
     def __init__(self, controller, root):
         super().__init__()
         self.geometry(f'{AskUpdate.x}x{AskUpdate.y}')  # Here, self is tkinter.Toplevel
+        self.minsize(width=AskUpdate.x, height=AskUpdate.y)
+        self.maxsize(width=AskUpdate.x, height=AskUpdate.y)
+        # Disable maximize / minimize button
+        self.resizable(width=False, height=False)
         self.controller = controller
         self.root = root
         self.grab_set()
@@ -58,7 +62,8 @@ class AskUpdate(tk.Toplevel):
         valuelabel = ttk.Label(askquit_topframe, text="A new update was found."
                                                       "\nDo you want to download the update?")
         valuelabel.pack(side='right', expand=True)
-        image = Image.open(os.path.join(parent_of_parent_folder, "images/questionmark.png"))
+        image = Image.open(os.path.join(parent_of_parent_folder,
+                                        "source\\multimedia\\images\\questionmark.png"))
         image = image.resize(
             (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), PIL.Image.ANTIALIAS)
         image = ImageTk.PhotoImage(image)
