@@ -24,6 +24,11 @@ class ToplevelDonate:
         self.dir_path = self.find_the_path_of_main()
         self.topleveldonate = tk.Toplevel()
         self.topleveldonate.title("Donate to TPP")
+        # Set a fixed size
+        self.topleveldonate.minsize(width=ToplevelDonate.x, height=ToplevelDonate.y)
+        self.topleveldonate.maxsize(width=ToplevelDonate.x, height=ToplevelDonate.y)
+        # Disable maximize / minimize button
+        self.topleveldonate.resizable(width=False, height=False)
         # First image
         self.img_dorea = ImageTk.PhotoImage(Image.open(os.path.join(self.dir_path,
                                                                     'source\\multimedia\\images\\tpp\\dorea.jpg')))

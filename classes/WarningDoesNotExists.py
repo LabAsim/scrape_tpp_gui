@@ -42,6 +42,11 @@ class WarningDoesNotExists(tk.Toplevel):
     def __init__(self, root, controller, info, program: str, x=270, y=125):
         super().__init__()
         self.geometry(f'{x}x{y}')  # Here, self is tkinter.Toplevel
+        # Set a fixed size
+        self.minsize(width=x, height=y)
+        self.maxsize(width=x, height=y)
+        # Disable maximize / minimize button
+        self.resizable(width=False, height=False)
         self.controller = controller
         self.root = root
         self.info = info

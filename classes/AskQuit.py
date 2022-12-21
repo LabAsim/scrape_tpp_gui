@@ -22,6 +22,7 @@ class AskQuit(tk.Toplevel):
         self.path_of_images()
         self.driver = driver
         self.geometry(f'{AskQuit.x}x{AskQuit.y}')  # Here, self is tkinter.Toplevel
+        # Set a fixed size
         self.minsize(width=AskQuit.x, height=AskQuit.y)
         self.maxsize(width=AskQuit.x, height=AskQuit.y)
         # Disable maximize / minimize button
