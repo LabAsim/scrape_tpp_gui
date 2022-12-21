@@ -463,20 +463,21 @@ class App:
                         """, list_to_insert)
                 # Remember to commit the transaction after executing INSERT.
                 con.commit()
-                with open('example.txt', 'a+', encoding="utf-8") as file:
-                    file.write(f"""
-                        INSERT INTO news VALUES('{text_id}','{tuple_dataclass[0]}','{tuple_dataclass[1]}',
-                        '{tuple_dataclass[2]}', '{tuple_dataclass[3]}', '{tuple_dataclass[4]}',
-                        '{tuple_dataclass[5]}','{tuple_dataclass[6]}','{tuple_dataclass[7]}',
-                        '{tuple_dataclass[8]})
-                        ON CONFLICT(news.url) DO UPDATE SET
-                            date = '{str(tuple_dataclass[0])}',
-                            main_content = '{str(tuple_dataclass[2])}',
-                            summary = '{str(tuple_dataclass[3])}',
-                            author = '{tuple_dataclass[5]}',,
-                            author_url = '{tuple_dataclass[6]}',
-                            category = '{tuple_dataclass[8]}';
-                        """)
+                if self.debug:
+                    with open('example.txt', 'a+', encoding="utf-8") as file:
+                        file.write(f"""
+                            INSERT INTO news VALUES('{text_id}','{tuple_dataclass[0]}','{tuple_dataclass[1]}',
+                            '{tuple_dataclass[2]}', '{tuple_dataclass[3]}', '{tuple_dataclass[4]}',
+                            '{tuple_dataclass[5]}','{tuple_dataclass[6]}','{tuple_dataclass[7]}',
+                            '{tuple_dataclass[8]})
+                            ON CONFLICT(news.url) DO UPDATE SET
+                                date = '{str(tuple_dataclass[0])}',
+                                main_content = '{str(tuple_dataclass[2])}',
+                                summary = '{str(tuple_dataclass[3])}',
+                                author = '{tuple_dataclass[5]}',,
+                                author_url = '{tuple_dataclass[6]}',
+                                category = '{tuple_dataclass[8]}';
+                            """)
             cur.execute("""SELECT * FROM news ORDER BY date_unix DESC""")
             for number, a in enumerate(cur.fetchall()):
                 if number <= 5:
