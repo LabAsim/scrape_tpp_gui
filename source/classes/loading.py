@@ -13,7 +13,7 @@ from scrape_tpp_gui.helper_functions import file_exists, center, tkinter_theme_c
 from scrape_tpp_gui.trace_error import trace_error
 
 
-class LoadingWindow(tk.Tk):
+class LoadingWindow(tk.Toplevel):
     """
     The class for the initial loading window
 
@@ -24,23 +24,36 @@ class LoadingWindow(tk.Tk):
 
     def __init__(self, root, controller):
         super().__init__()
+        self.value_label = None
+        self.askquit_topframe = None
+        self.valueLabel = None
+        self.progressbar = None
         # Load the themes to the new tk.Tk instance
         self.root = root
         self.controller = controller
         self.geometry(f'{LoadingWindow.x}x{LoadingWindow.y}')
+        # Disable maximize / minimize button
+        self.resizable(width=False, height=False)
         self.big_frame = ttk.Frame(self)
         self.big_frame.pack(expand=True, fill='both')
         self.init_UI()
         center(self)
         self.set_active()
-        # Alternative use tk.Toplevel, but be careful with RuntimeError: main thread is not in main loop.
         if isinstance(self, tk.Tk):
+            # Alternative use tk.Toplevel, but be careful with RuntimeError: main thread is not in main loop.
             tkinter_theme_calling(root=self)
             preferred_theme = self.read_theme()  # Reads the theme from the json (if exists)
             self.use_theme(preferred_theme)  # Sets the theme. If None, azure-dark is the default.
             print("LoadingWindow>theme_registering")
             self.update()
-        self.check_loading_status()
+            self.check_loading_status()
+        # It's a Toplevel.
+        else:
+            preferred_theme = self.read_theme()  # Reads the theme from the json (if exists)
+            self.use_theme(preferred_theme)  # Sets the theme. If None, azure-dark is the default.
+            # Wrap the function in a thread, so as not to block the rest program.
+            _thread = threading.Thread(target=self.check_loading_status)
+            _thread.start()
 
     def check_loading_status(self):
         """
@@ -52,8 +65,9 @@ class LoadingWindow(tk.Tk):
         print(f"LoadingWindow>check_loading_status>root withdrawn")
         while self.controller.loading_status:
             # If pass statement is used, it slows down the rest of the program
-            time.sleep(1)
+            time.sleep(0.125)
         else:
+            print(f"LoadingWindow: self.controller.loading_status set: {self.controller.loading_status}")
             self.root.deiconify()
             # Load transparency settings at startup
             # Here, it's the first time the user's settings are applied (it will call self.set_transparency() in App)
@@ -68,13 +82,25 @@ class LoadingWindow(tk.Tk):
         """
 
         self.title("Loading")
-        askquit_topframe = ttk.Frame(self.big_frame)
-        askquit_topframe.pack(side='top', expand=True)
-        valueLabel = ttk.Label(askquit_topframe, text="Loading..")
-        valueLabel.pack(expand=True)
+        self.askquit_topframe = ttk.Frame(self.big_frame)
+        self.askquit_topframe.pack(side='top', expand=True)
+        self.valueLabel = ttk.Label(self.askquit_topframe, text="Loading..")
+        self.valueLabel.pack(expand=True)
+        self.progressbar = ttk.Progressbar(self, orient='horizontal', mode='determinate', length=280)
+        self.progressbar.pack(side='top', pady=(10, 5))
+        self.value_label = ttk.Label(self, text=self.update_progress_label())
+        self.value_label.pack(side='bottom', expand=True)
 
-    @staticmethod
-    def read_theme() -> str | None:
+    def progress(self):
+        if self.progressbar['value'] < 100:
+            self.progressbar['value'] += 10
+            self.value_label['text'] = self.update_progress_label()
+            self.update()
+
+    def update_progress_label(self):
+        return f"Current Progress: {self.progressbar['value']}%"
+
+    def read_theme(self) -> str | None:
         """Reads the preferred theme"""
         dir_path = str
         if getattr(sys, 'frozen', False):
@@ -255,3 +281,10 @@ class LoadingWindow(tk.Tk):
         else:
             self.destroy()
             print(f'LoadingWindow>toplevel_quit: {self} is now destroyed')
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    center(root)
+    LoadingWindow(controller=None, root=root)
+    root.mainloop()
