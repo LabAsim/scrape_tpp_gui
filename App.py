@@ -41,6 +41,7 @@ class App:
     treeview_tab_page_counter = {}  # Default: {'Newsroom: 1'} (as, it loads the news up to the first page)
 
     def __init__(self, root, to_bypass, debug):
+        self.loading_tk = None
         self.dir_path = self.find_current_dir_path()
         self.transparency = None
         self.help_menu = None
@@ -60,10 +61,8 @@ class App:
         self.root = root
         self.bypass = to_bypass
         self.debug = debug
-        # Start a thread for the loading window without blocking the rest of the program
-        # See here: https://stackoverflow.com/a/67097216
-        thr = threading.Thread(target=self.loading_window)
-        thr.start()
+        # Show the loading window
+        self.loading_window()
         self.root.title('The Press Project news feed')
         self.time_widgets()
         self.note = ttk.Notebook(self.root)
@@ -88,31 +87,51 @@ class App:
 
     def loading_window(self):
         """
-        Just calls the LoadingWindow.
+        Just calls the LoadingWindow, a new Toplevel.
+
         :return: None
+
+
+        It can be also implemented with a tk.Tk() instance. You have to put this code in the init() of the App class.
+        You should also change the LoadingWindow to inherit from tk.Tk.
+                thr = threading.Thread(target=self.loading_window)
+                thr.start()
+
+        See here: https://stackoverflow.com/a/67097216
         """
-        # LoadingWindow can inherit either from tk.TK() or tk.Toplevel. If tk.Tk() is chosen, call loading_tk.mainloop()
-        # TODO: find a way to start the tk.TK instead of Toplevel and not user .after in FirstPage
-        loading_tk = LoadingWindow(root=self.root, controller=self)
+        # LoadingWindow can inherit either from tk.TK() or tk.Toplevel.
+        # If tk.Tk() is chosen, call loading_tk.mainloop().
+        self.loading_tk = LoadingWindow(root=self.root, controller=self)
         print("App>loading_window called")
-        if isinstance(loading_tk, tk.Tk):
-            loading_tk.mainloop()
+        if isinstance(self.loading_tk, tk.Tk):
+            self.loading_tk.mainloop()
 
     def create_the_notebook_pages(self):
         """
-        Creates the notebook pages.
+        Creates the notebook pages. After each creation, it updates the progress bar in the Loading Window.
         """
         # For the 1st page of Newsroom: list(url_list.values())[0][0]
         self.notebook_pages(url=list(url_list.values())[0][0], note=self.note, controller=self, name='Newsroom')
+        # Update the progress bar in the Toplevel loading window.
+        self.loading_tk.progress()
         self.notebook_pages(url=list(url_list.values())[1][0], note=self.note, controller=self, name='Politics')
+        self.loading_tk.progress()
         self.notebook_pages(url=list(url_list.values())[2][0], note=self.note, controller=self, name='Economy')
+        self.loading_tk.progress()
         self.notebook_pages(url=list(url_list.values())[3][0], note=self.note, controller=self, name='International')
+        self.loading_tk.progress()
         self.notebook_pages(url=list(url_list.values())[4][0], note=self.note, controller=self, name='Reportage')
+        self.loading_tk.progress()
         self.notebook_pages(url=list(url_list.values())[5][0], note=self.note, controller=self, name='Analysis')
+        self.loading_tk.progress()
         self.notebook_pages(url=list(url_list.values())[6][0], note=self.note, controller=self, name='tpp.tv')
+        self.loading_tk.progress()
         self.notebook_pages(url=list(url_list.values())[7][0], note=self.note, controller=self, name='tpp.radio')
+        self.loading_tk.progress()
         self.notebook_pages(url=list(url_list.values())[8][0], note=self.note, controller=self, name='Anaskopisi')
+        self.loading_tk.progress()
         self.notebook_pages(url=list(url_list.values())[9][0], note=self.note, controller=self, name='Culture')
+        self.loading_tk.progress()
 
     def notebook_pages(self, url, note, controller, name):
         """
