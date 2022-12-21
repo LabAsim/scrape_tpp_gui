@@ -50,7 +50,7 @@ class SettingsTopLevel(tk.Toplevel):
 
     def create_ui(self):
         """
-        Constructs the User Interface  for the Settings window.
+        Constructs the User Interface for the Settings window.
         :return: None
         """
 

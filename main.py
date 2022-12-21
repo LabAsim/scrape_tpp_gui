@@ -35,5 +35,4 @@ if __name__ == "__main__":
     end = time.perf_counter()
     print(f'Current Style: {root.tk.call("ttk::style", "theme", "use")}')
     print(f'Load in {end - start}')
-    print(check_new_version())
     root.mainloop()
