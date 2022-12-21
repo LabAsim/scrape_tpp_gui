@@ -25,7 +25,6 @@ class ToplevelDonate:
         self.topleveldonate = tk.Toplevel()
         self.topleveldonate.title("Donate to TPP")
         # Set a fixed size
-        self.topleveldonate.minsize(width=ToplevelDonate.x, height=ToplevelDonate.y)
         self.topleveldonate.maxsize(width=ToplevelDonate.x, height=ToplevelDonate.y)
         # Disable maximize / minimize button
         self.topleveldonate.resizable(width=False, height=False)

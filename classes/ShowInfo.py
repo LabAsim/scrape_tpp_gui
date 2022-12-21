@@ -29,8 +29,7 @@ class ShowInfo(tk.Toplevel):
     def __init__(self, controller, root, info):
         super().__init__()
         self.geometry(f'{ShowInfo.x}x{ShowInfo.y}')  # Here, self is tkinter.Toplevel
-        # Set fFixed size
-        self.minsize(width=ShowInfo.x, height=ShowInfo.y)
+        # Set fixed size
         self.maxsize(width=ShowInfo.x, height=ShowInfo.y)
         # Disable maximize / minimize button
         self.resizable(width=False, height=False)

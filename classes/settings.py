@@ -38,8 +38,7 @@ class SettingsTopLevel(tk.Toplevel):
         self.controller = controller
         self.x = x
         self.y = y
-        # Set fFixed size
-        self.minsize(width=self.x, height=self.y)
+        # Set fixed size
         self.maxsize(width=self.x, height=self.y)
         # Disable maximize / minimize button
         self.resizable(width=False, height=False)

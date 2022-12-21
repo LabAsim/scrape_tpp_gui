@@ -28,7 +28,6 @@ class ToplevelSocial:
         self.toplevelsocial = tk.Toplevel()
         self.toplevelsocial.title('ThePressProject social media')
         # Set a fixed size
-        self.toplevelsocial.minsize(width=ToplevelSocial.x, height=ToplevelSocial.y)
         self.toplevelsocial.maxsize(width=ToplevelSocial.x, height=ToplevelSocial.y)
         # Disable maximize / minimize button
         self.toplevelsocial.resizable(width=False, height=False)
