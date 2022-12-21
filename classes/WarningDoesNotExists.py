@@ -84,9 +84,11 @@ class WarningDoesNotExists(tk.Toplevel):
         valuelabel = ttk.Label(_topframe, text=f"{self.info}")
         valuelabel.pack(side='right', expand=True)
         if self.program == 'other':
-            image = Image.open(os.path.join(parent_of_parent_folder, "images/warning/warning_sign1.png"))
+            image = Image.open(os.path.join(parent_of_parent_folder,
+                                            "source/multimedia/images/warning/warning_sign1.png"))
         else:
-            image = Image.open(os.path.join(parent_of_parent_folder, "images/warning/warning_sign.png"))
+            image = Image.open(os.path.join(parent_of_parent_folder,
+                                            "source/multimedia/images/warning/warning_sign.png"))
         image = image.resize(
             (int(self.winfo_width() * 60), int(self.winfo_height() * 60)), PIL.Image.ANTIALIAS)
         image = ImageTk.PhotoImage(image)
