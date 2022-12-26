@@ -80,7 +80,6 @@ class LoadingWindow(tk.Toplevel):
         """
         Creates the User Interface
         """
-
         self.title("The Press Project news feed")
         self.askquit_topframe = ttk.Frame(self.big_frame)
         self.askquit_topframe.pack(side='top', expand=True)

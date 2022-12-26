@@ -15,9 +15,10 @@ class AskQuit(tk.Toplevel):
     x = 240
     y = 110
 
-    def __init__(self, parent, driver=None):
+    def __init__(self, parent, driver=None, controller=None):
         super().__init__()
         # self.root = root
+        self.controller = controller
         self.images_dir_path = None
         self.path_of_images()
         self.driver = driver
@@ -66,6 +67,9 @@ class AskQuit(tk.Toplevel):
                     self.driver.quit()
                 sys.exit()
             else:
+                if self.controller:
+                    # Set the Flag to true to terminate the thread
+                    self.controller.autosave_db_thread_stop_flag = True
                 self.destroy()
                 widget.destroy()
                 print(f'AskQuit>toplevel_quit: {widget} & {self} is now destroyed')

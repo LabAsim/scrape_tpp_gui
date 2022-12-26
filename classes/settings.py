@@ -63,7 +63,7 @@ class SettingsTopLevel(tk.Toplevel):
         Constructs the User Interface for the Settings window.
         :return: None
         """
-
+        self.protocol("WM_DELETE_WINDOW", self.toplevel_quit)
         self.title("Settings")
         self.big_frame = ttk.Frame(self)
         self.big_frame.pack(expand=True, fill='both')
@@ -300,6 +300,20 @@ class SettingsTopLevel(tk.Toplevel):
             self.dir_path = os.path.dirname(self.dir_path)
             print(f'Script: {self.dir_path}')
             return self.dir_path
+
+    def toplevel_quit(self, widget=None):
+        """how to bind a messagebox to toplevel window in python
+           https://stackoverflow.com/questions/17910866/python-3-tkinter-messagebox-with-a-toplevel-as-master"""
+        if widget is not None:
+            if isinstance(widget, tk.Tk):
+                sys.exit()
+            else:
+                self.destroy()
+                widget.destroy()
+                print(f'LoadingWindow>toplevel_quit: {widget} & {self} is now destroyed')
+        else:
+            self.destroy()
+            print(f'LoadingWindow>toplevel_quit: {self} is now destroyed')
 
 
 if __name__ == "__main__":
