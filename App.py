@@ -372,6 +372,7 @@ class App:
     def exit_the_program(self):
         """Exits the program"""
         # Set the flag to True so as the auto-saving thread to exit.
+        self.autosave_db_interval = 1
         self.autosave_db_thread_stop_flag = True
         if FirstPage.driver is not None:
             try:

@@ -20,7 +20,7 @@ class SettingsTopLevel(tk.Toplevel):
         super().__init__()
         # Auto-save
         self.autosave_db_spinbox = None
-        self.autosave_db_interval_variable = tk.IntVar(value=10)
+        self.autosave_db_interval_variable = tk.IntVar(value=60)
         self.autosave_db_button_variable = tk.BooleanVar(value=True)
         self.autosave_db_button = None
         self.db_frame = None
@@ -170,14 +170,6 @@ class SettingsTopLevel(tk.Toplevel):
             # Current value is the initial string. Just return the default value.
             return self.autosave_db_interval_variable.get()
 
-
-        if not isinstance(current_value_of_spinbox, str):
-            self.autosave_db_interval_variable.set(current_value_of_spinbox)
-            return int(current_value_of_spinbox)
-        else:
-
-            return self.autosave_db_interval_variable.get()
-
     def set_active(self):
         """
         https://stackoverflow.com/questions/15944533/how-to-keep-the-window-focus-on-new-toplevel-window-in-tkinter
@@ -278,7 +270,7 @@ class SettingsTopLevel(tk.Toplevel):
             self.transparency_percentage.set(0)
             # Autosave is True and the interval is 60 secs
             self.autosave_db_button_variable.set(True)
-            self.autosave_db_interval_variable.set(5)
+            self.autosave_db_interval_variable.set(60)
 
     def apply_settings(self):
         """
