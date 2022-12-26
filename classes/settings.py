@@ -18,6 +18,12 @@ class SettingsTopLevel(tk.Toplevel):
 
     def __init__(self, root, controller, x=500, y=500):
         super().__init__()
+        # Auto-save
+        self.autosave_db_spinbox = None
+        self.autosave_db_interval_variable = tk.IntVar(value=10)
+        self.autosave_db_button_variable = tk.BooleanVar(value=True)
+        self.autosave_db_button = None
+        self.db_frame = None
         self.button_frame = None
         self.apply_button = None
         self.apply_button_frame = None
@@ -83,6 +89,21 @@ class SettingsTopLevel(tk.Toplevel):
                                                    onvalue=True, offvalue=False,
                                                    style="Switch.TCheckbutton")
         self.check_update_button.pack(padx=5, pady=10)
+        # Database
+        # Button
+        self.db_frame = ttk.LabelFrame(self.big_frame, text='Database', padding=(20, 10))
+        self.db_frame.pack(padx=(20, 10), pady=(20, 10), side='top')
+        self.autosave_db_button = ttk.Checkbutton(self.db_frame, text="Autosave to database",
+                                                  command=self.autosave_db_button_func,
+                                                  variable=self.autosave_db_button_variable,
+                                                  onvalue=True, offvalue=False,
+                                                  style="Switch.TCheckbutton")
+        self.autosave_db_button.pack(padx=5, pady=10)
+        # Spinbox
+        self.autosave_db_spinbox = ttk.Spinbox(self.db_frame, from_=self.autosave_db_interval_variable.get(),
+                                               to=600, increment=5, command=self.autosave_spinbox_update)
+        self.autosave_db_spinbox.insert(0, 'Autosave interval')
+        self.autosave_db_spinbox.pack(padx=5, pady=10)
         # Transparency frame, scale, progressbar, label with text
         self.transparency_frame = ttk.LabelFrame(self.big_frame, text="Transparency")
         self.transparency_frame.pack(side='bottom', pady=5, padx=5)
@@ -126,6 +147,37 @@ class SettingsTopLevel(tk.Toplevel):
         print(f"check_update_button_variable set: value:{current_state_of_check_update_button_variable}")
         return current_state_of_check_update_button_variable
 
+    def autosave_db_button_func(self):
+        """
+        Returns the current state (True or False) of `self.autosave_db_button_variable`.
+        """
+        self.autosave_spinbox_update()
+        current_state_of_autosave_db_update_button_variable = self.autosave_db_button_variable.get()
+        print(f"autosave_db_button_variable set: value:{current_state_of_autosave_db_update_button_variable}")
+        return current_state_of_autosave_db_update_button_variable
+
+    def autosave_spinbox_update(self) -> int:
+        """
+
+        :return: Int: The current value of the spinbox
+        """
+        current_value_of_spinbox = self.autosave_db_spinbox.get()
+        try:
+            current_value_of_spinbox = int(current_value_of_spinbox)
+            self.autosave_db_interval_variable.set(current_value_of_spinbox)
+            return current_value_of_spinbox
+        except ValueError as err:
+            # Current value is the initial string. Just return the default value.
+            return self.autosave_db_interval_variable.get()
+
+
+        if not isinstance(current_value_of_spinbox, str):
+            self.autosave_db_interval_variable.set(current_value_of_spinbox)
+            return int(current_value_of_spinbox)
+        else:
+
+            return self.autosave_db_interval_variable.get()
+
     def set_active(self):
         """
         https://stackoverflow.com/questions/15944533/how-to-keep-the-window-focus-on-new-toplevel-window-in-tkinter
@@ -152,7 +204,10 @@ class SettingsTopLevel(tk.Toplevel):
         print(dir_path)
         # Saves desired transparency as a decimal (not percentage). To use it, subtract it from 1.
         save_settings_to_dump = {'auto_update_at_startup': self.check_button_save(),
-                                 'transparency': int(self.transparency_scale.get()) / 100}
+                                 'transparency': int(self.transparency_scale.get()) / 100,
+                                 'database': {'autosave_db': self.autosave_db_button_variable.get(),
+                                              'autosave_db_interval': self.autosave_spinbox_update()}
+                                 }
         if file_exists(name="settings.json", dir_path=dir_path):
             json_data = ''
             with open(os.path.join(dir_path, "settings.json"), "r+", encoding='utf-8') as file:
@@ -163,14 +218,16 @@ class SettingsTopLevel(tk.Toplevel):
                     json_data.update(save_settings_to_dump)
             with open(os.path.join(dir_path, "settings.json"), "w+", encoding='utf-8') as file:
                 json.dump(json_data, file, indent=4)
-                print(f"Settings saved in: {os.path.join(dir_path, 'settings.json')}")
+                print(f"Settings saved in: {os.path.join(dir_path, 'settings.json')}"
+                      f"\n Settings: {save_settings_to_dump}")
         else:  # Settings.json does not exist.
             with open(os.path.join(dir_path, "settings.json"), "w+", encoding='utf-8') as file:
                 json_data = save_settings_to_dump
                 json.dump(json_data, file, indent=4)
-                print(f"Settings saved in: {os.path.join(dir_path, 'settings.json')}")
+                print(f"Settings saved in: {os.path.join(dir_path, 'settings.json')}"
+                      f"\n Settings: {save_settings_to_dump}")
 
-    def read_settings_from_file(self):
+    def read_settings_from_file(self) -> dict | None:
         """
         Reads the settings from `settings.json`.
         :return: A dictionary with the settings.
@@ -186,7 +243,7 @@ class SettingsTopLevel(tk.Toplevel):
                 return json_data
         return None
 
-    def set_class_variables_from_settings(self):
+    def set_class_variables_from_settings(self) -> None:
         """
         Reads the file and sets all the class variables and their user-defined values from the file.
         :return: None
@@ -202,11 +259,26 @@ class SettingsTopLevel(tk.Toplevel):
                 self.transparency_percentage.set(self.settings_from_file['transparency'] * 100)
                 # Updates the text in the label
                 self.update_transparency_scale(event=None)
-                print(f"{self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])}"
-                      f"\n{self.transparency_scale['value']}")
+                # Autosave db 
+                self.autosave_db_button_variable.set(self.settings_from_file['autosave_db'])
+                self.autosave_db_interval_variable.set(self.settings_from_file['autosave_db_interval'])
+                print(f"Auto-update: "
+                      f"{self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])}"
+                      f"\nTransparency: {self.transparency_scale['value']}"
+                      f"\nAutosave: {self.autosave_db_button_variable.set(self.settings_from_file['autosave_db'])}"
+                      f"\nAutosave interval: {self.autosave_db_interval_variable.get()}")
             except KeyError:
                 self.settings_from_file = None
                 return None
+            # There is not a settings.json. Apply default settings
+        else:
+            # Prompt update window at startup
+            self.check_update_button_variable.set(True)
+            # 0% transparency
+            self.transparency_percentage.set(0)
+            # Autosave is True and the interval is 60 secs
+            self.autosave_db_button_variable.set(True)
+            self.autosave_db_interval_variable.set(5)
 
     def apply_settings(self):
         """
@@ -216,6 +288,10 @@ class SettingsTopLevel(tk.Toplevel):
         # The setting for auto-update does not need to be applied here. It makes no difference.
         # Sets the transparency of the root. Convert to decimal (i.e. 67% = 1 - 67/100 = 0.33)
         self.root.attributes('-alpha', (1 - int(self.transparency_percentage.get()) / 100))
+        # Apply autosave settings. The autosave thread in App reads the settings accordingly. Check auto_save_to_db().
+        self.controller.autosave_db = self.autosave_db_button_variable.get()
+        self.controller.autosave_db_interval = self.autosave_spinbox_update()
+        print(f"Settings>apply_settings> Settings applied")
 
     def find_the_path_of_main(self) -> str:
         """
@@ -236,6 +312,7 @@ class SettingsTopLevel(tk.Toplevel):
 
 if __name__ == "__main__":
     root = tk.Tk()
+    center(root)
     tkinter_theme_calling(root)
     top = SettingsTopLevel(controller=None, root=root)
     root.mainloop()
