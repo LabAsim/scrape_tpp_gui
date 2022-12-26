@@ -83,11 +83,11 @@ You should also convert updater.py to updater.exe to use **check for updates** c
 
     *   [x] Save to db option in menu
 
-    *   [ ] Periodically autosave to db
+    *   [x] Periodically autosave to db
 
-    *   [ ] Let the user choose the frequency of autosaving
+    *   [x] Let the user choose the frequency of autosaving
 
-    *   [ ] Let the user whether to autosave or not
+    *   [x] Let the user whether to autosave or not
 
     *   [ ] Create a toplevel window containing all the news from
         the database
