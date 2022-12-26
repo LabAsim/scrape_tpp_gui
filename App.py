@@ -41,6 +41,9 @@ class App:
     treeview_tab_page_counter = {}  # Default: {'Newsroom: 1'} (as, it loads the news up to the first page)
 
     def __init__(self, root, to_bypass, debug):
+        self.autosave_db_thread_stop_flag = False
+        self.autosave_db_interval: int = 60
+        self.autosave_db = True
         self.loading_tk = None
         self.dir_path = self.find_current_dir_path()
         self.transparency = None
@@ -82,7 +85,8 @@ class App:
         self.create_menu()
         # Check for updates at startup
         self.check_for_updates(startup=self.check_updates_at_startup, from_menu=False)
-
+        # Start the auto-saving thread
+        self.start_auto_saving_thread()
         # Load transparency settings at startup from LoadingWindow!
 
     def loading_window(self):
@@ -367,6 +371,8 @@ class App:
 
     def exit_the_program(self):
         """Exits the program"""
+        # Set the flag to True so as the auto-saving thread to exit.
+        self.autosave_db_thread_stop_flag = True
         if FirstPage.driver is not None:
             try:
                 FirstPage.driver.close()
@@ -393,6 +399,10 @@ class App:
             self.dir_path = os.path.dirname(__file__)
             print(f'Script: {self.dir_path}')
             return self.dir_path
+
+    ############
+    # Database #
+    ############
 
     def save_dataclasses_to_sqlite(self):
         """
@@ -445,9 +455,10 @@ class App:
                 for a in (tuple_dataclass[0], tuple_dataclass[2], tuple_dataclass[3],
                           tuple_dataclass[5], tuple_dataclass[6], tuple_dataclass[8]):
                     list_to_insert.append(a)
-                if number <= 5:
-                    print(f'FirstPage.news_total: \n\t{tuple_dataclass}')
-                    print(f'tuple for the db: {tuple_dataclass[1:3:1]}')
+                # if self.debug:
+                #    if number <= 5:
+                #       print(f'FirstPage.news_total: \n\t{tuple_dataclass}')
+                #       print(f'tuple for the db: {tuple_dataclass[1:3:1]}')
 
                 # On how to insert properly placeholders in SQL statements, see
                 # https://docs.python.org/3/library/sqlite3.html#how-to-use-placeholders-to-bind-values-in-sql-queries
@@ -478,16 +489,46 @@ class App:
                                 author_url = '{tuple_dataclass[6]}',
                                 category = '{tuple_dataclass[8]}';
                             """)
-            cur.execute("""SELECT * FROM news ORDER BY date_unix DESC""")
-            for number, a in enumerate(cur.fetchall()):
-                if number <= 5:
-                    print(f'Fetched from db: {a}')
+            if self.debug:
+                cur.execute("""SELECT * FROM news ORDER BY date_unix DESC""")
+                for number, a in enumerate(cur.fetchall()):
+                    if number <= 5:
+                        print(f'Fetched from db: {a}')
 
         except (sqlite3.Error, sqlite3.DatabaseError, UnicodeEncodeError, Exception) as err:
             trace_error()
             print(err)
         finally:
             con.close()
+
+    def auto_save_to_db(self):
+        """
+        It checks in a while loop if the user wants to autosave and if True, it saves periodically to the sqlite db.
+        The thread checks for the boolean `self.autosave_db_thread_stop_flag`. If true, it breaks the while loop.
+        :return: None
+
+        See: For the stop event: https://stackoverflow.com/a/325528
+        """
+
+        while True:
+            if self.autosave_db_thread_stop_flag:
+                print("App>auto_save_to_db>The auto-saving thread is stopping")
+                break
+            if self.autosave_db:
+                print("App>auto_save_to_db>Saving db")
+                self.save_dataclasses_to_sqlite()
+                time.sleep(self.autosave_db_interval)
+            else:
+                # If autosave_db is False, it sleeps and then rechecks the variable.
+                time.sleep(1)
+
+    def start_auto_saving_thread(self):
+        """
+        Starts a thread for auto-saving the sqlite db.
+        :return:
+        """
+        autosave_thread = threading.Thread(target=self.auto_save_to_db)
+        autosave_thread.start()
 
     def strip_ansi_characters(self, text=''):
         """https://stackoverflow.com/questions/48782529/exclude-ansi-escape-sequences-from-output-log-file"""
@@ -506,6 +547,79 @@ class App:
 
         except re.error as err:
             print(err)
+
+    ######################
+    # Settings functions #
+    ######################
+
+    def read_settings(self) -> dict | None:
+        """
+        Reads the settings from `settings.json`.
+        :return: A dictionary with the settings.
+
+        """
+
+        if file_exists(name="settings.json", dir_path=self.dir_path):
+            with open(os.path.join(self.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
+                json_data = json.load(file)
+                print(json_data)
+                return json_data
+        return None
+
+    def set_class_variables_from_settings_after_reading(self) -> None:
+        """
+        After loading the `settings.json`, it reads all the variables.
+        If the settings file is not found, it implements default values.
+        :return: None
+        """
+        self.settings_dict = self.read_settings()
+        if self.settings_dict:
+            # Even if the file exists, if the dictionary key does not exist, return self.settings as None
+            try:
+                self.check_updates_at_startup = self.settings_dict['auto_update_at_startup']  # Boolean
+                # It's a float, it does not need conversion from percentage. It depicts the proportion of transparency
+                # that the user wants. It needs to be subtracted from 1 in order to be used.
+                # i.e. self.root.attributes('-alpha', 1 - 0.02) => 2% transparency
+                self.transparency = self.settings_dict['transparency']
+                self.autosave_db = self.settings_dict['database']['autosave_db']
+                self.autosave_db_interval = self.settings_dict['database']['autosave_db_interval']
+                print(f"Settings passed: "
+                      f"\n\tauto_update_at_startup: {self.settings_dict['auto_update_at_startup']}"
+                      f"\n\ttransparency: {self.settings_dict['transparency']}")
+            except KeyError:
+                self.settings_dict = None
+                return None
+        # There is not a settings.json. Apply default settings
+        else:
+            # Prompt update window at startup
+            self.check_updates_at_startup = True
+            # 0% transparency
+            self.transparency = 0.0
+            # Autosave is True and the interval is 60 secs
+            self.autosave_db = True
+            self.autosave_db_interval = 5
+            # Assign the values to settings dict
+            self.settings_dict = {'auto_update_at_startup': self.check_updates_at_startup,
+                                  'transparency': self.transparency,
+                                  'database': {'autosave_db': self.autosave_db,
+                                               'autosave_db_interval': self.autosave_db_interval}
+                                  }
+
+    def set_transparency(self):
+        """
+        Sets the transparency using the value from settings.json
+        """
+        self.root.attributes('-alpha', 1 - self.transparency)
+
+    def apply_settings(self):
+        """
+        Apply all settings.
+        :return: None
+        """
+        # Assure that self.settings_dict is not None.
+        if self.settings_dict:
+            self.set_transparency()
+            # Auto-saving does not need to be re-applied.
 
     ###################
     # Theme functions #
@@ -775,67 +889,3 @@ class App:
         for toplevel in toplevel_temporary_list:  # Then re-draw the toplevel windows.
             # Thus, the toplevel will always be on top
             toplevel.deiconify()
-
-    ######################
-    # Settings functions #
-    ######################
-
-    def read_settings(self) -> dict | None:
-        """
-        Reads the settings from `settings.json`.
-        :return: A dictionary with the settings.
-
-        """
-
-        if file_exists(name="settings.json", dir_path=self.dir_path):
-            with open(os.path.join(self.dir_path, "settings.json"), "r+", encoding='utf-8') as file:
-                json_data = json.load(file)
-                print(json_data)
-                return json_data
-        return None
-
-    def set_class_variables_from_settings_after_reading(self) -> None:
-        """
-        After loading the `settings.json`, it reads all the variables.
-        If the settings file is not found, it implements default values.
-        :return: None
-        """
-        self.settings_dict = self.read_settings()
-        if self.settings_dict:
-            # Even if the file exists, if the dictionary key does not exist, return self.settings as None
-            try:
-                self.check_updates_at_startup = self.settings_dict['auto_update_at_startup']  # Boolean
-                # It's a float, it does not need conversion from percentage. It depicts the proportion of transparency
-                # that the user wants. It needs to be subtracted from 1 in order to be used.
-                # i.e. self.root.attributes('-alpha', 1 - 0.02) => 2% transparency
-                self.transparency = self.settings_dict['transparency']
-                print(f"Settings passed: "
-                      f"\n\tauto_update_at_startup: {self.settings_dict['auto_update_at_startup']}"
-                      f"\n\ttransparency: {self.settings_dict['transparency']}")
-            except KeyError:
-                self.settings_dict = None
-                return None
-        # There is not a settings.json. Apply default settings
-        else:
-            # Prompt update window at startup
-            self.check_updates_at_startup = True
-            # 0% transparency
-            self.transparency = 0.0
-            # Assign the values to settings dict
-            self.settings_dict = {'auto_update_at_startup': self.check_updates_at_startup,
-                                  'transparency': self.transparency}
-
-    def set_transparency(self):
-        """
-        Sets the transparency using the value from settings.json
-        """
-        self.root.attributes('-alpha', 1 - self.transparency)
-
-    def apply_settings(self):
-        """
-        Apply all settings.
-        :return: None
-        """
-        # Assure that self.settings_dict is not None.
-        if self.settings_dict:
-            self.set_transparency()
