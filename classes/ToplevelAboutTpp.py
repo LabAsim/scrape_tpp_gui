@@ -9,6 +9,9 @@ from ttkwidgets.font import FontSelectFrame
 import tktooltip
 
 class ToplevelAboutTpp:
+    """
+    A window containing info for The Press Project.
+    """
     x = 1200
     y = 500
     url = 'https://thepressproject.gr/pos-litourgoume/'
@@ -17,6 +20,7 @@ class ToplevelAboutTpp:
     def __init__(self, controller, root):
         self.controller = controller
         self.toplevelabouttpp = tk.Toplevel()
+        self.toplevelabouttpp.protocol("WM_DELETE_WINDOW", self.toplevel_quit)
         self.toplevelabouttpp.title(f"About The Press Project")
         self.toplevelabouttpp.geometry(f"{ToplevelAboutTpp.x}x{ToplevelAboutTpp.y}")
         self.font_selection = FontSelectFrame(self.toplevelabouttpp, callback=self.update_preview)
@@ -82,12 +86,20 @@ class ToplevelAboutTpp:
             self.text.configure(font=selected_font)
             self.text.config(state='disabled')
 
-    @staticmethod
-    def toplevel_quit(widget):
-        """how to bind a messagebox to toplevel window in python
-           https://stackoverflow.com/questions/17910866/python-3-tkinter-messagebox-with-a-toplevel-as-master"""
-        if widget is not None:
-            widget.destroy()
+    def bring_focus_back(self):
+        """
+        Maximizes the toplevel window and forces the focus on it.
+        """
+        self.toplevelabouttpp.deiconify()
+        self.big_frame.lift()
+        self.big_frame.focus_force()
+
+    def toplevel_quit(self):
+        """It closes the window and set the controller variable back to None"""
+        # Set the variable of this toplevel in the controller class back to None
+        self.controller.toplevelabouttpp = None
+        # Destroy the toplevel
+        self.toplevelabouttpp.destroy()
 
     @staticmethod
     def ask_toplevel_quit(widget):

@@ -41,6 +41,9 @@ class App:
     treeview_tab_page_counter = {}  # Default: {'Newsroom: 1'} (as, it loads the news up to the first page)
 
     def __init__(self, root, to_bypass, debug):
+        # Toplevels
+        self.toplevelabouttpp = None
+        # Autosave
         self.autosave_db_thread_stop_flag = False
         self.autosave_db_interval: int = 60
         self.autosave_db = True
@@ -248,7 +251,7 @@ class App:
         # TPP menu
         self.tpp_menu = Menu(self.main_menu, tearoff=0)
         self.tpp_menu.add_command(label='About ThePressProject', font='Arial 10',
-                                  command=lambda: ToplevelAboutTpp(self, root=self.root))
+                                  command=lambda: self.call_toplevelabouttpp())
         self.tpp_menu.add_command(label='Social media', font='Arial 10',
                                   command=lambda: ToplevelSocial(self, root=self.root, dir_path=dir_path))
         self.tpp_menu.add_command(label='Donate', font='Arial 10',
@@ -400,6 +403,20 @@ class App:
             self.dir_path = os.path.dirname(__file__)
             print(f'Script: {self.dir_path}')
             return self.dir_path
+
+    ######################
+    # TPP MENU Functions #
+    ######################
+
+    def call_toplevelabouttpp(self):
+        """
+        Checks if the window exists and brings it back to focus. Otherwise, it creates a new one.
+        """
+        if self.toplevelabouttpp is None:
+            self.toplevelabouttpp = ToplevelAboutTpp(controller=self, root=self.root)
+        else:
+            self.toplevelabouttpp.bring_focus_back()
+            print(f"ToplevelAboutTpp is opened!")
 
     ############
     # Database #
