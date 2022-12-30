@@ -100,8 +100,11 @@ class SettingsTopLevel(tk.Toplevel):
                                                   style="Switch.TCheckbutton")
         self.autosave_db_button.pack(padx=5, pady=10)
         # Spinbox
-        self.autosave_db_spinbox = ttk.Spinbox(self.db_frame, from_=self.autosave_db_interval_variable.get(),
-                                               to=600, increment=5, command=self.autosave_spinbox_update)
+        # Bind the value of the spinbox with a tk.IntVar using textvariable option
+        # See: https://stackoverflow.com/a/53815095
+        self.autosave_db_spinbox = ttk.Spinbox(self.db_frame, from_=0,
+                                               to=600, increment=5, command=self.autosave_spinbox_update,
+                                               textvariable=self.autosave_db_interval_variable)
         self.autosave_db_spinbox.insert(0, 'Autosave interval')
         self.autosave_db_spinbox.pack(padx=5, pady=10)
         # Transparency frame, scale, progressbar, label with text
@@ -252,18 +255,20 @@ class SettingsTopLevel(tk.Toplevel):
                 # Updates the text in the label
                 self.update_transparency_scale(event=None)
                 # Autosave db 
-                self.autosave_db_button_variable.set(self.settings_from_file['autosave_db'])
-                self.autosave_db_interval_variable.set(self.settings_from_file['autosave_db_interval'])
-                print(f"Auto-update: "
-                      f"{self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])}"
-                      f"\nTransparency: {self.transparency_scale['value']}"
-                      f"\nAutosave: {self.autosave_db_button_variable.set(self.settings_from_file['autosave_db'])}"
-                      f"\nAutosave interval: {self.autosave_db_interval_variable.get()}")
-            except KeyError:
+                self.autosave_db_button_variable.set(self.settings_from_file['database']['autosave_db'])
+                self.autosave_db_interval_variable.set(self.settings_from_file['database']['autosave_db_interval'])
+                print(f"Settings>set_class_variables_from_settings> "
+                      f"\n\tAuto-update: {self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])}" 
+                      f"\n\tTransparency: {self.transparency_scale['value']}"
+                      f"\n\tAutosave: {self.autosave_db_button_variable.set(self.settings_from_file['database']['autosave_db'])}"
+                      f"\n\tAutosave interval: {self.autosave_db_interval_variable.get()}")
+            except KeyError as err:
+                print(f"Settings>set_class_variables_from_settings> {err}")
                 self.settings_from_file = None
                 return None
             # There is not a settings.json. Apply default settings
         else:
+            print(f"Settings>set_class_variables_from_settings>Settings file not found")
             # Prompt update window at startup
             self.check_update_button_variable.set(True)
             # 0% transparency
