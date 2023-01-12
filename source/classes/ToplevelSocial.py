@@ -4,28 +4,32 @@ import tkinter as tk
 from tkinter import ttk
 import tktooltip
 from PIL import Image, ImageTk
+
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
-sys.path.append(parent)
+parent_parent = os.path.dirname(parent)
+sys.path.append(parent_parent)
 # Now, python can detect the helper_functions.py from the parent directory
 from helper_functions import file_exists, center, callback
+
 
 class ToplevelSocial:
     """Contains the links to TPP's social media"""
     x = 1000
     y = 500
-    image_x_size = int(600*0.7)
-    image_y_size = int(150*0.7)
+    image_x_size = int(600 * 0.7)
+    image_y_size = int(150 * 0.7)
     social_media_urls = ['https://www.facebook.com/ThePressProject',
                          'https://www.facebook.com/anaskopisi',
                          'https://twitter.com/intent/follow?screen_name=ThePressProject&tw_p=followbutton',
                          'https://libretooth.gr/@thepressproject']
 
-    def __init__(self, controller, root, dir_path):
+    def __init__(self, controller, root):
         # https://stackoverflow.com/questions/69293836/tkinter-how-do-i-resize-an-image-to-fill-its-labelframe-and-have-that-labelfram
         self.controller = controller
         self.dir_path = self.find_the_path_of_main()
         self.toplevelsocial = tk.Toplevel()
+        self.toplevelsocial.protocol("WM_DELETE_WINDOW", self.toplevel_quit)
         self.toplevelsocial.title('ThePressProject social media')
         # Set a fixed size
         self.toplevelsocial.maxsize(width=ToplevelSocial.x, height=ToplevelSocial.y)
@@ -40,9 +44,11 @@ class ToplevelSocial:
         self.bottomframe = ttk.Frame(self.bigframe)
         self.bottomframe.pack(expand=True, fill='both', side='bottom', padx=80, pady=10)
         # First image
-        self.img_facebook = Image.open(os.path.join(self.dir_path,
-                                                    'source\\multimedia\\images\\socialmedia\\facebook\\facebook.png'))
-        self.img_facebook = self.img_facebook.resize((ToplevelSocial.image_x_size, ToplevelSocial.image_y_size), Image.ANTIALIAS)
+        path_to_img_facebook = os.path.join(self.dir_path,
+                                                    'source\\multimedia\\images\\socialmedia\\facebook\\facebook.png')
+        self.img_facebook = Image.open(path_to_img_facebook)
+        self.img_facebook = self.img_facebook.resize((ToplevelSocial.image_x_size, ToplevelSocial.image_y_size),
+                                                     Image.ANTIALIAS)
         # (int(self.toplevelsocial.winfo_width() * 200), int(self.toplevelsocial.winfo_height() * 200)),
 
         self.img_facebook_tk = ImageTk.PhotoImage(self.img_facebook)
@@ -54,7 +60,8 @@ class ToplevelSocial:
         # 2nd image
         self.img_twitter = Image.open(os.path.join(self.dir_path,
                                                    'source\\multimedia\\images\\socialmedia\\twitter\\twitter.png'))
-        self.img_twitter = self.img_twitter.resize((ToplevelSocial.image_x_size, ToplevelSocial.image_y_size), Image.ANTIALIAS)
+        self.img_twitter = self.img_twitter.resize((ToplevelSocial.image_x_size, ToplevelSocial.image_y_size),
+                                                   Image.ANTIALIAS)
         # (int(self.toplevelsocial.winfo_width()/3), int(self.toplevelsocial.winfo_height()/3)),
         # Image.ANTIALIAS)
         self.img_twitter_tk = ImageTk.PhotoImage(self.img_twitter)
@@ -66,7 +73,8 @@ class ToplevelSocial:
         # 3rd image
         self.img_mastodon = Image.open(os.path.join(self.dir_path,
                                                     'source\\multimedia\\images\\socialmedia\\mastodon\\mastodon.png'))
-        self.img_mastodon = self.img_mastodon.resize((ToplevelSocial.image_x_size, ToplevelSocial.image_y_size), Image.ANTIALIAS)
+        self.img_mastodon = self.img_mastodon.resize((ToplevelSocial.image_x_size, ToplevelSocial.image_y_size),
+                                                     Image.ANTIALIAS)
         self.img_mastodon_tk = ImageTk.PhotoImage(self.img_mastodon)
         self.label_mastodon = ttk.Label(self.bottomframe, image=self.img_mastodon_tk, cursor='hand2')
         self.label_mastodon.image = self.img_mastodon_tk
@@ -99,19 +107,39 @@ class ToplevelSocial:
         """
         if getattr(sys, 'frozen', False):
             print(getattr(sys, 'frozen', False))
+
             # The temporary path of the files (MEIPP)
-            self.dir_path = os.path.dirname(os.path.dirname(__file__))
-            print("Exe:", self.dir_path)
+            self.dir_path = os.path.dirname(os.path.realpath(__file__))
+            self.dir_path = os.path.dirname(self.dir_path)  # We need the parent of the parent of this directory
+            self.dir_path = os.path.dirname(self.dir_path)  # We need the parent of the parent of this directory
+            # The path until this step contains \\scrape_tpp_gui. So we want the parent dir, which is a temp dir(MEIPP).
+            self.dir_path = os.path.dirname(self.dir_path)
+            print("ToplevelSocial>find_the_path_of_main():Exe:", self.dir_path)
             return self.dir_path
         elif __file__:
-            self.dir_path = os.path.dirname(__file__)  # We need the parent of this directory
+            self.dir_path = os.path.dirname(__file__)  # We need the parent of the parent of this directory
+            self.dir_path = os.path.dirname(self.dir_path)  # We need the parent of the parent of this directory
             self.dir_path = os.path.dirname(self.dir_path)
-            print(f'Script: {self.dir_path}')
+            print(f'ToplevelSocial>find_the_path_of_main():Script: {self.dir_path}')
             return self.dir_path
 
+    def bring_focus_back(self):
+        """
+        Maximizes the toplevel window and forces the focus on it.
+        """
+        self.toplevelsocial.deiconify()
+        self.bigframe.lift()
+        self.bigframe.focus_force()
+
+    def toplevel_quit(self):
+        """It closes the window and set the controller variable back to None"""
+        # Set the variable of this toplevel in the controller class back to None
+        self.controller.toplevelsocial = None
+        # Destroy the toplevel
+        self.toplevelsocial.destroy()
+
 if __name__ == "__main__":
-    from misc import dir_path
     root = tk.Tk()
     center(root)
-    ToplevelSocial(controller=None, root=root, dir_path=dir_path)
+    ToplevelSocial(controller=None, root=root)
     root.mainloop()

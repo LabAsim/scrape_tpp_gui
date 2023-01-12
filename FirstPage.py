@@ -174,7 +174,9 @@ class FirstPage:
                 count += 1
 
     def renew_feed(self):
+        """Clears the lists containing the news and refills the treeview"""
         FirstPage.values.clear()
+        self.values.clear()
         FirstPage.news_to_open_in_browser.clear()
         self.fill_the_tree()
         print(f"FirstPage>renew_feed(): Tree renewed")
@@ -262,6 +264,7 @@ class FirstPage:
             trace_error()
 
     def renew_feed_bypass(self):
+        """Clears the lists containing the news and refills the treeview"""
         if self.controller.check_for_chrome_and_chromedriver() is False:
             return  # Just stop the function
         FirstPage.values.clear()

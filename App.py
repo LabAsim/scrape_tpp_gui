@@ -12,19 +12,18 @@ from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
 import sv_ttk
-import undetected_chromedriver
-from scrape_tpp_gui.helper_functions import callback, str2bool
+from scrape_tpp_gui.helper_functions import callback
 from scrape_tpp_gui.source.version.version_module import file_exists
 from misc import url_list, url_list_base_page, dir_path
 from FirstPage import FirstPage
 from classes.ShowInfo import ShowInfo
 from classes.ToplevelAbout import ToplevelAbout
-from classes.ToplevelSocial import ToplevelSocial
-from classes.ToplevelDonate import ToplevelDonate
+from scrape_tpp_gui.source.classes.ToplevelSocial import ToplevelSocial
+from scrape_tpp_gui.source.classes.ToplevelDonate import ToplevelDonate
 from classes.ToplevelAboutTpp import ToplevelAboutTpp
 from classes.AskUpdate import AskUpdate
 from scrape_tpp_gui.trace_error import trace_error
-from source.version.version_module import check_online_version, check_new_version
+from source.version.version_module import check_new_version
 from classes.search_software import InstalledSoftware
 from classes.WarningDoesNotExists import WarningDoesNotExists
 from classes.settings import SettingsTopLevel
@@ -42,7 +41,9 @@ class App:
 
     def __init__(self, root, to_bypass, debug):
         # Toplevels
+        self.topleveldonate = None
         self.toplevelabouttpp = None
+        self.toplevelsocial = None
         # Autosave
         self.autosave_db_thread_stop_flag = False
         self.autosave_db_interval: int = 60
@@ -253,9 +254,9 @@ class App:
         self.tpp_menu.add_command(label='About ThePressProject', font='Arial 10',
                                   command=lambda: self.call_toplevelabouttpp())
         self.tpp_menu.add_command(label='Social media', font='Arial 10',
-                                  command=lambda: ToplevelSocial(self, root=self.root, dir_path=dir_path))
+                                  command=lambda: self.call_toplevelsocial())
         self.tpp_menu.add_command(label='Donate', font='Arial 10',
-                                  command=lambda: ToplevelDonate(self, root=self.root, dir_path=dir_path))
+                                  command=lambda: self.call_topleveldonate())
         self.tpp_menu.add_command(label='Subscribe to Newsletter', font='Arial 10',
                                   command=lambda: callback('http://eepurl.com/dGNy2H'))
         # Create the Help menu on top of main menu
@@ -408,16 +409,38 @@ class App:
     # TPP MENU Functions #
     ######################
 
-    def call_toplevelabouttpp(self):
+    def call_toplevelsocial(self):
         """
         Checks if the window exists and brings it back to focus. Otherwise, it creates a new one.
+        """
+        if self.toplevelsocial is None:
+            self.toplevelsocial = ToplevelSocial(controller=self, root=self.root)
+        else:
+            self.toplevelsocial.bring_focus_back()
+            print(f"ToplevelSocial is opened!")
+
+    def call_toplevelabouttpp(self):
+        """
+        Checks if the window with the TPP social media exists and brings it back to focus.
+        Otherwise, it creates a new one.
         """
         if self.toplevelabouttpp is None:
             self.toplevelabouttpp = ToplevelAboutTpp(controller=self, root=self.root)
         else:
             self.toplevelabouttpp.bring_focus_back()
             print(f"ToplevelAboutTpp is opened!")
-
+    
+    def call_topleveldonate(self):
+        """
+                Checks if the window with the TPP social media exists and brings it back to focus.
+                Otherwise, it creates a new one.
+                """
+        if self.topleveldonate is None:
+            self.topleveldonate = ToplevelDonate(controller=self, root=self.root)
+        else:
+            self.topleveldonate.bring_focus_back()
+            print(f"ToplevelDonate is opened!")
+    
     ############
     # Database #
     ############

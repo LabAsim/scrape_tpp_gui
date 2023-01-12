@@ -6,7 +6,6 @@ import os
 import sys
 import threading
 import time
-import tkinter
 import tkinter as tk
 from tkinter import ttk
 from scrape_tpp_gui.helper_functions import file_exists, center, tkinter_theme_calling
@@ -197,9 +196,9 @@ class LoadingWindow(tk.Toplevel):
                 try:
                     self.tk.call("set_theme", "dark")
                     # root.tk.call("ttk::style", "theme", "use", "azure-dark")
-                except tkinter.TclError as err:
+                except tk.TclError as err:
                     print(err)
-        except (tkinter.TclError, Exception) as err:
+        except (tk.TclError, Exception) as err:
             print(err)
 
     def change_theme_xpnative(self):
@@ -208,7 +207,7 @@ class LoadingWindow(tk.Toplevel):
             if self.tk.call("ttk::style", "theme", "use") == "azure-dark":
                 self.tk.call("set_theme", "light")
             self.tk.call("ttk::style", "theme", "use", 'vista')
-        except tkinter.TclError as err:
+        except tk.TclError as err:
             print(err)
 
     def change_theme_radiance(self):
@@ -216,7 +215,7 @@ class LoadingWindow(tk.Toplevel):
             if self.tk.call("ttk::style", "theme", "use") == "azure-dark":
                 self.tk.call("set_theme", "light")
             self.tk.call("ttk::style", "theme", "use", 'radiance')
-        except tkinter.TclError as err:
+        except tk.TclError as err:
             print(err)
 
     def change_theme_aquativo(self):
@@ -224,7 +223,7 @@ class LoadingWindow(tk.Toplevel):
             if self.tk.call("ttk::style", "theme", "use") == "azure-dark":
                 self.tk.call("set_theme", "light")
             self.tk.call("ttk::style", "theme", "use", 'aquativo')
-        except tkinter.TclError as err:
+        except tk.TclError as err:
             trace_error()
             print(err)
 
@@ -233,7 +232,7 @@ class LoadingWindow(tk.Toplevel):
             if self.tk.call("ttk::style", "theme", "use") == "azure-dark":
                 self.tk.call("set_theme", "light")
             self.tk.call("ttk::style", "theme", "use", 'plastik')
-        except tkinter.TclError as err:
+        except tk.TclError as err:
             print(err)
 
     def change_theme_adapta(self):
@@ -241,7 +240,7 @@ class LoadingWindow(tk.Toplevel):
             if self.tk.call("ttk::style", "theme", "use") == "azure-dark":
                 self.tk.call("set_theme", "light")
             self.tk.call("ttk::style", "theme", "use", 'adapta')
-        except tkinter.TclError as err:
+        except tk.TclError as err:
             print(err)
 
     def change_theme_yaru(self):
@@ -249,7 +248,7 @@ class LoadingWindow(tk.Toplevel):
             if self.tk.call("ttk::style", "theme", "use") == "azure-dark":
                 self.tk.call("set_theme", "light")
             self.tk.call("ttk::style", "theme", "use", 'yaru')
-        except tkinter.TclError as err:
+        except tk.TclError as err:
             print(err)
 
     def change_theme_arc(self):
@@ -257,7 +256,7 @@ class LoadingWindow(tk.Toplevel):
             if self.tk.call("ttk::style", "theme", "use") == "azure-dark":
                 self.tk.call("set_theme", "light")
             self.tk.call("ttk::style", "theme", "use", 'arc')
-        except tkinter.TclError as err:
+        except tk.TclError as err:
             print(err)
 
     def set_active(self):
