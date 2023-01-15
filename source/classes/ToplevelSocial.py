@@ -45,7 +45,7 @@ class ToplevelSocial:
         self.bottomframe.pack(expand=True, fill='both', side='bottom', padx=80, pady=10)
         # First image
         path_to_img_facebook = os.path.join(self.dir_path,
-                                                    'source\\multimedia\\images\\socialmedia\\facebook\\facebook.png')
+                                            'source\\multimedia\\images\\socialmedia\\facebook\\facebook.png')
         self.img_facebook = Image.open(path_to_img_facebook)
         self.img_facebook = self.img_facebook.resize((ToplevelSocial.image_x_size, ToplevelSocial.image_y_size),
                                                      Image.ANTIALIAS)
@@ -104,16 +104,29 @@ class ToplevelSocial:
         """
         Returns The path of the directory of main.py or the .exe
         :return: The path of the directory of main.py or the .exe
+
+        Note that if the current class is import in App.py as
+        'from scrape_tpp_gui.source.classes.ToplevelSocial import ToplevelSocial',
+        the path will contain scrape_tpp_gui\\, which does not exist in temporary directories.
+        Thus, in this situation, you need the parent folder.
+        It's easier to use 'source.classes.ToplevelSocial import ToplevelSocial' to avoid that
+
         """
         if getattr(sys, 'frozen', False):
             print(getattr(sys, 'frozen', False))
-
-            # The temporary path of the files (MEIPP)
+            '''
+            The temporary path of the files (MEIPP).
+            Note that if the current class is import in App.py as 
+            'from scrape_tpp_gui.source.classes.ToplevelSocial import ToplevelSocial', 
+            the path will contain \\scrape_tpp_gui\\, which does not exist in temporary directories. 
+            Thus, in this situation, you need the parent folder.
+            It's easier to use 'source.classes.ToplevelSocial import ToplevelSocial' to avoid that
+            '''
             self.dir_path = os.path.dirname(os.path.realpath(__file__))
             self.dir_path = os.path.dirname(self.dir_path)  # We need the parent of the parent of this directory
             self.dir_path = os.path.dirname(self.dir_path)  # We need the parent of the parent of this directory
-            # The path until this step contains \\scrape_tpp_gui. So we want the parent dir, which is a temp dir(MEIPP).
-            self.dir_path = os.path.dirname(self.dir_path)
+            # If the path until this step contains \\scrape_tpp_gui, get the parent dir, which is a temp dir(MEIPP).
+            # self.dir_path = os.path.dirname(self.dir_path)
             print("ToplevelSocial>find_the_path_of_main():Exe:", self.dir_path)
             return self.dir_path
         elif __file__:
@@ -134,9 +147,11 @@ class ToplevelSocial:
     def toplevel_quit(self):
         """It closes the window and set the controller variable back to None"""
         # Set the variable of this toplevel in the controller class back to None
-        self.controller.toplevelsocial = None
+        if self.controller:
+            self.controller.toplevelsocial = None
         # Destroy the toplevel
         self.toplevelsocial.destroy()
+
 
 if __name__ == "__main__":
     root = tk.Tk()

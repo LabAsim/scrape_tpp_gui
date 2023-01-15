@@ -12,14 +12,14 @@ from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
 import sv_ttk
-from scrape_tpp_gui.helper_functions import callback
-from scrape_tpp_gui.source.version.version_module import file_exists
-from misc import url_list, url_list_base_page, dir_path
+from helper_functions import callback
+from source.version.version_module import file_exists
+from misc import url_list, url_list_base_page
 from FirstPage import FirstPage
 from classes.ShowInfo import ShowInfo
-from classes.ToplevelAbout import ToplevelAbout
-from scrape_tpp_gui.source.classes.ToplevelSocial import ToplevelSocial
-from scrape_tpp_gui.source.classes.ToplevelDonate import ToplevelDonate
+from source.classes.ToplevelAbout import ToplevelAbout
+from source.classes.ToplevelSocial import ToplevelSocial
+from source.classes.ToplevelDonate import ToplevelDonate
 from classes.ToplevelAboutTpp import ToplevelAboutTpp
 from classes.AskUpdate import AskUpdate
 from scrape_tpp_gui.trace_error import trace_error
@@ -40,10 +40,12 @@ class App:
     treeview_tab_page_counter = {}  # Default: {'Newsroom: 1'} (as, it loads the news up to the first page)
 
     def __init__(self, root, to_bypass, debug):
-        # Toplevels
+        # Toplevel windows
+        # The names are PascalCase to be identical to __class__.__name__ of each Toplevel class.
         self.topleveldonate = None
         self.toplevelabouttpp = None
         self.toplevelsocial = None
+        self.ToplevelAbout = None
         # Autosave
         self.autosave_db_thread_stop_flag = False
         self.autosave_db_interval: int = 60
@@ -261,7 +263,7 @@ class App:
                                   command=lambda: callback('http://eepurl.com/dGNy2H'))
         # Create the Help menu on top of main menu
         self.help_menu = Menu(self.main_menu, tearoff=0)
-        self.help_menu.add_command(label='About...', font='Arial 10', command=lambda: ToplevelAbout(self, self.root))
+        self.help_menu.add_command(label='About...', font='Arial 10', command=lambda: self.call_toplevelabout())
         self.help_menu.add_command(label='Check for updates', font='Arial 10',
                                    command=self.check_for_updates)
         # Add the rest menus as cascades menus on top of main menu
@@ -365,14 +367,6 @@ class App:
                                 lambda: ShowInfo(controller=self,
                                                  root=self.root, info='The application is up-to-date!'))
 
-    def post_settings(self):
-        """
-        Settings
-        # TODO fill details
-        :return:
-        """
-        pass
-
     def exit_the_program(self):
         """Exits the program"""
         # Set the flag to True so as the auto-saving thread to exit.
@@ -440,7 +434,23 @@ class App:
         else:
             self.topleveldonate.bring_focus_back()
             print(f"ToplevelDonate is opened!")
-    
+
+    #############
+    # Help Menu #
+    #############
+
+    def call_toplevelabout(self):
+        """
+        Checks if the window exists and gets the focus back to it.
+        Otherwise, it creates a new one.
+        :return: None
+        """
+        if self.ToplevelAbout is None:
+            self.ToplevelAbout = ToplevelAbout(controller=self, root=self.root)
+        else:
+            self.ToplevelAbout.bring_focus_back()
+            print("App>ToplevelAbout is opened!")
+
     ############
     # Database #
     ############

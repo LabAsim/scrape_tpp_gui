@@ -66,6 +66,13 @@ class ToplevelDonate:
         """
         Returns The path of the directory of main.py or the .exe
         :return: The path of the directory of main.py or the .exe
+
+
+        Note that if the current class is import in App.py as
+        'from scrape_tpp_gui.source.classes.ToplevelSocial import ToplevelSocial',
+        the path will contain scrape_tpp_gui\\, which does not exist in temporary directories.
+        Thus, in this situation, you need the parent folder.
+        It's easier to use 'source.classes.ToplevelSocial import ToplevelSocial' to avoid that
         """
         if getattr(sys, 'frozen', False):
             print(getattr(sys, 'frozen', False))
@@ -73,8 +80,8 @@ class ToplevelDonate:
             self.dir_path = os.path.dirname(os.path.realpath(__file__))
             self.dir_path = os.path.dirname(self.dir_path)  # We need the parent of the parent of this directory
             self.dir_path = os.path.dirname(self.dir_path)  # We need the parent of the parent of this directory
-            # The path until this step contains \\scrape_tpp_gui. So we want the parent dir, which is a temp dir(MEIPP).
-            self.dir_path = os.path.dirname(self.dir_path)
+            # If the path until this step contains \\scrape_tpp_gui, get the parent dir, which is a temp dir(MEIPP).
+            # self.dir_path = os.path.dirname(self.dir_path)
             print("Exe:", self.dir_path)
             return self.dir_path
         elif __file__:
@@ -95,14 +102,13 @@ class ToplevelDonate:
     def toplevel_quit(self):
         """It closes the window and set the controller variable back to None"""
         # Set the variable of this toplevel in the controller class back to None
-        self.controller.topleveldonate = None
+        if self.controller:
+            self.controller.topleveldonate = None
         # Destroy the toplevel
         self.topleveldonate.destroy()
 
 
 if __name__ == "__main__":
-    from misc import dir_path
-
     root = tk.Tk()
     center(root)
     ToplevelDonate(controller=None, root=root)
