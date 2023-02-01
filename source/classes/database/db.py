@@ -38,13 +38,12 @@ class DatabaseWindow(GenericToplevel):
 
     def __init__(self, root, controller, debug=False):
         super().__init__(root=root, controller=controller)
+        # self.dir_path and self.toplevel are inherited from the GenericToplevel
         # Although this is redundant, if it is declared here, Pycharm's autofill works.
         self.toplevel: tk.Toplevel = self.toplevel
         # https://stackoverflow.com/questions/44218662/how-to-get-the-hwnd-of-a-tkinter-window-on-windows
         # Hide the window until everything is set up.
         self.toplevel.withdraw()
-        # self.toplevel.iconify()
-        # self.dir_path and self.toplevel are inherited from the GenericToplevel
         self.x = 1500
         self.y = 500
         self.root = root
@@ -101,16 +100,17 @@ class DatabaseWindow(GenericToplevel):
         # https://docs.python.org/3.10/library/tkinter.ttk.html#tkinter.ttk.Combobox.current
         self.combobox.current(0)  # Set the first value as current default value
         self.combobox.pack(side='left', padx=(5, 5), pady=(5, 5))
-        # self.combobox.bind("<FocusIn>", self.defocus)
         self.combobox.bind("<<ComboboxSelected>>", self.shift_focus_from_combobox_to_searchbox)
         self.searchbox = tk.Entry(self.upper_frame, textvariable=self.text_var, font='Arial 15', width=20)
         self.searchbox.pack(side='left', padx=(5, 5), pady=(5, 5))
         self.case_sensitive_button_save()
+        # The style renamed with "Color." in front of "Switch.TCheckbutton" so as not to interfere with the rest of
+        # the GUI
         self.case_sensitive_button = ttk.Checkbutton(self.upper_frame, text="Case sensitive",
                                                      command=self.case_sensitive_button_save,
                                                      variable=self.case_sensitive_boolean,
                                                      onvalue=True, offvalue=False,
-                                                     style="Switch.TCheckbutton")
+                                                     style="Color.Switch.TCheckbutton")
         self.case_sensitive_button.pack(side='right', padx=15, pady=10)
         # To display the proper color for the text, It does not work without after.
         self.toplevel.after(50, self.case_sensitive_button_save)
@@ -119,6 +119,8 @@ class DatabaseWindow(GenericToplevel):
         self.tree = ttk.Treeview(self.big_frame, columns=DatabaseWindow.headers, show='headings')
         self.setup_treeview()
         self.tree.pack(expand=True, fill='both')
+        # Register quit button to the quit function
+        self.toplevel.protocol("WM_DELETE_WINDOW", self.toplevel_quit)
         # Make everything visible again
         self.toplevel.deiconify()
 
@@ -180,7 +182,7 @@ class DatabaseWindow(GenericToplevel):
             # Fix the lengths
             self.tree.column(column='Title', minwidth=100, width=950, stretch=True)
             self.tree.column(column='Date', minwidth=150, width=int(max(dates) - 100), stretch=False)
-
+            print(f"DatabaseWindow>fill_treeview()>news inserted")
         except tk.TclError as err:
             print(err)
             trace_error()
@@ -195,6 +197,7 @@ class DatabaseWindow(GenericToplevel):
         self.bar_menu.add_cascade(label='Menu', menu=self.main_menu, background='black')
         self.database_submenu = tk.Menu(self.main_menu, font='Arial 10', tearoff=0, background='black', fg='white')
         self.main_menu.add_cascade(label='Database', menu=self.database_submenu, background='black')
+        self.database_submenu.add_command(label="Reload", command=self.fill_treeview)
         self.database_submenu.add_command(label='Save', font='Arial 10  italic', background='black',
                                           command=self.save_to_db)
         self.main_menu.add_separator()
@@ -356,7 +359,8 @@ class DatabaseWindow(GenericToplevel):
         # All greek letters or a space and at most one special character (to create a stressed vowel).
         # examples: "Χρυσής Αυγή εισαγγελέας"
         greek_letters_utf8 = re.compile("[\u0370-\u03ff\u1f00-\u1fff\s][\u0300-\u0301]?")
-        greek_english_letters_numbers_utf8 = re.compile("[0-9\u0040-\u007e\u0370-\u03ff\u1f00-\u1fff\s][\u0300-\u0301]{0,1}")
+        greek_english_letters_numbers_utf8 = re.compile(
+            "[0-9\u0040-\u007e\u0370-\u03ff\u1f00-\u1fff\s][\u0300-\u0301]{0,1}")
         term_to_return = bytes()
         # print(f"term:{term}")
         # TODO: remove it
@@ -403,7 +407,8 @@ class DatabaseWindow(GenericToplevel):
                         # print(_tuple[0:4])
                         if not self.case_sensitive_boolean.get():  # Case not sensitive
                             # term is already converted from the wrapper functiom!
-                            tuple_item_modified = converted_stressed_vowels_to_non_stressed(match_vowels(convert_to_case_not_sensitive(tuple_item)))
+                            tuple_item_modified = converted_stressed_vowels_to_non_stressed(
+                                match_vowels(convert_to_case_not_sensitive(tuple_item)))
                             if term in tuple_item_modified:
                                 # print(f"{__class__.__name__}>{inspect.getframeinfo(inspect.currentframe())[2]}>"
                                 #      f"Case-sensitive({self.case_sensitive_boolean.get()}): Term: "
@@ -415,7 +420,7 @@ class DatabaseWindow(GenericToplevel):
 
                             term = DatabaseWindow.match_vowels(term)
                             if term in tuple_item_matched_vowels:
-                                #print(f"{__class__.__name__}>{inspect.getframeinfo(inspect.currentframe())[2]}>"
+                                # print(f"{__class__.__name__}>{inspect.getframeinfo(inspect.currentframe())[2]}>"
                                 #      f"Case-sensitive({self.case_sensitive_boolean.get()}): Term: "
                                 #      f"{term}: {tuple_item_matched_vowels}")
                                 if chopped_tuple not in self.tree_searched_values:
@@ -469,13 +474,13 @@ class DatabaseWindow(GenericToplevel):
         """
         current_state_of_case_sensitive_button_save_variable = self.case_sensitive_boolean.get()
         if not current_state_of_case_sensitive_button_save_variable:
-            self.color_config(widget_style="Switch.TCheckbutton", color="red")
+            self.color_config(widget_style="Color.Switch.TCheckbutton", color="red")
             print(f"DatabaseWindow>case_sensitive_button_save>Case NOT sensitive, color "
-                  f"{ttk.Style().lookup('Switch.TCheckbutton', option='foreground')}")
+                  f"{ttk.Style().lookup('Color.Switch.TCheckbutton', option='foreground')}")
         elif current_state_of_case_sensitive_button_save_variable:
-            self.color_config(widget_style="Switch.TCheckbutton", color="green")
+            self.color_config(widget_style="Color.Switch.TCheckbutton", color="green")
             print(f"DatabaseWindow>case_sensitive_button_save>Case sensitive, color "
-                  f"{ttk.Style().lookup('Switch.TCheckbutton', option='foreground')}")
+                  f"{ttk.Style().lookup('Color.Switch.TCheckbutton', option='foreground')}")
         print(
             f"current_state_of_case_sensitive_button_save_variable set: value:{current_state_of_case_sensitive_button_save_variable}")
         return current_state_of_case_sensitive_button_save_variable
@@ -518,7 +523,7 @@ class DatabaseWindow(GenericToplevel):
             On how to insert properly placeholders in SQL statements, see
                 https://docs.python.org/3/library/sqlite3.html#how-to-use-placeholders-to-bind-values-in-sql-queries
         """
-        db_path = os.path.join(self.dir_path, 'tpp.db')
+        db_path = os.path.join(self.dir_path_exe, 'tpp.db')
         con = sqlite3.connect(db_path)
         try:
             cur = con.cursor()
@@ -583,7 +588,7 @@ class DatabaseWindow(GenericToplevel):
         :return: Data from the database
         """
 
-        db_path = os.path.join(self.dir_path, 'tpp.db')
+        db_path = os.path.join(self.dir_path_exe, 'tpp.db')
         con = sqlite3.connect(db_path)
         try:
             cur = con.cursor()
@@ -601,7 +606,7 @@ class DatabaseWindow(GenericToplevel):
         Connects and fetches the saved news from the sqlite db.
         :return: None
         """
-        db_path = os.path.join(self.dir_path, 'tpp.db')
+        db_path = os.path.join(self.dir_path_exe, 'tpp.db')
         con = sqlite3.connect(db_path)
         try:
             cur = con.cursor()
@@ -614,6 +619,19 @@ class DatabaseWindow(GenericToplevel):
             trace_error()
         finally:
             con.close()
+
+    ##################
+    # Misc functions #
+    ##################
+
+    def toplevel_quit(self):
+        """
+        Sets the variable of itself in self.controller as None and quits.
+        :return:
+        """
+        if self.controller:
+            self.controller.database_tk_window = None
+        self.toplevel.destroy()
 
 
 if __name__ == "__main__":
