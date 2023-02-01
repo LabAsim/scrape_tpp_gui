@@ -68,7 +68,8 @@ class FirstPage:
         """
         # Menu emerging on the right click only
         self.right_click_menu = Menu(font='Arial 10', tearoff=0)
-        self.right_click_menu.add_command(label='Show article', command=self.show_main_article)
+        # Lambda here is needed because there is no event to be passed. If no lambda is used, an error will be raised
+        self.right_click_menu.add_command(label='Show article', command=lambda: self.show_main_article(event=None))
         self.right_click_menu.add_command(label='Show article (bypass)', command=self.show_main_article_bypass)
         self.right_click_menu.add_command(label='Open article in browser', command=self.open_article_link)
         self.right_click_menu.add_command(label='Load more news',
