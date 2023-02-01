@@ -5,6 +5,7 @@ from tkinter import ttk, messagebox
 import pyperclip
 from ttkwidgets.font import FontSelectFrame
 import tktooltip
+
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
 sys.path.append(parent)
@@ -43,6 +44,9 @@ class ToplevelArticle:
         self.title_label.pack(expand=True, fill='both')
         self.title_label.bind("<Button-1>", lambda e: callback(self.url))
         tktooltip.ToolTip(self.title_label, msg='Click to open the article in the browser', delay=0.75)
+        # Create menu for Title Label
+        self.right_click_menu_for_title_label = None
+        self.create_right_click_menu()
         self.empty_label = ttk.Label(self.big_frame, text=f"\n")
         self.empty_label.pack(expand=True)
         # A tk.Text inside a tk.Text
@@ -83,11 +87,27 @@ class ToplevelArticle:
         self.menu.add_command(label='Copy', font='Arial 10', command=self.copy_text_to_clipboard)
         self.text.bind('<ButtonRelease-3>', self.post_menu)  # Menu is posted in self.text
         self.text1.bind('<ButtonRelease-3>', self.post_menu)
+        # Create the binds
+        self.create_binds()
         center(self.toplevelarticle, self.root)
 
     def post_menu(self, event):
         """Posts the right click menu at the cursor's coordinates"""
         self.menu.post(event.x_root, event.y_root)
+
+    def post_title_menu(self, event):
+        """Posts the right click menu of the Title Label at the cursor's coordinates"""
+        self.right_click_menu_for_title_label.post(event.x_root, event.y_root)
+
+    def create_right_click_menu(self):
+        """Creates the menu for the title label"""
+        self.right_click_menu_for_title_label = tk.Menu(self.title_label, tearoff=0)
+        self.right_click_menu_for_title_label.add_command(label='Copy link', font='Arial 10',
+                                                          command=lambda: pyperclip.copy(self.url))
+
+    def create_binds(self):
+        """Creates the binds for the menus"""
+        self.title_label.bind('<ButtonRelease-3>', self.post_title_menu)  # Menu is posted in self.text
 
     def copy_text_to_clipboard(self):
         """
