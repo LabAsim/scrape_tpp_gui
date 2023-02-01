@@ -172,6 +172,8 @@ class SettingsTopLevel(tk.Toplevel):
         except ValueError as err:
             # Current value is the initial string. Just return the default value.
             return self.autosave_db_interval_variable.get()
+        except Exception as err:
+            print(f"settings>autosave_spinbox_update>{err}")
 
     def set_active(self):
         """

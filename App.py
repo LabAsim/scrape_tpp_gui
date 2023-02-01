@@ -28,7 +28,7 @@ from classes.search_software import InstalledSoftware
 from classes.WarningDoesNotExists import WarningDoesNotExists
 from classes.settings import SettingsTopLevel
 from source.classes.loading import LoadingWindow
-
+from source.classes.database.db import DatabaseWindow
 
 class App:
     """Main App"""
@@ -46,6 +46,7 @@ class App:
         self.toplevelabouttpp = None
         self.toplevelsocial = None
         self.ToplevelAbout = None
+        self.database_tk_window = None
         # Autosave
         self.autosave_db_thread_stop_flag = False
         self.autosave_db_interval: int = 60
@@ -54,6 +55,7 @@ class App:
         self.dir_path = self.find_current_dir_path()
         self.transparency = None
         self.help_menu = None
+        self.database_menu = None
         self.tpp_menu = None
         self.theme_menu = None
         self.edit_menu = None
@@ -228,7 +230,10 @@ class App:
                                  command=lambda: SettingsTopLevel(root=self.root, controller=self))
         # Save to db
         self.context.add_separator()
-        self.context.add_command(label='Save to db', font='Arial 10', command=self.save_dataclasses_to_sqlite)
+        self.database_menu = tk.Menu(self.context, font='Arial 10', tearoff=0)
+        self.database_menu.add_command(label='Open', command=self.open_db_window)
+        self.database_menu.add_command(label='Save', font='Arial 10', command=self.save_dataclasses_to_sqlite)
+        self.context.add_cascade(label='Database', menu=self.database_menu, underline=0, font='Arial 10')
         # Exit
         self.context.add_separator()
         self.context.add_command(label='Exit', font='Arial 10', command=self.exit_the_program)
@@ -298,6 +303,8 @@ class App:
         FirstPage.news_total.clear()  # Clear needs to be called here, just once. Not in Firstpage via renew_feed()
         for dictio in App.page_dict.values():
             dictio.renew_feed()
+            # Reset the counter
+            App.treeview_tab_page_counter[dictio.name] = 1
         self.f_time.destroy()
         self.time_widgets()
         print(f'App>call_renew_feed()')
@@ -312,6 +319,8 @@ class App:
         FirstPage.news_total.clear()  # Clear needs to be called here, just once. Not in Firstpage via renew_feed()
         for dictio in App.page_dict.values():
             dictio.renew_feed_bypass()
+            # Reset the counter
+            App.treeview_tab_page_counter[dictio.name] = 1
         self.f_time.destroy()
         self.time_widgets()
         print(f'Notebooks renewed')
@@ -398,6 +407,21 @@ class App:
             self.dir_path = os.path.dirname(__file__)
             print(f'Script: {self.dir_path}')
             return self.dir_path
+
+    #######################
+    # Main Menu functions #
+    #######################
+
+    def open_db_window(self):
+        """
+        It opens the database in separate toplevel window
+        :return: None
+        """
+        if self.database_tk_window is None:
+            self.database_tk_window = DatabaseWindow(controller=self, root=self.root, debug=self.debug)
+        else:
+            self.database_tk_window.bring_focus_back()
+            print(f"App>open_db_window>DatabaseWindow is opened!")
 
     ######################
     # TPP MENU Functions #
@@ -525,6 +549,7 @@ class App:
                         """, list_to_insert)
                 # Remember to commit the transaction after executing INSERT.
                 con.commit()
+
                 if self.debug:
                     with open('example.txt', 'a+', encoding="utf-8") as file:
                         file.write(f"""
@@ -540,12 +565,12 @@ class App:
                                 author_url = '{tuple_dataclass[6]}',
                                 category = '{tuple_dataclass[8]}';
                             """)
+            print(f"App>Saved to db")
             if self.debug:
                 cur.execute("""SELECT * FROM news ORDER BY date_unix DESC""")
                 for number, a in enumerate(cur.fetchall()):
                     if number <= 5:
                         print(f'Fetched from db: {a}')
-
         except (sqlite3.Error, sqlite3.DatabaseError, UnicodeEncodeError, Exception) as err:
             trace_error()
             print(err)
@@ -566,7 +591,7 @@ class App:
                 print("App>auto_save_to_db>The auto-saving thread is stopping")
                 break
             if self.autosave_db:
-                print("App>auto_save_to_db>Saving db")
+                print(f"App>auto_save_to_db>Saving db (interval: {self.autosave_db_interval})")
                 self.save_dataclasses_to_sqlite()
                 time.sleep(self.autosave_db_interval)
             else:
@@ -580,6 +605,7 @@ class App:
         """
         autosave_thread = threading.Thread(target=self.auto_save_to_db)
         autosave_thread.start()
+        print(f"App>start_auto_saving_thread()>Auto-saving to database thread started")
 
     def strip_ansi_characters(self, text=''):
         """https://stackoverflow.com/questions/48782529/exclude-ansi-escape-sequences-from-output-log-file"""
