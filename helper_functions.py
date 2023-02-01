@@ -71,7 +71,7 @@ def close_tkinter(root):
         sys.exit()
 
 
-def date_to_unix(date):
+def date_to_unix(date: str):
     """
     Converts and returns the date to unix timestamp
     :param date: Date in various forms
@@ -83,7 +83,7 @@ def date_to_unix(date):
         datetime: https://docs.python.org/3/library/datetime.html
     """
     # Make sure it's a string. Date is a tuple containing the date and an integer from sorting function (sortby())
-    date = str(date[0])
+    date = str(date[0]).strip()
     # If the date is in the form of "Πριν 6 ώρες/λεπτά"
     if re.match('[Ππ]ρ[ιίΙ]ν', date):
         # Remove 'Πριν/πριν'
@@ -92,21 +92,23 @@ def date_to_unix(date):
         if 'δευ' in date:  # "39 δευτερόλεπτα"
             date_now = datetime.now()
             date = date.split(' ')
-            date = float(date[0])
+            date = float(date[0].strip(" ́").strip())
             unix_date = date_now - timedelta(seconds=date)
             unix_date = time.mktime(unix_date.timetuple())
             return unix_date
-        elif 'λεπτά' in date:  # "2 λεπτά"
+        elif 'λεπτ' in date:  # "2 λεπτά" or "1 λεπτό"
             date_now = datetime.now()
-            date = date.strip('Πριν').strip("λεπτά").strip()
-            date = float(date)
+            date = re.sub(pattern='[Λλ]{,2}επτ[αΑάΆοοΟόΌ]{,1}', repl="", string=date, flags=re.IGNORECASE).lstrip(' ')
+            date = float(date.strip(" ́").strip())
             unix_date = date_now - timedelta(minutes=date)
             unix_date = time.mktime(unix_date.timetuple())
             return unix_date
-        elif 'ώρ' in date:  # "2 ώρες / ώρα"
+        elif "ώρ" or "ωρ" in date:
             date_now = datetime.now()
-            date = date.strip('Πριν').strip("ώρα").strip("ώρες").strip()
-            date = float(date)
+            date = date.split(" ")
+            #date = re.sub(pattern="\s[ωώ]ρ[εα][ςΣ]?", repl="", string=date, flags=re.IGNORECASE).lstrip(' ')
+            #date = date.strip('Πριν').strip("ώρα").strip("ώρες").strip()
+            date = float(date[0].strip(" ́").strip())
             unix_date = date_now - timedelta(hours=date)
             unix_date = time.mktime(unix_date.timetuple())
             return unix_date
@@ -117,7 +119,8 @@ def date_to_unix(date):
             unix_date = date_now - timedelta(days=date)
             unix_date = time.mktime(unix_date.timetuple())
             return unix_date
-    else:  # Date is in the form of "19/10/22"
+    # Date is in the form of "19/10/22"
+    elif "/" in date:
         date = date.split('/')
         year = int(date[-1])
         month = int(date[1])
@@ -125,7 +128,48 @@ def date_to_unix(date):
         unix_date = datetime(year, month, day)
         unix_date = time.mktime(unix_date.timetuple())
         return unix_date
+    # The date is in the form of "Κυριακή 18 Δεκεμβρίου 2022"
+    else:
+        date = date.split()
+        date = date[1:]  # Drop the name of the day
+        year = int(date[-1])
+        month = month_str_to_int(date[1])
+        day = int(date[0])
+        unix_date = datetime(year, month, day)
+        unix_date = time.mktime(unix_date.timetuple())
+        print(f"from a string: {unix_date}")
+        return unix_date
 
+def month_str_to_int(month: str) -> int:
+    """
+    Converts a string based month to an integer based month. i.e. 'Δεκέμβρης' -> 12
+    :param month: str
+    :return: int
+    """
+    if re.match('Ιανου[αά]ρ[ιί][οuη]{,2}', month) or re.match('Γεν[αά]ρης', month):
+        return 1
+    elif re.match('Φεβρου[αά]ρ[ιί][οuη]{,2}', month) or re.match('Φλεβ[αά]ρης', month):
+        return 2
+    elif re.match('Μ[αά]ρτ[ιί][οuη]{,2}', month):
+        return 3
+    elif re.match('Απρ[ιί]λ[ιί][οuη]{,2}', month):
+        return 4
+    elif re.match('Μ[αά][ιί][οuη]{,2}', month):
+        return 5
+    elif re.match('Ιο[υύ]ν[ιί][οuη]{,2}', month):
+        return 6
+    elif re.match('Ιο[υύ][ιί][οuη]{,2}', month):
+        return 7
+    elif re.match('Α[υύ]γο[υύ]στου', month):
+        return 8
+    elif re.match('Σεπτ[εέ]μβρ[ιί][οuη]{,2}', month):
+        return 9
+    elif re.match('Οκτ[ωώ]βρ[ιί][οuη]{,2}', month):
+        return 10
+    elif re.match('Νο[εέ]μβρ[ιί][οuη]{,2}', month):
+        return 11
+    elif re.match('Δεκ[εέ]μβρ[ιί][οuη]{,2}', month):
+        return 12
 
 def sortby(tree, col, descending):
     """sort tree contents when a column header is clicked on"""
@@ -146,13 +190,25 @@ def sortby(tree, col, descending):
                                                      int(not descending)))
 
 
-'''def file_exists(dir_path, name) -> bool:
-    """Returns true if the path exists"""
-    path_to_name = pathlib.Path(os.path.join(dir_path, name))
-    if path_to_name.exists():
-        return True
-    else:
-        return False'''
+def dark_title_bar(window):
+    """
+    Sets the title bar (but not the menu bar) to dark theme.
+    MORE INFO:
+    https://learn.microsoft.com/en-us/windows/win32/api/dwmapi/ne-dwmapi-dwmwindowattribute
+    https://stackoverflow.com/a/70724666
+    https://stackoverflow.com/questions/44218662/how-to-get-the-hwnd-of-a-tkinter-window-on-windows
+    """
+    import ctypes
+    window.update()
+    DWMWA_USE_IMMERSIVE_DARK_MODE = 20
+    set_window_attribute = ctypes.windll.dwmapi.DwmSetWindowAttribute
+    get_parent = ctypes.windll.user32.GetParent
+    hwnd = get_parent(window.winfo_id())
+    rendering_policy = DWMWA_USE_IMMERSIVE_DARK_MODE
+    value = 2
+    value = ctypes.c_int(value)
+    set_window_attribute(hwnd, rendering_policy, ctypes.byref(value),
+                         ctypes.sizeof(value))
 
 
 def headers() -> dict[str, str]:
@@ -290,6 +346,3 @@ def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
     base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
     return os.path.join(base_path, relative_path)
-
-
-
