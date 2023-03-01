@@ -287,14 +287,17 @@ class FirstPage:
             # TODO: pass to webdriver all the urls simultaneously and open the urls in separate tabs to scrape faster
             # https://www.geeksforgeeks.org/python-opening-multiple-tabs-using-selenium/
             if self.name == "Newsroom":
-                options = uc.ChromeOptions()
-                # options.add_argument("--headless")
-                # options.add_argument("start-minimized")
-                # options.add_argument("--lang=en-US")
-                driver = uc.Chrome(use_subprocess=True, options=options)
-                FirstPage.driver = driver
-                driver.implicitly_wait(6)
-                driver.set_window_position(-1000, 0)  # Set Chrome off-screen
+                if is_driver_open(FirstPage.driver) is False:
+                    options = uc.ChromeOptions()
+                    # options.add_argument("--headless")
+                    # options.add_argument("start-minimized")
+                    # options.add_argument("--lang=en-US")
+                    driver = uc.Chrome(use_subprocess=True, options=options)
+                    FirstPage.driver = driver
+                    driver.implicitly_wait(6)
+                    driver.set_window_position(-1000, 0)  # Set Chrome off-screen
+                else:
+                    driver = FirstPage.driver
             else:
                 if is_driver_open(FirstPage.driver):
                     driver = FirstPage.driver
@@ -308,12 +311,12 @@ class FirstPage:
                     driver.implicitly_wait(6)
                     driver.set_window_position(-1000, 0)  # Set Chrome off-screen
             feed = PageReaderBypass(url=self.url, name=self.name, driver=driver, firstpage=self, debug=self.debug)
-            title_list = [self.font.measure(d[0]) for d in FirstPage.values]
-            date_list = [self.font.measure(d[2]) for d in FirstPage.values]
+            title_list = [self.font.measure(d[0]) for d in self.values]
+            date_list = [self.font.measure(d[2]) for d in self.values]
             self.tree.column(column='Title', minwidth=100, width=max(title_list), stretch=True)
             self.tree.column(column='Date', minwidth=150, width=max(date_list), stretch=True)
             print(max(title_list))
-            for number, tuple_feed in enumerate(FirstPage.values):
+            for number, tuple_feed in enumerate(self.values):
                 self.tree.insert("", tk.END, iid=str(number),
                                  values=[tuple_feed[2].strip(), tuple_feed[0].strip()])  # , tuple_feed[1].strip()
             # Sort the rows of column with heading "Date"
@@ -356,6 +359,7 @@ class FirstPage:
             if self.controller.check_for_chrome_and_chromedriver() is False:  # Needs to be first here
                 return  # Just stop the function
             if is_driver_open(FirstPage.driver):
+                print("FirstPage>insert_news_from_page>webdriver is opened")
                 PageReaderBypass(url=url, driver=FirstPage.driver, name=self.name, firstpage=self,
                                  debug=self.debug)
             else:

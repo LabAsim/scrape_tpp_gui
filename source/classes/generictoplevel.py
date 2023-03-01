@@ -33,7 +33,7 @@ class GenericToplevel:
             print(getattr(sys, 'frozen', False))
             # The temporary path of the file when the app runs as an .exe
             self.dir_path_exe = os.path.dirname(os.path.realpath(sys.executable))
-            self.dir_path_exe = os.path.dirname(self.dir_path_exe)  # We need the parent of the parent of this directory
+            # self.dir_path_exe = os.path.dirname(self.dir_path_exe)  # We need the parent of the parent of this directory
             # self.dir_path = os.path.dirname(self.dir_path)  # We need the parent of the parent of this directory
             # If the path until this step contains \\scrape_tpp_gui, get the parent dir, which is a temp dir(MEIPP).
             # self.dir_path = os.path.dirname(self.dir_path)

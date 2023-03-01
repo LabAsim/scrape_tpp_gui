@@ -386,9 +386,8 @@ class App:
                 FirstPage.driver.close()
                 FirstPage.driver.quit()
                 print("App>exit_the_program>Driver closed")
-            except Exception as err:
-                print(err)
-                trace_error()
+            except Exception:
+                trace_error(to_print_error=False)
         self.root.destroy()
         print(f'App>exit_the_program()')
         sys.exit()

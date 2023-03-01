@@ -20,15 +20,14 @@ class NewsDataclass:
     title: str = ''
     author: str = ''
     author_url: str = ''
-    date_unix: Any = 'To_change'
+    date_unix: int = 0
     category: str = ''
 
     def __post_init__(self):
         # Convert date to UNIX timestamp
         try:
             self.date_unix = self.date_to_unix(self.date)
-        except Exception as err:
-            print(err)
+        except Exception:
             trace_error()
         # Strip unnecessary characters
         try:
@@ -36,8 +35,7 @@ class NewsDataclass:
             self.summary = self.strip_ansi_characters(self.summary)
             self.author = self.strip_ansi_characters(self.author)
             self.author_url = self.strip_ansi_characters(self.author_url)
-        except Exception as err:
-            print(err)
+        except Exception:
             trace_error()
         # Lower first letters
         self.category = self.category.lower()
@@ -169,6 +167,11 @@ class NewsDataclass:
             return 11
         elif re.match('Δεκ[εέ]μβρ[ιί][οuη]{,2}', month):
             return 12
+
+    @staticmethod
+    def unix_to_datetime(unixtimestamp: int) -> str:
+        """Converts unix timestampe to datetime format (DD/MM/YYYY)"""
+        return datetime.utcfromtimestamp(unixtimestamp).strftime('%d/%m/%Y')
 
     def return_as_tuple(self):
         """

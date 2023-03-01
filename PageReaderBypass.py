@@ -20,7 +20,7 @@ class PageReaderBypass:
         self.news_dict = None
         self.temp_list = None
         self.r = None
-        self.name = name  # The category's name
+        self.name = self.category = name  # The category's name
         self.url = url
         self.driver = driver  # driver passed from FirstPage
         self.debug = debug
@@ -143,7 +143,7 @@ class PageReaderBypass:
                 temp_list.append(date_child)
         self.firstpage.values.append(temp_list)
         self.firstpage.news_to_open_in_browser.append(temp_list)
-        self.firstpage.news_total.append(NewsDataclass(url=link, title=title, date=date, category=self.name))
+        self.firstpage.news_total.append(NewsDataclass(url=link, title=title, date=date, category=self.category))
 
     def iterate_div_for_anaskopisi(self, div: Any):
         """
@@ -176,5 +176,5 @@ class PageReaderBypass:
             text_summary = text_div.text
         self.firstpage.values.append(temp_list)
         self.firstpage.news_to_open_in_browser.append(temp_list)
-        self.firstpage.news_total.append(NewsDataclass(url=link, title=title, date=date))
+        self.firstpage.news_total.append(NewsDataclass(url=link, title=title, date=date, category=self.category))
         # print(temp_list)

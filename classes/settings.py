@@ -260,14 +260,13 @@ class SettingsTopLevel(tk.Toplevel):
                 self.autosave_db_button_variable.set(self.settings_from_file['database']['autosave_db'])
                 self.autosave_db_interval_variable.set(self.settings_from_file['database']['autosave_db_interval'])
                 print(f"Settings>set_class_variables_from_settings> "
-                      f"\n\tAuto-update: {self.check_update_button_variable.set(self.settings_from_file['auto_update_at_startup'])}" 
+                      f"\n\tAuto-update: {self.settings_from_file['auto_update_at_startup']}" 
                       f"\n\tTransparency: {self.transparency_scale['value']}"
-                      f"\n\tAutosave: {self.autosave_db_button_variable.set(self.settings_from_file['database']['autosave_db'])}"
+                      f"\n\tAutosave: {self.settings_from_file['database']['autosave_db']}"
                       f"\n\tAutosave interval: {self.autosave_db_interval_variable.get()}")
             except KeyError as err:
                 print(f"Settings>set_class_variables_from_settings> {err}")
                 self.settings_from_file = None
-                return None
             # There is not a settings.json. Apply default settings
         else:
             print(f"Settings>set_class_variables_from_settings>Settings file not found")

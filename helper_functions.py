@@ -8,8 +8,11 @@ import webbrowser
 from datetime import datetime, timedelta
 from tkinter import messagebox
 from colorama import Fore, Style
+from urllib3.exceptions import NewConnectionError, MaxRetryError
+
 from scrape_tpp_gui.misc import themes_paths
 import sys
+import undetected_chromedriver as uc
 from scrape_tpp_gui.source.version.version_module import file_exists  # Other modules, import file_exists from here
 
 headers_list = [
@@ -137,7 +140,7 @@ def date_to_unix(date: str):
         day = int(date[0])
         unix_date = datetime(year, month, day)
         unix_date = time.mktime(unix_date.timetuple())
-        print(f"from a string: {unix_date}")
+        # print(f"from a string: {unix_date}")
         return unix_date
 
 def month_str_to_int(month: str) -> int:
@@ -321,26 +324,40 @@ def cprint(text, to_print_time=True):
         print(f'{text}')
 
 
-def is_driver_open(driver) -> bool:
+def is_driver_open(driver: None | uc.Chrome) -> bool:
     """
     Checks if the webdriver is still open by checking the logs.
 
-    :param driver: The webdriver
+    :param driver: The webdriver.
     :return: Boolean
 
     See also: https://stackoverflow.com/a/52000037
     """
     disconnected_msg = 'Unable to evaluate script: disconnected: not connected to DevTools\n'
+    disc_msg = "Unable to evaluate script: no such window: target window already closed" \
+               "\nfrom unknown error: web view not found\n"
+    message_listener = "subscribing a listener to the already connected DevToolsClient"
     if driver:
-        log = driver.get_log('driver')
+        try:
+            log = driver.get_log('driver')
+        except (ConnectionRefusedError, MaxRetryError, NewConnectionError):
+            # The webdriver is closed, the connection to the Chrome is refused.
+            return False
+        print(f"is_driver_open(): log: {log}")
         if len(log) != 0:  # This does not catch all other messages.
-            if log[-1]['message'] == disconnected_msg:
+            if log[-1]['message'] in (disconnected_msg, disc_msg):
+                print("Webdriver is closed")
+                return False
+            elif message_listener in log[-1]['message']:
+                # It's not closed.
                 return True
             else:
-                return False
+                return True
         else:  # No errors, return True.
             return True
-
+    else:
+        print(f"Driver is {driver}!")
+        return False
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """

@@ -19,7 +19,7 @@ class NewsDataclass:
     title: str = ''
     author: str = ''
     author_url: str = ''
-    date_unix: Any = 'To_change'
+    date_unix: int = 0
     category: str = ''
 
     def __post_init__(self):
@@ -136,7 +136,7 @@ class NewsDataclass:
             return int(unix_date)
 
     @staticmethod
-    def date_to_unix(_date: str) -> float:
+    def date_to_unix(_date: str) -> int:
         """
         Converts and returns the date to unix timestamp
         :param _date: Date in various forms
@@ -172,7 +172,7 @@ class NewsDataclass:
                 unix_date = time.mktime(unix_date.timetuple())
                 return unix_date
             # elif re.search("[ωώ]ρ[εα][ς]?", date, flags=re.IGNORECASE):#"ώρ" in date: #  # "2 ώρες / ώρα" pass
-            elif "ώρ" or "ωρ" in _date:
+            elif "ώρ" or "ωρ" or "ω΄ρ" in _date:
                 date_now = datetime.now()
                 _date = _date.split(" ")
                 # date = re.sub(pattern="\s[ωώ]ρ[εα][ςΣ]?", repl="", string=date, flags=re.IGNORECASE).lstrip(' ')
@@ -240,6 +240,11 @@ class NewsDataclass:
             return 11
         elif re.match('Δεκ[εέ]μβρ[ιί][οuη]{,2}', month):
             return 12
+
+    @staticmethod
+    def unix_to_datetime(unixtimestamp: int) -> str:
+        """Converts unix timestampe to datetime format (DD/MM/YYYY)"""
+        return datetime.utcfromtimestamp(unixtimestamp).strftime('%d/%m/%Y')
 
     def return_as_tuple(self):
         """

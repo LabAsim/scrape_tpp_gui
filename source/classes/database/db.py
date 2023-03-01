@@ -57,7 +57,7 @@ class DatabaseWindow(GenericToplevel):
         self.searchbox = None
         self.text_var = tk.StringVar()
         self.combobox = None
-        self.combobox_values = ['All', 'Date', 'Title', 'Summary', 'Category']
+        self.combobox_values = ('All', 'Date', 'Title', 'Summary', 'Category')
         self.upper_frame = None
         self.notebook = None
         self.big_frame = None
@@ -201,7 +201,7 @@ class DatabaseWindow(GenericToplevel):
         self.database_submenu.add_command(label='Save', font='Arial 10  italic', background='black',
                                           command=self.save_to_db)
         self.main_menu.add_separator()
-        self.main_menu.add_command(label='Exit', command=self.toplevel.destroy)
+        self.main_menu.add_command(label='Exit', command=self.toplevel_quit)
         # Right click menu only for the treeview
         self.right_click_menu = tk.Menu(font='Arial 10', tearoff=0)
         # Lambda here is needed because there is no event to be passed. If no lambda is used, an error will be raised
@@ -416,9 +416,8 @@ class DatabaseWindow(GenericToplevel):
                                 if chopped_tuple not in self.tree_searched_values:
                                     self.tree_searched_values.append(chopped_tuple)
                         else:  # Case-sensitive is set to True
-                            tuple_item_matched_vowels = DatabaseWindow.match_vowels(tuple_item)
-
-                            term = DatabaseWindow.match_vowels(term)
+                            tuple_item_matched_vowels = match_vowels(tuple_item)
+                            term = match_vowels(term)
                             if term in tuple_item_matched_vowels:
                                 # print(f"{__class__.__name__}>{inspect.getframeinfo(inspect.currentframe())[2]}>"
                                 #      f"Case-sensitive({self.case_sensitive_boolean.get()}): Term: "

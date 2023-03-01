@@ -79,17 +79,15 @@ class PageReader:
         Scrapes the soup
         :return: None
         """
-        with concurrent.futures.ThreadPoolExecutor(max_workers=8) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
             # https://docs.python.org/3/library/concurrent.futures.html#concurrent.futures.ThreadPoolExecutor
             if self.category in ('Anaskopisi', 'anaskopisi'):
                 print(f"PageReader>scrape_the_soup>{self.category}")
                 for div in self.soup.find_all('div', class_='m-item grid-item col-md-6'):
                     try:
                         executor.submit(self.iterate_div_for_anaskopisi, div)
-                    except Exception as err:
-                        print(f'SubPageReader Error: {err}')
+                    except Exception:
                         trace_error()
-                        raise err
             else:
                 print(f"PageReader>scrape_the_soup>{self.category}")
                 for div in self.soup.find_all('div', class_='col-md-8 archive-item'):
@@ -98,7 +96,6 @@ class PageReader:
                     except Exception as err:
                         print(f'SubPageReader Error: {err}')
                         trace_error()
-                        raise err
         if self.debug:
             print(self.firstpage.values)
 
