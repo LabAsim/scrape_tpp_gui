@@ -58,7 +58,7 @@ def match_vowels(term: str):
     # examples: "Χρυσής Αυγή εισαγγελέας"
     greek_letters_utf8 = re.compile("[\u0370-\u03ff\u1f00-\u1fff\s][\u0300-\u0301]?")
     greek_english_letters_numbers_utf8 = re.compile(
-        "[0-9\u0040-\u007e\u0370-\u03ff\u1f00-\u1fff\s][\u0300-\u0301]{0,1}")
+        "[0-9\u0040-\u007e\u0370-\u03ff\u1f00-\u1fff\s][\u0300-\u0301]{0,1}")  # ^[\u200b]
     term_to_return = bytes()
     # print(f"term:{term}")
     # TODO: remove it
