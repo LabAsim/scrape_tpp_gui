@@ -525,9 +525,13 @@ class App:
                 text_id = tuple_dataclass[8] + '+' + tuple_dataclass[1]
                 # Create a tuple with all the values to be passed in SQL statement
                 list_to_insert = [text_id]
-                for a in tuple_dataclass:
+                for num, a in enumerate(tuple_dataclass):
+                    if num == 7:
+                        # tuple_dataclass[7] is the unix time stamp. Convert it to datetime format D/M/Y
+                        a = _dataclass.unix_to_datetime(int(a))
                     list_to_insert.append(a)
-                for a in (tuple_dataclass[0], tuple_dataclass[2], tuple_dataclass[3],
+                # tuple_dataclass[7] is the unix time stamp. Convert it to datetime format D/M/Y
+                for a in (_dataclass.unix_to_datetime(int(tuple_dataclass[7])), tuple_dataclass[2], tuple_dataclass[3],
                           tuple_dataclass[5], tuple_dataclass[6], tuple_dataclass[8]):
                     list_to_insert.append(a)
                 # if self.debug:
