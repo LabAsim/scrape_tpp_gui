@@ -51,15 +51,16 @@ class SearchTerm:
             for a in item.find("h2"):
                 # print(f"{number}\t: {a}\n")
                 link = a['href'].strip()
-                for b in a.find_all('a', href=True, rel=True):
-                    title = b.text
-                    # print(title)
+                title = a.text
             for p in item.find("p"):
                 summary = p.text
                 # print(p.text)
             for _date in item.find("div", class_="entry-meta"):
                 date = _date.text.strip()
                 # print(_date.text)
+                #if len(date) == 0:
+
+
             # The date = "" will raise an IndexError in Newsdataclass, but we don't care about the unixtimestamp
             # in this occasion. Thus, debug is set to False. It remains True, for the rest of the program which uses
             # the Newsdataclass
@@ -67,9 +68,9 @@ class SearchTerm:
 
 
 if __name__ == "__main__":
-    to = SearchTerm('τσιπρας', 1, True)
+    to = SearchTerm('σα', 1, True)
     print(to.final_url)
 
     for dataclass_ in to.list:
-        print(dataclass_)
+        print(f"{dataclass_.date}:{dataclass_.title} {dataclass_.url} {dataclass_.summary}")
     print(to.list)

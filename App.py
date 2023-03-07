@@ -31,7 +31,7 @@ from classes.settings import SettingsTopLevel
 from source.classes.loading import LoadingWindow
 from source.classes.database.db import DatabaseWindow
 from source.classes.search import SearchTerm
-
+from source.classes.searchtoplevel import ToplevelSearch
 
 class App:
     """Main App"""
@@ -45,6 +45,7 @@ class App:
     def __init__(self, root, to_bypass, debug):
         # Toplevel windows
         # The names are PascalCase to be identical to __class__.__name__ of each Toplevel class.
+
         self.topleveldonate = None
         self.toplevelabouttpp = None
         self.toplevelsocial = None
@@ -86,6 +87,9 @@ class App:
         self.search_label = None
         self.searchbox = None
         self.search_button = None
+        self.searchtoplevel = None
+        self.term = None  # The keyword that the user provided
+        self.search_counter = 1
         self.create_search_ui()
         self.top_parent_label = ttk.Label(self.root)
         self.top_parent_label.pack(side="top", pady=15)
@@ -291,9 +295,8 @@ class App:
         """Creates the ui for the search"""
         self.search_text_var: tk.StringVar = tk.StringVar()
         self.search_label = ttk.Frame(self.root)
-        #self.search_label.pack(side='right')
+        self.search_label.pack(side='right')
         tktooltip.ToolTip(self.search_label, msg='Search the ThePressProject site', delay=0.5)
-        #self.search_label.pack()
         self.search_labelframe = ttk.Labelframe(self.search_label, text="Keyword")
         self.search_labelframe.pack(side="left")
         self.searchbox = tk.Entry(self.search_labelframe, textvariable=self.search_text_var, font='Arial 15',
@@ -317,10 +320,19 @@ class App:
         """Picks the user's input from the search box, searches the TPP site and
         retrieves the results from the first page"""
         self.searchbox.focus_set()
-        term = self.search_text_var.get().strip()
-        searched_term = SearchTerm(term=term, page_number=1, debug=False)
-        print(searched_term.list)
+        self.term = self.search_text_var.get().strip()
+        results = SearchTerm(term=self.term, page_number=1, debug=False)
+        print(results.list)
         self.search_text_var.set("")
+        self.searchtoplevel = ToplevelSearch(root=self.root, controller=self, results=results.list)
+
+    def search_site_load_more(self):
+        """Loads more results for the given keyword. The function is called from ToplevelSearch class"""
+        self.search_counter += 1
+        results = SearchTerm(term=self.term, page_number=self.search_counter, debug=False)
+        # Merge the new results to the old ones and refill the treeview
+        self.searchtoplevel.fetched_news += results.list
+        self.searchtoplevel.fill_treeview()
 
     def insert_news_for_a_particular_tab(self, name, bypass=False):
         """
