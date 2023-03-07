@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from scrape_tpp_gui.trace_error import trace_error
-from NewsDataclass import NewsDataclass
+from scrape_tpp_gui.source.classes.NewsDataclass import NewsDataclass
 
 
 class SearchTerm:
@@ -58,9 +58,6 @@ class SearchTerm:
             for _date in item.find("div", class_="entry-meta"):
                 date = _date.text.strip()
                 # print(_date.text)
-                #if len(date) == 0:
-
-
             # The date = "" will raise an IndexError in Newsdataclass, but we don't care about the unixtimestamp
             # in this occasion. Thus, debug is set to False. It remains True, for the rest of the program which uses
             # the Newsdataclass

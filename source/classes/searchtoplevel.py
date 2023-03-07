@@ -2,12 +2,11 @@ import threading
 import tkinter as tk
 from tkinter import ttk
 import tkinter.font as font
-
 from scrape_tpp_gui.source.classes.database.SubPageReaderDB import SubPageReader
 from scrape_tpp_gui.source.classes.database.helper import ToplevelArticleDatabase
 from scrape_tpp_gui.source.classes.generictoplevel import GenericToplevel
 from scrape_tpp_gui.trace_error import trace_error
-from NewsDataclass import NewsDataclass
+from scrape_tpp_gui.source.classes.NewsDataclass import NewsDataclass
 from scrape_tpp_gui.helper_functions import sortby, center, headers
 
 
@@ -17,6 +16,7 @@ class ToplevelSearch(GenericToplevel):
 
     def __init__(self, controller, root: tk.Tk, results: list[NewsDataclass]):
         super().__init__(controller=controller, root=root)
+        self.toplevel.withdraw()
         self.toplevel: tk.Toplevel = self.toplevel
         self.controller = controller
         self.root = root
@@ -30,6 +30,8 @@ class ToplevelSearch(GenericToplevel):
         self.font = font.Font(size=14)
         self.big_frame = None
         self.tree = None
+        self.bar_menu = None
+        self.main_menu = None
         self.right_click_menu = None
         self.create_menu()
         self.create_ui()
@@ -37,6 +39,7 @@ class ToplevelSearch(GenericToplevel):
         self.fill_treeview()
         self.create_binds()
         center(self.toplevel, self.root)
+        self.toplevel.deiconify()
         self.toplevel.lift()
 
     def create_menu(self):
@@ -48,10 +51,13 @@ class ToplevelSearch(GenericToplevel):
         self.main_menu = tk.Menu(self.bar_menu, font='Arial 10', tearoff=0, background='black', fg='white')
         self.bar_menu.add_cascade(label='Menu', menu=self.main_menu, background='black')
         self.main_menu.add_command(label='Load more results', command=self.controller.search_site_load_more)
+        # self.main_menu.add_command(label='root', command=lambda: center(self.toplevel, self.root))
+        # self.main_menu.add_command(label='screen', command=lambda: center(self.toplevel))
         # Right click menu only for the treeview
         self.right_click_menu = tk.Menu(font='Arial 10', tearoff=0)
         # Lambda here is needed because there is no event to be passed. If no lambda is used, an error will be raised
         self.right_click_menu.add_command(label='Show article', command=lambda: self.show_main_article(event=None))
+        self.right_click_menu.add_command(label='Load more results', command=self.controller.search_site_load_more)
 
     def create_ui(self):
         """Constructs the user interface"""
@@ -108,9 +114,12 @@ class ToplevelSearch(GenericToplevel):
             # Fix the lengths
             self.tree.column(column='Title', minwidth=100, width=int(max(titles_length)), stretch=True)
             self.tree.column(column='Date', minwidth=150, width=int(max(dates_length)), stretch=False)
-            # Adjust the x axis after the scraped data is loaded in the treeview
-            self.x = int(max(titles_length)) + int(max(dates_length)) + 150
+            # Adjust the x-axis after the scraped data is loaded in the treeview
+            self.x = int(max(titles_length)) + int(max(dates_length))
+            self.toplevel.withdraw()
             self.toplevel.geometry(f"{self.x}x{self.y}")
+            center(self.toplevel)
+            self.toplevel.deiconify()
             print(f"ToplevelSearch>fill_treeview()>news inserted")
 
     def create_binds(self):
@@ -186,6 +195,7 @@ if __name__ == "__main__":
     from scrape_tpp_gui.helper_functions import center, tkinter_theme_calling, parse_arguments
     from scrape_tpp_gui.trace_error import trace_error
     from search import SearchTerm
+
     center(root)
     tkinter_theme_calling(root)
     results = SearchTerm(term="κουλης", page_number=1, debug=False)

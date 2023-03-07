@@ -45,7 +45,6 @@ class App:
     def __init__(self, root, to_bypass, debug):
         # Toplevel windows
         # The names are PascalCase to be identical to __class__.__name__ of each Toplevel class.
-
         self.topleveldonate = None
         self.toplevelabouttpp = None
         self.toplevelsocial = None
@@ -57,6 +56,7 @@ class App:
         self.autosave_db = True
         self.loading_tk = None
         self.dir_path = self.find_current_dir_path()
+        self.dir_path_of_main = self.find_the_path_of_main()
         self.transparency = None
         self.help_menu = None
         self.database_menu = None
@@ -88,7 +88,9 @@ class App:
         self.searchbox = None
         self.search_button = None
         self.searchtoplevel = None
-        self.term = None  # The keyword that the user provided
+        self.search_photo = None
+        self.search_labelframe = None
+        self.seach_keyword = None  # The keyword that the user provided
         self.search_counter = 1
         self.create_search_ui()
         self.top_parent_label = ttk.Label(self.root)
@@ -303,7 +305,8 @@ class App:
                                   width=10, border=0)
         self.searchbox.pack(side="left")
         self.searchbox.bind("<Return>", self.search_handler)
-        self.search_photo = Image.open(os.path.join(self.dir_path, "source\\multimedia\\images\\misc\\search.png"))
+        self.search_photo = Image.open(os.path.join(self.dir_path_of_main,
+                                                    "source\\multimedia\\images\\misc\\search.png"))
         self.search_photo = self.search_photo.resize((35, 35), Image.ANTIALIAS)
         self.search_photo = ImageTk.PhotoImage(image=self.search_photo, master=self.search_label)
         self.search_button = tk.Button(self.search_label, image=self.search_photo,
@@ -320,8 +323,8 @@ class App:
         """Picks the user's input from the search box, searches the TPP site and
         retrieves the results from the first page"""
         self.searchbox.focus_set()
-        self.term = self.search_text_var.get().strip()
-        results = SearchTerm(term=self.term, page_number=1, debug=False)
+        self.seach_keyword = self.search_text_var.get().strip()
+        results = SearchTerm(term=self.seach_keyword, page_number=1, debug=False)
         print(results.list)
         self.search_text_var.set("")
         self.searchtoplevel = ToplevelSearch(root=self.root, controller=self, results=results.list)
@@ -329,7 +332,7 @@ class App:
     def search_site_load_more(self):
         """Loads more results for the given keyword. The function is called from ToplevelSearch class"""
         self.search_counter += 1
-        results = SearchTerm(term=self.term, page_number=self.search_counter, debug=False)
+        results = SearchTerm(term=self.seach_keyword, page_number=self.search_counter, debug=False)
         # Merge the new results to the old ones and refill the treeview
         self.searchtoplevel.fetched_news += results.list
         self.searchtoplevel.fill_treeview()
@@ -464,6 +467,31 @@ class App:
             self.dir_path = os.path.dirname(__file__)
             print(f'Script: {self.dir_path}')
             return self.dir_path
+
+    def find_the_path_of_main(self) -> str:
+        """
+        Finds and returns the path of the main.py or the temporary folder (MEIPP) if the program runs as an exe.
+        :return: The folder path
+        """
+        if getattr(sys, 'frozen', False):
+            print(getattr(sys, 'frozen', False))
+            # The temporary path of the file when the app runs as an .exe
+            self.dir_path_of_main = os.path.dirname(os.path.realpath(__file__))
+            # If the path until this step contains \\scrape_tpp_gui, get the parent dir, which is a temp dir(MEIPP).
+            # self.dir_path = os.path.dirname(self.dir_path)
+            print(f"{self.name_of_class}>Exe (dir_path_of_main):", self.dir_path_of_main)
+            return self.dir_path_of_main
+        elif __file__:
+            self.dir_path = os.path.dirname(__file__)  # We need the parent of the parent of this directory
+            print(f'{self.name_of_class}>Script (self.dir_path): {self.dir_path}')
+            return self.dir_path
+
+    @property
+    def name_of_class(self):
+        """
+        :return: The name of the class in lower case.
+        """
+        return self.__class__.__name__.lower()
 
     #######################
     # Main Menu functions #
