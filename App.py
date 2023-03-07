@@ -12,6 +12,7 @@ from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
 import sv_ttk
+from PIL import Image, ImageTk
 from helper_functions import callback
 from source.version.version_module import file_exists
 from misc import url_list, url_list_base_page
@@ -29,6 +30,8 @@ from classes.WarningDoesNotExists import WarningDoesNotExists
 from classes.settings import SettingsTopLevel
 from source.classes.loading import LoadingWindow
 from source.classes.database.db import DatabaseWindow
+from source.classes.search import SearchTerm
+
 
 class App:
     """Main App"""
@@ -79,9 +82,17 @@ class App:
         self.note = ttk.Notebook(self.root)
         self.note.pack(side='bottom', fill='both', expand=True)
         self.create_the_notebook_pages()
-        self.top_label = ttk.Label(self.root, text='The Press Project', cursor='hand2', font='Arial 20')
-        self.top_label.pack(side='top', pady=15)
+        self.search_text_var = None
+        self.search_label = None
+        self.searchbox = None
+        self.search_button = None
+        self.create_search_ui()
+        self.top_parent_label = ttk.Label(self.root)
+        self.top_parent_label.pack(side="top", pady=15)
+        self.top_label = ttk.Label(self.top_parent_label, text='The Press Project', cursor='hand2', font='Arial 20')
+        self.top_label.pack(side='left')
         self.top_label.bind("<Button-1>", lambda e: callback(App.base_url))
+
         tktooltip.ToolTip(self.top_label, msg='Click to open ThePressProject site in the browser', delay=0.5)
         self.empty_label_between_top_and_notebook = ttk.Label(self.root, text=" ", font='Arial 16')
         self.empty_label_between_top_and_notebook.pack(side='top')
@@ -276,6 +287,41 @@ class App:
         self.main_menu.add_cascade(label='TPP', menu=self.tpp_menu, underline=0)
         self.main_menu.add_cascade(label="Help", menu=self.help_menu, underline=0)
 
+    def create_search_ui(self):
+        """Creates the ui for the search"""
+        self.search_text_var: tk.StringVar = tk.StringVar()
+        self.search_label = ttk.Frame(self.root)
+        #self.search_label.pack(side='right')
+        tktooltip.ToolTip(self.search_label, msg='Search the ThePressProject site', delay=0.5)
+        #self.search_label.pack()
+        self.search_labelframe = ttk.Labelframe(self.search_label, text="Keyword")
+        self.search_labelframe.pack(side="left")
+        self.searchbox = tk.Entry(self.search_labelframe, textvariable=self.search_text_var, font='Arial 15',
+                                  width=10, border=0)
+        self.searchbox.pack(side="left")
+        self.searchbox.bind("<Return>", self.search_handler)
+        self.search_photo = Image.open(os.path.join(self.dir_path, "source\\multimedia\\images\\misc\\search.png"))
+        self.search_photo = self.search_photo.resize((35, 35), Image.ANTIALIAS)
+        self.search_photo = ImageTk.PhotoImage(image=self.search_photo, master=self.search_label)
+        self.search_button = tk.Button(self.search_label, image=self.search_photo,
+                                       command=lambda: self.search_handler(event=None), border=0)
+        self.search_button.pack(side='right', padx=(5, 5))
+
+    def search_handler(self, event):
+        """Starts a thread for searching the site"""
+
+        search_thread = threading.Thread(target=self.search_site)
+        search_thread.start()
+
+    def search_site(self):
+        """Picks the user's input from the search box, searches the TPP site and
+        retrieves the results from the first page"""
+        self.searchbox.focus_set()
+        term = self.search_text_var.get().strip()
+        searched_term = SearchTerm(term=term, page_number=1, debug=False)
+        print(searched_term.list)
+        self.search_text_var.set("")
+
     def insert_news_for_a_particular_tab(self, name, bypass=False):
         """
         Saves the number of pages loaded in the particular category to App.treeview_tab_page_counter[name]
@@ -446,7 +492,7 @@ class App:
         else:
             self.toplevelabouttpp.bring_focus_back()
             print(f"ToplevelAboutTpp is opened!")
-    
+
     def call_topleveldonate(self):
         """
                 Checks if the window with the TPP social media exists and brings it back to focus.
