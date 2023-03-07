@@ -22,13 +22,16 @@ class NewsDataclass:
     author_url: str = ''
     date_unix: int = 0
     category: str = ''
+    debug: bool = True
 
     def __post_init__(self):
         # Convert date to UNIX timestamp
         try:
             self.date_unix = self.date_to_unix(self.date)
         except Exception:
-            trace_error()
+            # To avoid tracing errors from search.py. Timestamps are irrelevant for the purpose of SearchTerm class.
+            if self.debug:
+                trace_error()
         # Strip unnecessary characters
         try:
             self.main_content = self.strip_ansi_characters(self.main_content)
@@ -36,7 +39,9 @@ class NewsDataclass:
             self.author = self.strip_ansi_characters(self.author)
             self.author_url = self.strip_ansi_characters(self.author_url)
         except Exception:
-            trace_error()
+            # To avoid tracing errors from search.py. Timestamps are irrelevant for the purpose of SearchTerm class.
+            if self.debug:
+                trace_error()
         # Lower first letters
         self.category = self.category.lower()
 
