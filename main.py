@@ -10,7 +10,7 @@ import App
 from classes.AskQuit import AskQuit
 from FirstPage import FirstPage
 from helper_functions import center, tkinter_theme_calling, parse_arguments
-from source.version.version_module import check_new_version
+
 
 if __name__ == "__main__":
     mp.freeze_support()
