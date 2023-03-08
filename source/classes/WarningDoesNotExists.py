@@ -24,10 +24,10 @@ from scrape_tpp_gui.helper_functions import str2bool, tkinter_theme_calling, cen
 # import scrape_tpp_gui.helper_functions.center
 parent_folder = os.path.dirname(__file__)
 parent_of_parent_folder = os.path.dirname(parent_folder)
-sys.path.append(parent_of_parent_folder)
-sys.path.append(parent_folder)
+sys.path.append(os.path.dirname(parent_of_parent_folder))
+# sys.path.append(parent_folder)
 
-from classes.search_software import InstalledSoftware
+from source.classes.search_software import InstalledSoftware
 import xml.etree.ElementTree as ET
 
 
@@ -85,10 +85,10 @@ class WarningDoesNotExists(tk.Toplevel):
         valuelabel.pack(side='right', expand=True)
         if self.program == 'other':
             image = Image.open(os.path.join(parent_of_parent_folder,
-                                            "source/multimedia/images/warning/warning_sign1.png"))
+                                            "multimedia/images/warning/warning_sign1.png"))
         else:
             image = Image.open(os.path.join(parent_of_parent_folder,
-                                            "source/multimedia/images/warning/warning_sign.png"))
+                                            "multimedia/images/warning/warning_sign.png"))
         image = image.resize(
             (int(self.winfo_width() * 60), int(self.winfo_height() * 60)), PIL.Image.ANTIALIAS)
         image = ImageTk.PhotoImage(image)
@@ -146,7 +146,7 @@ class WarningDoesNotExists(tk.Toplevel):
         # Check if there is an identical version for Chromedriver
         try:
             response = requests.get(self.url_target_version(current_chrome_version), timeout=4)
-            print(f"respone code {response.status_code}")
+            print(f"response code {response.status_code}")
             if response.status_code in (400, 401, 402, 403, 404):
                 # Check Google API
                 google_api_respone = requests.get('https://chromedriver.storage.googleapis.com/', timeout=4)
@@ -172,6 +172,9 @@ class WarningDoesNotExists(tk.Toplevel):
                                         # Example: Split '107.0.5304.18/chromedriver_win32.zip' and
                                         # return the first part
                                         return child_child.text.split('/')[0]
+            # There is a identical chromedriver version of current Chrome.
+            elif response.status_code in (200, 201, 203, 204):
+                return current_chrome_version
         except Exception as err:
             print(f"{err}")
             raise

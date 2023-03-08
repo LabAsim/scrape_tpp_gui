@@ -7,8 +7,8 @@ from tkinter import Menu, ttk
 import undetected_chromedriver as uc  # pip install undetected-chromedriver
 from helper_functions import callback, headers, sortby, date_to_unix, is_driver_open
 from trace_error import trace_error
-from classes.NewsDataclass import NewsDataclass
-from classes.ToplevelArticle import ToplevelArticle
+from source.classes.NewsDataclass import NewsDataclass
+from source.classes.ToplevelArticle import ToplevelArticle
 from PageReader import PageReader
 from SubPageReader import SubPageReader
 from SubPageReaderBypass import SubPageReaderBypass

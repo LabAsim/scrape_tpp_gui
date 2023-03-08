@@ -7,7 +7,7 @@ import tkinter as tk
 import tkinter.font
 from tkinter import ttk
 import App
-from classes.AskQuit import AskQuit
+from source.classes.AskQuit import AskQuit
 from FirstPage import FirstPage
 from helper_functions import center, tkinter_theme_calling, parse_arguments
 

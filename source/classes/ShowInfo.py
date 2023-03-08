@@ -3,17 +3,14 @@ A toplevel to display some info
 """
 
 import os.path
-import pathlib
-import subprocess
 import sys
-import time
 import tkinter as tk
 from tkinter import ttk
 import PIL.Image
 
 parent_folder = os.path.dirname(__file__)
 parent_of_parent_folder = os.path.dirname(parent_folder)
-sys.path.append(parent_of_parent_folder)
+#sys.path.append(parent_of_parent_folder)
 
 from helper_functions import center
 from PIL import Image, ImageTk
@@ -62,7 +59,7 @@ class ShowInfo(tk.Toplevel):
         askquit_topframe.pack(side='top', expand=True)
         valuelabel = ttk.Label(askquit_topframe, text=f"{self.info}")
         valuelabel.pack(side='right', expand=True)
-        image = Image.open(os.path.join(parent_of_parent_folder, "images/exclamation_mark.png"))
+        image = Image.open(os.path.join(parent_of_parent_folder, "multimedia\\images\\exclamation_mark.png"))
         image = image.resize(
             (int(self.winfo_width() * 60), int(self.winfo_height() * 60)), PIL.Image.ANTIALIAS)
         image = ImageTk.PhotoImage(image)

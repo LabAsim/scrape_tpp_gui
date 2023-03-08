@@ -8,11 +8,11 @@ import tktooltip
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
-sys.path.append(parent)
+sys.path.append(os.path.dirname(parent))
 # Now, python can detect the helper_functions.py from the parent directory
 from helper_functions import file_exists, center, callback
 from source.misc.help_text import text_about
-from classes.AskQuit import AskQuit
+from source.classes.AskQuit import AskQuit
 
 
 class ToplevelArticle:

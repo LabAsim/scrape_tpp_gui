@@ -91,4 +91,4 @@ class AskQuit(tk.Toplevel):
         """
         current_dir_path = os.path.dirname(os.path.realpath(__file__))
         parent_of_current_dir = os.path.dirname(current_dir_path)
-        self.images_dir_path = os.path.join(parent_of_current_dir, "source\\multimedia\\images\\questionmark.png")
+        self.images_dir_path = os.path.join(parent_of_current_dir, "multimedia\\images\\questionmark.png")

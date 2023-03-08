@@ -11,9 +11,9 @@ import psutil
 
 parent_folder = os.path.dirname(__file__)
 parent_of_parent_folder = os.path.dirname(parent_folder)
-sys.path.append(parent_of_parent_folder)
+sys.path.append(os.path.dirname(parent_of_parent_folder))
 from helper_functions import center
-from classes.ShowInfo import ShowInfo
+from source.classes.ShowInfo import ShowInfo
 from PIL import Image, ImageTk
 import PIL.Image
 #from misc import dir_path
@@ -63,7 +63,7 @@ class AskUpdate(tk.Toplevel):
                                                       "\nDo you want to download the update?")
         valuelabel.pack(side='right', expand=True)
         image = Image.open(os.path.join(parent_of_parent_folder,
-                                        "source\\multimedia\\images\\questionmark.png"))
+                                        "multimedia\\images\\questionmark.png"))
         image = image.resize(
             (int(self.winfo_width() * 25), int(self.winfo_height() * 25)), PIL.Image.ANTIALIAS)
         image = ImageTk.PhotoImage(image)

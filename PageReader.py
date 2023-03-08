@@ -2,7 +2,7 @@ import concurrent.futures
 from typing import Any
 import requests
 from bs4 import BeautifulSoup
-from classes.NewsDataclass import NewsDataclass
+from source.classes.NewsDataclass import NewsDataclass
 from trace_error import trace_error
 
 

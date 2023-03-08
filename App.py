@@ -17,17 +17,17 @@ from helper_functions import callback
 from source.version.version_module import file_exists
 from misc import url_list, url_list_base_page
 from FirstPage import FirstPage
-from classes.ShowInfo import ShowInfo
+from source.classes.ShowInfo import ShowInfo
 from source.classes.ToplevelAbout import ToplevelAbout
 from source.classes.ToplevelSocial import ToplevelSocial
 from source.classes.ToplevelDonate import ToplevelDonate
-from classes.ToplevelAboutTpp import ToplevelAboutTpp
-from classes.AskUpdate import AskUpdate
+from source.classes.ToplevelAboutTpp import ToplevelAboutTpp
+from scrape_tpp_gui.source.classes.AskUpdate import AskUpdate
 from scrape_tpp_gui.trace_error import trace_error
 from source.version.version_module import check_new_version
-from classes.search_software import InstalledSoftware
-from classes.WarningDoesNotExists import WarningDoesNotExists
-from classes.settings import SettingsTopLevel
+from scrape_tpp_gui.source.classes.search_software import InstalledSoftware
+from scrape_tpp_gui.source.classes.WarningDoesNotExists import WarningDoesNotExists
+from scrape_tpp_gui.source.classes.settings import SettingsTopLevel
 from source.classes.loading import LoadingWindow
 from source.classes.database.db import DatabaseWindow
 from source.classes.search import SearchTerm

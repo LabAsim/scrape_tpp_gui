@@ -2,7 +2,7 @@ import time
 from typing import Any
 from bs4 import BeautifulSoup
 from trace_error import trace_error
-from classes.NewsDataclass import NewsDataclass
+from source.classes.NewsDataclass import NewsDataclass
 
 
 class PageReaderBypass:
