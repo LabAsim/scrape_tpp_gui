@@ -89,17 +89,17 @@ You should also convert updater.py to updater.exe to use **check for updates** c
 
     *   [x] Let the user whether to autosave or not
 
-    *   [ ] Create a toplevel window containing all the news from
+    *   [x] Create a toplevel window containing all the news from
         the database
 
-        *   [ ] Add search option based on date (Greek format DD-MM-YY)
+        *   [x] Add search option based on date (Greek format DD-MM-YY)
 
-        *   [ ] Add advanced search (author, category, date)
+        *   [x] Add advanced search (author, category, date)
 
 *   Code refactoring
-	* [ ] Move the files from ./classes to ./source/classes dir & consequently, fix the paths for the rest of the code
-	* [ ] Move images to source
-	* [ ] Rename the camelCase/PascalCase .py files to snake_case style.
+	* [x] Move the files from ./classes to ./source/classes dir & consequently, fix the paths for the rest of the code
+	* [x] Move images to source
+	
 
 ## Credits
 
