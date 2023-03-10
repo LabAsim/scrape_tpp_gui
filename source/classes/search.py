@@ -48,15 +48,22 @@ class SearchTerm:
             link = ""
             date = ""
             summary = ""
-            for a in item.find("h2"):
-                # print(f"{number}\t: {a}\n")
-                link = a['href'].strip()
-                title = a.text
-            for p in item.find("p"):
-                summary = p.text
-                # print(p.text)
-            for _date in item.find("div", class_="entry-meta"):
-                date = _date.text.strip()
+            h2_find = item.find("h2")
+            p_find = item.find("p")
+            date_find = item.find("div", class_="entry-meta")
+            # These ifs exist to avoid Nones (No content from the search)
+            if h2_find:
+                for a in item.find("h2"):
+                    # print(f"{number}\t: {a}\n")
+                    link = a['href'].strip()
+                    title = a.text
+            if p_find:
+                for p in item.find("p"):
+                    summary = p.text
+                    # print(p.text)
+            if date_find:
+                for _date in item.find("div", class_="entry-meta"):
+                    date = _date.text.strip()
                 # print(_date.text)
             # The date = "" will raise an IndexError in Newsdataclass, but we don't care about the unixtimestamp
             # in this occasion. Thus, debug is set to False. It remains True, for the rest of the program which uses

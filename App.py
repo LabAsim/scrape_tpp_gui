@@ -32,7 +32,7 @@ from source.classes.loading import LoadingWindow
 from source.classes.database.db import DatabaseWindow
 from source.classes.search import SearchTerm
 from source.classes.searchtoplevel import ToplevelSearch
-
+from source.classes.helpers.loadingwindow import loading_tooltip
 class App:
     """Main App"""
     x = 1600
@@ -42,7 +42,7 @@ class App:
     # Holds the number of the page inserted in each notebook tab (FirstPage).
     treeview_tab_page_counter = {}  # Default: {'Newsroom: 1'} (as, it loads the news up to the first page)
 
-    def __init__(self, root, to_bypass, debug):
+    def __init__(self, root: tk.Tk, to_bypass: bool, debug: bool):
         # Toplevel windows
         # The names are PascalCase to be identical to __class__.__name__ of each Toplevel class.
         self.topleveldonate = None
@@ -234,11 +234,11 @@ class App:
                                                command=lambda: self.insert_news_for_a_particular_tab(name='Culture',
                                                                                                      bypass=True))
         # Add the self.load_more_news to self.context
-        self.context.add_command(label='Renew titles', font='Arial 10', command=self.call_renew_feed)
+        self.context.add_command(label='Renew titles', font='Arial 10', command=self.renew_feed_handler)
         self.context.add_cascade(label='Load more news', menu=self.load_more_news, underline=0, font='Arial 10')
         # Add more commands
         self.context.add_separator()
-        self.context.add_command(label='Renew titles (bypass)', font='Arial 10', command=self.call_renew_feed_bypass)
+        self.context.add_command(label='Renew titles (bypass)', font='Arial 10', command=self.renew_feed_bypass_handler)
         self.context.add_cascade(label='Load more news (bypass)', menu=self.load_more_news_bypass, underline=0,
                                  font='Arial 10')
         # Settings
@@ -315,8 +315,8 @@ class App:
 
     def search_handler(self, event):
         """Starts a thread for searching the site"""
-
-        search_thread = threading.Thread(target=self.search_site)
+        #self.root.after(1, lambda: loading_tooltip(self.root, self.search_site))
+        search_thread = threading.Thread(target=lambda: loading_tooltip(self.root, self.search_site))
         search_thread.start()
 
     def search_site(self):
@@ -345,19 +345,37 @@ class App:
         :param name: The name of the category as a strings
         :return: None
         """
-        print("App>insert_news_for_a_particular_tab")
-        if bypass:  # Need to check here.
-            if self.check_for_chrome_and_chromedriver() is False:  # If it returns False (=>Either does not exists)
-                return  # Just break the function
-        App.treeview_tab_page_counter[name] += 1  # Add 1 to the default counter
-        if name not in ('Anaskopisi', 'anaskopisi'):
-            url_to_scrape = str(url_list_base_page[name]) + str(App.treeview_tab_page_counter[name])
-        else:  # name == Anaskopisi
-            suffix = (App.treeview_tab_page_counter[name] - 1) * 20  # The second page needs n=20
-            url_to_scrape = str(url_list_base_page[name]) + str(suffix)
-        print(f"News [counter {App.treeview_tab_page_counter[name]}] will be added to the category {name} "
-              f"from url: {url_to_scrape}")
-        App.page_dict[name].insert_news_from_page(url=url_to_scrape, category=name, bypass=bypass)
+
+        def inner_function():
+            """Wraps the logic of the function in order to be called from the thread"""
+            print("App>insert_news_for_a_particular_tab")
+            if bypass:  # Need to check here.
+                if self.check_for_chrome_and_chromedriver() is False:  # If it returns False (=>Either does not exists)
+                    return  # Just break the function
+            App.treeview_tab_page_counter[name] += 1  # Add 1 to the default counter
+            if name not in ('Anaskopisi', 'anaskopisi'):
+                url_to_scrape = str(url_list_base_page[name]) + str(App.treeview_tab_page_counter[name])
+            else:  # name == Anaskopisi
+                suffix = (App.treeview_tab_page_counter[name] - 1) * 20  # The second page needs n=20
+                url_to_scrape = str(url_list_base_page[name]) + str(suffix)
+            print(f"News [counter {App.treeview_tab_page_counter[name]}] will be added to the category {name} "
+                  f"from url: {url_to_scrape}")
+            App.page_dict[name].insert_news_from_page(url=url_to_scrape, category=name, bypass=bypass)
+
+        def create_tooltip():
+            """Creates the tooltip"""
+            loading_tooltip(self.root, inner_function)
+        search_thread = threading.Thread(
+            target=create_tooltip)
+        search_thread.start()
+
+    def renew_feed_handler(self):
+        """Starts a thread for renewing the titles"""
+        def inner_fuction():
+            loading_tooltip(self.root, self.call_renew_feed)
+
+        search_thread = threading.Thread(target=inner_fuction)
+        search_thread.start()
 
     def call_renew_feed(self):
         """Recalls the site and renew the treeview for all tabs"""
@@ -369,6 +387,11 @@ class App:
         self.f_time.destroy()
         self.time_widgets()
         print(f'App>call_renew_feed()')
+
+    def renew_feed_bypass_handler(self):
+        """Starts a thread for renewing the titles"""
+        search_thread = threading.Thread(target=lambda: loading_tooltip(self.root, self.call_renew_feed_bypass))
+        search_thread.start()
 
     def call_renew_feed_bypass(self):
         """
@@ -433,9 +456,8 @@ class App:
             if from_menu:
                 ShowInfo(controller=self, root=self.root, info='The application is up-to-date!')
             if startup:
-                self.root.after(8000,
-                                lambda: ShowInfo(controller=self,
-                                                 root=self.root, info='The application is up-to-date!'))
+                # The version is up-to-date. Do nothing at startup. Only if the user choose to update from menu.
+                pass
 
     def exit_the_program(self):
         """Exits the program"""
