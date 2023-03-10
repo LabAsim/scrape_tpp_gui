@@ -28,6 +28,7 @@ from source.classes.generictoplevel import GenericToplevel
 from source.classes.NewsDataclass import NewsDataclass
 from helper import ToplevelArticleDatabase, wrapper_for_case_conversion, convert_to_case_not_sensitive, \
     converted_stressed_vowels_to_non_stressed, match_vowels
+from scrape_tpp_gui.source.classes.helpers.loadingwindow import tooltip_handler_thread, loading_tooltip
 
 
 class DatabaseWindow(GenericToplevel):
@@ -114,8 +115,6 @@ class DatabaseWindow(GenericToplevel):
         self.case_sensitive_button.pack(side='right', padx=15, pady=10)
         # To display the proper color for the text, It does not work without after.
         self.toplevel.after(50, self.case_sensitive_button_save)
-        # Bind the self.search to self.search_handler
-        self.searchbox.bind('<KeyRelease>', self.search_handler)
         self.tree = ttk.Treeview(self.big_frame, columns=DatabaseWindow.headers, show='headings')
         self.setup_treeview()
         self.tree.pack(expand=True, fill='both')
@@ -209,10 +208,21 @@ class DatabaseWindow(GenericToplevel):
 
     def create_binds(self):
         """Binds events to functions"""
+        # Bind the self.search to self.search_handler
+        self.searchbox.bind('<KeyRelease>', self.search_handler)
+        self.searchbox.bind('<Return>', self.search_handler, "+")
         # Bind left double click to post the menu
         self.tree.bind("<Double-1>", self.show_main_article)
         # Bind the right click with self.post_menu()
         self.tree.bind('<ButtonRelease-3>', self.post_menu)
+        # Bind the right click on the Switch Button with the search.
+        # When the user clicks on the button, a new search will initiate.
+        self.case_sensitive_button.bind('<Button-1>', self.delayed_search)
+
+    def delayed_search(self, event=None):
+        """Delays a bit the search after the user has pressed the Switch button. The delay is essential because
+        otherwise it will not search properly the db."""
+        self.toplevel.after(250, lambda: self.search_handler(event=event))
 
     def post_menu(self, event):
         """
@@ -303,7 +313,7 @@ class DatabaseWindow(GenericToplevel):
     ####################
     # Search functions #
     ####################
-    def search_handler(self, event) -> None:
+    def search_handler(self, event=None) -> None:
         """
         Called after a key is released in the search box. The functions grabs the values of the combobox
         and the search box, retrieves the news based on these values and fills the treeview afterwards.
@@ -406,7 +416,7 @@ class DatabaseWindow(GenericToplevel):
                     for tuple_item in chopped_tuple:
                         # print(_tuple[0:4])
                         if not self.case_sensitive_boolean.get():  # Case not sensitive
-                            # term is already converted from the wrapper functiom!
+                            # term is already converted from the wrapper function!
                             tuple_item_modified = converted_stressed_vowels_to_non_stressed(
                                 match_vowels(convert_to_case_not_sensitive(tuple_item)))
                             if term in tuple_item_modified:
