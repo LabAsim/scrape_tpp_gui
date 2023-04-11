@@ -12,10 +12,12 @@ from scrape_tpp_gui.helper_functions import sortby, center, headers
 
 class ToplevelSearch(GenericToplevel):
     """Contains the scraped results from the search in the TPP site"""
-    headers = ('Date', 'Title')  # , 'Summary')
+    headers = ('Date', 'Title')
 
     def __init__(self, controller, root: tk.Tk, results: list[NewsDataclass]):
         super().__init__(controller=controller, root=root)
+        # Initially, hide the window
+        self.toplevel.iconify()
         self.toplevel.withdraw()
         self.toplevel: tk.Toplevel = self.toplevel
         self.controller = controller
@@ -29,6 +31,7 @@ class ToplevelSearch(GenericToplevel):
         self.toplevel.protocol("WM_DELETE_WINDOW", self.toplevel_quit)
         self.font = font.Font(size=14)
         self.big_frame = None
+        self.topframe = None
         self.tree = None
         self.bar_menu = None
         self.main_menu = None
@@ -50,14 +53,14 @@ class ToplevelSearch(GenericToplevel):
         # Main menu
         self.main_menu = tk.Menu(self.bar_menu, font='Arial 10', tearoff=0, background='black', fg='white')
         self.bar_menu.add_cascade(label='Menu', menu=self.main_menu, background='black')
-        self.main_menu.add_command(label='Load more results', command=self.controller.search_site_load_more)
+        self.main_menu.add_command(label='Load more results', command=self.controller.search_site_load_more_handler)
         # self.main_menu.add_command(label='root', command=lambda: center(self.toplevel, self.root))
         # self.main_menu.add_command(label='screen', command=lambda: center(self.toplevel))
         # Right click menu only for the treeview
         self.right_click_menu = tk.Menu(font='Arial 10', tearoff=0)
         # Lambda here is needed because there is no event to be passed. If no lambda is used, an error will be raised
         self.right_click_menu.add_command(label='Show article', command=lambda: self.show_main_article(event=None))
-        self.right_click_menu.add_command(label='Load more results', command=self.controller.search_site_load_more)
+        self.right_click_menu.add_command(label='Load more results', command=self.controller.search_site_load_more_handler)
 
     def create_ui(self):
         """Constructs the user interface"""
