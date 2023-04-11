@@ -1,6 +1,7 @@
 import argparse
 import os.path
 import pathlib
+from pprint import pprint
 import random
 import re
 import time
@@ -9,7 +10,7 @@ from datetime import datetime, timedelta
 from tkinter import messagebox
 from colorama import Fore, Style
 from urllib3.exceptions import NewConnectionError, MaxRetryError
-
+import tkinter as tk
 from scrape_tpp_gui.misc import themes_paths
 import sys
 import undetected_chromedriver as uc
@@ -109,8 +110,8 @@ def date_to_unix(date: str):
         elif "ώρ" or "ωρ" in date:
             date_now = datetime.now()
             date = date.split(" ")
-            #date = re.sub(pattern="\s[ωώ]ρ[εα][ςΣ]?", repl="", string=date, flags=re.IGNORECASE).lstrip(' ')
-            #date = date.strip('Πριν').strip("ώρα").strip("ώρες").strip()
+            # date = re.sub(pattern="\s[ωώ]ρ[εα][ςΣ]?", repl="", string=date, flags=re.IGNORECASE).lstrip(' ')
+            # date = date.strip('Πριν').strip("ώρα").strip("ώρες").strip()
             date = float(date[0].strip(" ́").strip())
             unix_date = date_now - timedelta(hours=date)
             unix_date = time.mktime(unix_date.timetuple())
@@ -143,6 +144,7 @@ def date_to_unix(date: str):
         # print(f"from a string: {unix_date}")
         return unix_date
 
+
 def month_str_to_int(month: str) -> int:
     """
     Converts a string based month to an integer based month. i.e. 'Δεκέμβρης' -> 12
@@ -173,6 +175,7 @@ def month_str_to_int(month: str) -> int:
         return 11
     elif re.match('Δεκ[εέ]μβρ[ιί][οuη]{,2}', month):
         return 12
+
 
 def sortby(tree, col, descending):
     """sort tree contents when a column header is clicked on"""
@@ -233,7 +236,13 @@ def center(window, parent_window=None):
     :param parent_window: A toplevel or root
     """
     if not parent_window:
-        window.update_idletasks()
+        # For example, if the window is the LoadingWindow
+        if not isinstance(window, tk.Tk):
+            window.update_idletasks()
+            window.update()
+        # Withdraw root, to appear centered afterwards
+        else:
+            window.withdraw()
         width = window.winfo_width()
         frm_width = window.winfo_rootx() - window.winfo_x()
         win_width = width + 2 * frm_width
@@ -243,7 +252,10 @@ def center(window, parent_window=None):
         x = window.winfo_screenwidth() // 2 - win_width // 2
         y = window.winfo_screenheight() // 2 - win_height // 2
         window.geometry('+{}+{}'.format(x, y))
+        window.update()
         window.deiconify()
+        window.lift()
+        window.focus_set()
         print(f"Window: {window} centered according to the width and the height of the screen")
     else:
         window.update_idletasks()
@@ -358,6 +370,7 @@ def is_driver_open(driver: None | uc.Chrome) -> bool:
     else:
         print(f"Driver is {driver}!")
         return False
+
 
 def resource_path(relative_path):
     """ Get absolute path to resource, works for dev and for PyInstaller """
