@@ -84,12 +84,14 @@ class TestDB(unittest.TestCase):
         sentence = "IndEPEndent: ΤΟ παΣΌΚ ήΤΑΝ εδώ"
         sentence = converted_stressed_vowels_to_non_stressed(match_vowels(convert_to_case_not_sensitive(sentence)))
         self.assertEqual("independent το πασοκ ηταν εδω", sentence)
-        sentence = "Tσίπρας:".encode("utf-8").decode("utf-8")
+        # The char `:` will be stripped.
+        sentence = "Τσίπρας:"
         sentence = converted_stressed_vowels_to_non_stressed(
-            match_vowels(convert_to_case_not_sensitive(sentence))).encode("utf-8").decode("utf-8")
-        self.assertEqual("τ".encode("utf-8").decode("utf-8"), sentence)
+            match_vowels(convert_to_case_not_sensitive(sentence)))
+        self.assertEqual("τσιπρασ", sentence)
         # https://stackoverflow.com/questions/71098498/why-im-getting-unicodeencodeerror-charmap-codec-cant-encode-characters-in-p
-        # converted_stressed_vowels_to_non_stressed(match_vowels(convert_to_case_not_sensitive("Tσίπρας:"))) == "tσιπρασ" is True
+        self.assertEqual(converted_stressed_vowels_to_non_stressed(
+            match_vowels(convert_to_case_not_sensitive("Tσίπρας"))), "tσιπρασ")
 
 
 if __name__ == '__main__':
