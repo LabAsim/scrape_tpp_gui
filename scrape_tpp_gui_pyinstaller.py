@@ -13,7 +13,6 @@ PyInstaller.__main__.run([
     '--console',
     '--nowindowed',
     '--noconsole',
-    f'--add-data={images_dir_path};images',
     f'--add-data={source_dir_path};source',
     '-y'
 ])

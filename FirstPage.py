@@ -1,6 +1,7 @@
 """
 A class containing the notebook tabs (ttk.notebook).
 """
+import threading
 import tkinter as tk
 import tkinter.font
 from tkinter import Menu, ttk
@@ -26,7 +27,7 @@ class FirstPage:
     news_total = []  # Contains all the dataclasses
     driver = None  # The Chromedriver
 
-    def __init__(self, note, name, controller, url, to_bypass, debug, root=None):
+    def __init__(self, note, name, controller, url, to_bypass, debug, root=None, thread=True):
         self.right_click_menu = None
         self.font = tkinter.font.Font(size=14)  # To measure the length of the letters
         self.note = note
@@ -51,7 +52,13 @@ class FirstPage:
         # the main window will be visible.
         if not self.to_bypass:  # To use BeautifulSoup
             # Alternative: self.note.after(75, lambda: self.fill_the_tree())
-            self.fill_the_tree()
+            # self.fill_the_tree()
+            # To speed up, start a thread instead of just calling the method.
+            if thread:
+                thr = threading.Thread(target=self.fill_the_tree)
+                thr.start()
+            else:
+                self.fill_the_tree()
         # self.to_bypass = True ==> Uses chromedriver
         else:
             self.fill_the_tree_bypass()
@@ -257,9 +264,6 @@ class FirstPage:
                 self.tree.move(item, '', index)
             if self.debug:
                 print(f'Treeview was filled {self.values}')
-            # Set self.root.LOADING_STATUS to false
-            if self.name.lower() == 'culture':
-                self.controller.loading_status = False
         except Exception as err:
             print(f'Loading failed! Error: {err}')
             trace_error()

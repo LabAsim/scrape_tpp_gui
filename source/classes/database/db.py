@@ -28,7 +28,6 @@ from source.classes.generictoplevel import GenericToplevel
 from source.classes.NewsDataclass import NewsDataclass
 from helper import ToplevelArticleDatabase, wrapper_for_case_conversion, convert_to_case_not_sensitive, \
     converted_stressed_vowels_to_non_stressed, match_vowels
-from scrape_tpp_gui.source.classes.helpers.loadingwindow import tooltip_handler_thread, loading_tooltip
 
 
 class DatabaseWindow(GenericToplevel):

@@ -28,10 +28,11 @@ if __name__ == "__main__":
     tkinter_theme_calling(root)
     myapp = App.App(root=root, to_bypass=bypass, debug=debug)
     # https://stackoverflow.com/questions/111155/how-do-i-handle-the-window-close-event-in-tkinter
-    root.protocol("WM_DELETE_WINDOW", lambda: AskQuit(root, FirstPage.driver, myapp))
-    preferred_theme = myapp.read_theme()  # Reads the theme from the json (if exists)
-    myapp.use_theme(preferred_theme)  # Sets the theme. If None, azure-dark is the default.
-    center(root)  # Centers tkinter.Tk to screen's height & length
+    #root.protocol("WM_DELETE_WINDOW", lambda: AskQuit(root, FirstPage.driver, myapp))
+    #preferred_theme = myapp.read_theme()  # Reads the theme from the json (if exists)
+    #myapp.use_theme(preferred_theme)  # Sets the theme. If None, azure-dark is the default.
+    #root.update()
+    #center(root)
     end = time.perf_counter()
     print(f'Current Style: {root.tk.call("ttk::style", "theme", "use")}')
     print(f'Load in {end - start}')

@@ -50,9 +50,10 @@ class LoadingWindow(tk.Toplevel):
         else:
             preferred_theme = self.read_theme()  # Reads the theme from the json (if exists)
             self.use_theme(preferred_theme)  # Sets the theme. If None, azure-dark is the default.
-            # Wrap the function in a thread, so as not to block the rest program.
-            _thread = threading.Thread(target=self.check_loading_status)
-            _thread.start()
+            # No longer need. Previously, the function was wrapped in a thread, so as not to block the rest program.
+            # Now everything is handled in App
+            # _thread = threading.Thread(target=self.check_loading_status)
+            # _thread.start()
 
     def check_loading_status(self):
         """
@@ -64,16 +65,19 @@ class LoadingWindow(tk.Toplevel):
         print(f"LoadingWindow>check_loading_status>root withdrawn")
         while self.controller.loading_status:
             # If pass statement is used, it slows down the rest of the program
-            time.sleep(0.125)
+            # The time sleep here is essential. Do not remove it.
+            time.sleep(0.05)
         else:
             print(f"LoadingWindow: self.controller.loading_status set: {self.controller.loading_status}")
             # Load transparency settings at startup
             # Here, it's the first time the user's settings are applied (it will call self.set_transparency() in App)
-            self.controller.apply_settings()
-            self.root.deiconify()
-            print(f"LoadingWindow>check_loading_status>settings applied")
-            self.attributes('-alpha', 0.0)
-            self.toplevel_quit()
+            # self.controller.apply_settings()
+            # self.root.deiconify()
+            # print(f"LoadingWindow>check_loading_status>settings applied")
+            # If this toplevel is not killed by the App
+            if self.winfo_exists():
+                self.attributes('-alpha', 0.0)
+                self.toplevel_quit()
 
     def init_UI(self):
         """

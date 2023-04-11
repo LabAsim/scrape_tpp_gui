@@ -12,8 +12,10 @@ from datetime import datetime
 from tkinter import Menu, StringVar, ttk
 import tktooltip  # pip install tkinter-tooltip https://github.com/gnikit/tkinter-tooltip
 import sv_ttk
+from typing import Union
 from PIL import Image, ImageTk
-from helper_functions import callback
+from helper_functions import callback, center
+from scrape_tpp_gui.source.classes.AskQuit import AskQuit
 from source.version.version_module import file_exists
 from misc import url_list, url_list_base_page
 from FirstPage import FirstPage
@@ -33,6 +35,8 @@ from source.classes.database.db import DatabaseWindow
 from source.classes.search import SearchTerm
 from source.classes.searchtoplevel import ToplevelSearch
 from source.classes.helpers.loadingwindow import loading_tooltip
+
+
 class App:
     """Main App"""
     x = 1600
@@ -43,6 +47,7 @@ class App:
     treeview_tab_page_counter = {}  # Default: {'Newsroom: 1'} (as, it loads the news up to the first page)
 
     def __init__(self, root: tk.Tk, to_bypass: bool, debug: bool):
+        root.protocol("WM_DELETE_WINDOW", lambda: AskQuit(root, FirstPage.driver, self))
         # Toplevel windows
         # The names are PascalCase to be identical to __class__.__name__ of each Toplevel class.
         self.topleveldonate = None
@@ -54,7 +59,7 @@ class App:
         self.autosave_db_thread_stop_flag = False
         self.autosave_db_interval: int = 60
         self.autosave_db = True
-        self.loading_tk = None
+        self.loading_tk: Union[None, LoadingWindow] = None
         self.dir_path = self.find_current_dir_path()
         self.dir_path_of_main = self.find_the_path_of_main()
         self.transparency = None
@@ -112,7 +117,18 @@ class App:
         self.check_for_updates(startup=self.check_updates_at_startup, from_menu=False)
         # Start the auto-saving thread
         self.start_auto_saving_thread()
-        # Load transparency settings at startup from LoadingWindow!
+        # The news are loaded, make the root visible again
+        self.apply_settings()
+        # Reads the theme from the json (if exists)
+        preferred_theme = self.read_theme()
+        self.use_theme(preferred_theme)  # Sets the theme. If None, azure-dark is the default.
+        # Set self.LOADING_STATUS to false
+        self.loading_status = False
+        # Destroy the loading window
+        if self.loading_tk.winfo_exists():
+            self.loading_tk.toplevel_quit()
+        # Center the root. By centering, the root.deiconify() will be invoked and the root will be visible again.
+        center(self.root)
 
     def loading_window(self):
         """
@@ -138,9 +154,13 @@ class App:
     def create_the_notebook_pages(self):
         """
         Creates the notebook pages. After each creation, it updates the progress bar in the Loading Window.
+        `self.loading_status` is set to False in FirstPage after `FirstPage` for Culture is invoked.
         """
         # For the 1st page of Newsroom: list(url_list.values())[0][0]
-        self.notebook_pages(url=list(url_list.values())[0][0], note=self.note, controller=self, name='Newsroom')
+        # The first notebook will not be called from a separate thread. This way, the notebook will be already filled
+        # when the gui is visible.
+        self.notebook_pages(url=list(url_list.values())[0][0], note=self.note, controller=self, name='Newsroom',
+                            thread=False)
         # Update the progress bar in the Toplevel loading window.
         self.loading_tk.progress()
         self.notebook_pages(url=list(url_list.values())[1][0], note=self.note, controller=self, name='Politics')
@@ -162,12 +182,12 @@ class App:
         self.notebook_pages(url=list(url_list.values())[9][0], note=self.note, controller=self, name='Culture')
         self.loading_tk.progress()
 
-    def notebook_pages(self, url, note, controller, name):
+    def notebook_pages(self, url, note, controller, name, thread=True):
         """
         Initiates and stores all the pages of the notebook (FirstPage class) in App.page_dict
         """
         App.page_dict[name] = FirstPage(note=note, name=name, controller=self, url=url, to_bypass=self.bypass,
-                                        debug=self.debug, root=self.root)
+                                        debug=self.debug, root=self.root, thread=thread)
         if name not in App.treeview_tab_page_counter:
             App.treeview_tab_page_counter[name] = 1
 
@@ -315,7 +335,7 @@ class App:
 
     def search_handler(self, event):
         """Starts a thread for searching the site"""
-        #self.root.after(1, lambda: loading_tooltip(self.root, self.search_site))
+        # self.root.after(1, lambda: loading_tooltip(self.root, self.search_site))
         search_thread = threading.Thread(target=lambda: loading_tooltip(self.root, self.search_site))
         search_thread.start()
 
@@ -328,6 +348,12 @@ class App:
         print(results.list)
         self.search_text_var.set("")
         self.searchtoplevel = ToplevelSearch(root=self.root, controller=self, results=results.list)
+
+    def search_site_load_more_handler(self, event=None):
+        """Starts a thread which loads the next scraped page of the search"""
+        load_more_thread = threading.Thread(target=lambda: loading_tooltip([self.root, self.searchtoplevel.toplevel],
+                                                                           self.search_site_load_more))
+        load_more_thread.start()
 
     def search_site_load_more(self):
         """Loads more results for the given keyword. The function is called from ToplevelSearch class"""
@@ -365,12 +391,14 @@ class App:
         def create_tooltip():
             """Creates the tooltip"""
             loading_tooltip(self.root, inner_function)
-        search_thread = threading.Thread(
-            target=create_tooltip)
+
+        # Start the thread
+        search_thread = threading.Thread(target=create_tooltip)
         search_thread.start()
 
     def renew_feed_handler(self):
         """Starts a thread for renewing the titles"""
+
         def inner_fuction():
             loading_tooltip(self.root, self.call_renew_feed)
 
